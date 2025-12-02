@@ -1,0 +1,19 @@
+.swiper {
+    width: 100%;
+    padding-left: 56px;
+    padding-right: 56px;
+    height: calc(100vh - 88px); 
+}
+
+.swiper-pagination-bullet.swiper-pagination-bullet-active {
+    background-color: #E98074;
+    opacity: 1;
+}
+
+.swiper-pagination-bullets > span {
+    width: 24px;
+    height: 24px;
+    background: #000000;
+    margin: 20 40px;
+    transition: all 200ms ease;
+}

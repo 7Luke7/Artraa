@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "regular-tbc";
+  src: url("/fonts/TBCXRegular.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "medium-tbc";
+  src: url("/fonts/TBCXMedium.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "bold-tbc";
+  src: url("/fonts/TBCXBold.ttf") format("truetype");
+  font-display: swap;
+}
+
+@theme {
+  --font-regular-tbc: "regular-tbc", sans-serif;
+  --font-medium-tbc: "medium-tbc", sans-serif;
+  --font-bold-tbc: "bold-tbc", sans-serif;
+}
+
+body {
+  margin: 0;
+  box-sizing: border-box;
+}

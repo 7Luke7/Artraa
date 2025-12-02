@@ -1,0 +1,16 @@
+-- Security --
+
+    -- change the session name to something generic that doesn't hint attacker to what session might represent
+
+    -- Save 'user agent' 'ip' or any identifying information that we can use to validate the session
+        this will be saved in User table and we will check against these fields against new requests
+        if there is difference we will alert the user.
+
+    -- when user wants to logout we must clear(destroy) the session on server/database and on the client side as well
+    
+    We could add password checker onInput event
+
+-- payment postgresql --
+
+    look into https://node-postgres.com/features/transactions
+    way of doing transaction correct way, "POOLING DOESNT WORK!" 
