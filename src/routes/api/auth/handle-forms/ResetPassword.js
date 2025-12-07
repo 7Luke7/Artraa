@@ -1,26 +1,28 @@
-import { action, json } from "@solidjs/router";
+import { action, json, redirect } from "@solidjs/router";
 import { getRequestEvent } from "solid-js/web";
 import { getCookie } from "../../utils";
 import { pool } from "../../db";
 import { FormDataValidator } from "../../validate/validation-service";
+import { randomBytes } from "node:crypto";
+import { hash_password } from "../hash";
+import { redisDel, redisGet } from "../../lib/redis/basic";
 
 export const resetPasswordAction = action(async (formData) => {
     'use server'
     const {request} = getRequestEvent()
     const cookie = request.headers.get('cookie')
-    const {პაროლი: password, დაადასტურე_პაროლი: confirm_password} = FormDataValidator.validateInput(formData)
-
-    if (password !== confirm_password) return json({message: 'პაროლები ერთმანეთს არ ემთხვევა'}, {status: 400})
     if (!cookie) return json({message: 'თქვენ არ გაქვთ გვერდზე წვდომის უფლება.'}, {status: 401})
     const rs = getCookie('reset_session', cookie)
     if (!rs) return json({message: 'თქვენ არ გაქვთ გვერდზე წვდომის უფლება.'}, {status: 401})
-    try {
-        const reset_session = await pool.query(`
-            SELECT user_id FROM password_reset_sessions
-            WHERE id=$1
-        `, [rs])
 
-        if (reset_session.rowCount === 0) return json({message: 'თქვენ არ გაქვთ გვერდზე წვდომის უფლება.'}, {status: 401})
+    const result = FormDataValidator.validateInput(formData)
+    if (!result.ok) return json({message: result.error_message}, {status: 400})
+    const {პაროლი: password, 'დაადასტურე პაროლი': confirm_password} = result.data
+    if (password !== confirm_password) return json({message: 'პაროლები ერთმანეთს არ ემთხვევა'}, {status: 400})
+    
+    try {
+        const user_id = await redisGet(`password:reset:${rs}`)
+        if (!user_id) return json({message: 'სესიის დრო ამოიწურა.'}, {status: 401})
 
         const salt = randomBytes(16); 
         const parameters = {
@@ -40,9 +42,10 @@ export const resetPasswordAction = action(async (formData) => {
             SET password = $2,
                 salt = $3
             WHERE id = $1
-        `, [reset_session.rows[0].user_id, hash_result, salt])
+        `, [user_id, hash_result.key, salt.toString('hex')])
 
-        if (change_password.rowCount === 0) return json({message: 'პაროლი წარმატებით განახლდა.'}, {status: 200})
+        if (!change_password.rowCount) return json({message: 'პაროლი ვერ განახლდა, სცადეთ ხელახლა'}, {status: 400})
+        try {await redisDel(`password:reset:${rs}`)} catch (error) {console.log(error)}
         throw redirect('/login', { 
             status: 303,
             headers: {

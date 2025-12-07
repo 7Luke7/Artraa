@@ -5,8 +5,8 @@ import { A, createAsync, useSubmission } from "@solidjs/router"
 import { Match, Show, Switch } from "solid-js"
 import { ProtectAnonymousRoute } from "~/components/protectAnonymousRoutes"
 import { resetPasswordAction } from "~/routes/api/auth/handle-forms/ResetPassword"
-import { ProtectResetPassword } from "~/routes/api/auth/reset_password"
 import { HttpStatusCode } from "@solidjs/start"
+import { ProtectResetPassword } from "~/routes/api/auth/ProtectRoutes"
 
 const ResetPassword = () => {
     const authResult = createAsync(ProtectResetPassword, { deferStream: true })
@@ -77,7 +77,7 @@ const ResetPassword = () => {
                                                 დაადასტურეთ პაროლი
                                             </label>
                                             <input
-                                                name="დაადასტურე_პაროლი"
+                                                name="დაადასტურე პაროლი"
                                                 type="password"
                                                 class="bg-slate-50 w-full text-sm font-medium-tbc text-slate-900 px-4 py-3 rounded-md outline-0 border border-gray-200 focus:border-[#E98074] focus:bg-transparent"
                                                 placeholder="გაიმეორეთ ახალი პაროლი"

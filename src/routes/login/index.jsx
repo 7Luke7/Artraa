@@ -1,7 +1,7 @@
 import { Meta, Title } from "@solidjs/meta"
 import { Footer } from "~/components/Footer"
 import { Header } from "~/components/Header"
-import { A, redirect, useSubmission } from "@solidjs/router"
+import { A, revalidate, useSubmission } from "@solidjs/router"
 import { Show } from "solid-js"
 import "~/components/google-btn.css"
 import { login } from "../api/auth/handle-forms/login"
@@ -31,6 +31,7 @@ const Login = () => {
             if (data.success) {
                 window.removeEventListener('message', listener);
                 window.location = '/dashboard'
+                revalidate('protect-anonymous-route')
             } else if (data.success === false) {
                 window.removeEventListener('message', listener);
             }

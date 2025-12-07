@@ -37,7 +37,7 @@ export class FormDataValidator {
 
         const val = this.normalizeWhitespace(value);
 
-        if (rules.required && (!val || val.length === 0)) return {
+        if (rules.required && (!val || !val.length)) return {
             ok: false,
             error_message: `${fieldName} სავალდებულოა.`
         };

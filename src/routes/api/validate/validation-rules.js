@@ -27,7 +27,7 @@ export const validation_rules = {
         pattern: /^(?=.*[\p{L}])(?=.*\d)[\p{L}\d!@#$%^&*()_+\-=\[\]{};':"\|,.<>\/?]+$/u,
         maxLength: 128,
     },
-    დაადასტურე_პაროლი: {
+    'დაადასტურე პაროლი': {
         required: true,
         type: 'string',
         minLength: 8,

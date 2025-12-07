@@ -2,8 +2,10 @@ import { action, json, redirect } from "@solidjs/router"
 import { FormDataValidator } from "../../validate/validation-service"
 import { pool } from "../../db"
 import { send_verification_code } from "../../utils"
-import { createHmac,randomBytes, randomInt } from "node:crypto"
+import { createHmac,randomBytes, randomInt, randomUUID } from "node:crypto"
 import { hash_password } from "../hash"
+import { redisHSet } from "../../lib/redis/hash"
+import { redis } from "../../redis"
 
 export const register = action(async (formData) => {
     "use server"
@@ -40,25 +42,37 @@ export const register = action(async (formData) => {
         if (!hash_result.ok) throw new Error(hash_result.err)
         const verification_code = randomInt(100000, 1000000).toString();
         const hashed_verification_code = createHmac('sha256', process.env.CODE_PEPPER).update(verification_code).digest('hex')
-                                                                            
-        const verification_insert_result = await pool.query(
-            `INSERT INTO email_verifications (name, email, password_hash, remember_me, verification_code, verification_type, salt)
-            VALUES ($1, $2, $3, $4, $5, 'signup', $6) RETURNING id`,
-            [firstname + ' ' + lastname, email, hash_result.key, remember_me, hashed_verification_code, salt.toString('hex')]
-        );
-
-        if (verification_insert_result.rowCount === 0) return json({
+        const rand_id = randomUUID()                
+        
+        const set_verify = await redisHSet(`verify:email:${rand_id}`, {
+            name: firstname + ' ' + lastname, 
+            email, 
+            password: hash_result.key, 
+            remember_me: remember_me ? '1' : '0',
+            type: 'signup',
+            code: hashed_verification_code, 
+            salt: salt.toString('hex')
+        })
+        if (!set_verify) return json({
             error_message: 'ვერიფიკაციის კოდის გაგზავნა ვერ მოხერხდა, სცადეთ ხელახლა.'
         }, {
             status: 400
         })
+
+        const set_expire = await redis.expire(`verify:email:${rand_id}`, 600)
+        if (!set_expire) return json({
+            error_message: 'ვერიფიკაციის კოდის გაგზავნა ვერ მოხერხდა, სცადეთ ხელახლა.'
+        }, {
+            status: 400
+        })
+
 
         try { await send_verification_code(email, verification_code) } catch (e) { }
 
         throw redirect('/verify', {
             status: 303,
             headers: {
-                'Set-Cookie': `pending_verification=${verification_insert_result.rows[0].id}; Path=/; Max-Age=1800; HttpOnly; Secure; SameSite=Strict`
+                'Set-Cookie': `pending_verification=${rand_id}; Path=/; Max-Age=600; HttpOnly; Secure; SameSite=Strict`
             }
         })
     } catch (error) {

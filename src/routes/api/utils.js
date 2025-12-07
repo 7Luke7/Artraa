@@ -1,7 +1,8 @@
 "use server"
 import { UAParser } from "ua-parser-js";
 import nodemailer from "nodemailer"
-import {createHmac} from "node:crypto"
+import { createHmac } from "node:crypto"
+import { redisHGetAll } from "./lib/redis/hash";
 
 export const getCookie = (name, cookieHeader) => {
   if (!cookieHeader) return null;
@@ -14,23 +15,42 @@ export const getCookie = (name, cookieHeader) => {
 }
 
 export const exctract_client_info = (request, clientAddress) => {
-  const salt = process.env.IP_SECRET
+  const ip_salt = process.env.IP_SECRET
   const user_agent = request.headers.get('user-agent');
 
-  const hashed_ip = createHmac('sha256', salt).update(clientAddress).digest('hex')
+  const hashed_ip = createHmac('sha256', ip_salt).update(clientAddress).digest('hex')
   const parser = new UAParser(user_agent);
-  const uaResult = parser.getResult();
+  const result = parser.getResult();
+
+  const osMajor = (result.os.version || "").split(".")[0] || "unknown";
+  const browserMajor = result.browser.major || (result.browser.version || "").split(".")[0] || "unknown";
+
+  const signature = [
+    result.device.type || "desktop",
+    result.device.vendor || "unknown",
+    result.device.model || "unknown",
+    result.os.name || "unknown",
+    osMajor,
+    result.browser.name || "unknown",
+    browserMajor,
+    result.engine.name || "unknown",
+    result.cpu.architecture || "unknown"
+  ].join("|");
+
+  const signature_salt = process.env.SIGNATURE_SECRET
+  const device_fingerprint = createHmac('sha256', signature_salt).update(signature).digest('hex')
 
   return {
     ip_address: hashed_ip,
     user_agent,
-    browser: `${uaResult.browser.name || 'unknown'}`,
-    browser_version: uaResult.browser.version || 'unknown',
-    os: `${uaResult.os.name || 'unknown'}`,
-    os_version: uaResult.os.version || 'unknown',
-    device_type: uaResult.device.type || 'desktop',
-    device_vendor: uaResult.device.vendor || 'unknown',
-    device_model: uaResult.device.model || 'unknown',
+    browser: `${result.browser.name || 'unknown'}`,
+    browser_version: result.browser.version || 'unknown',
+    os: `${result.os.name || 'unknown'}`,
+    os_version: result.os.version || 'unknown',
+    device_type: result.device.type || 'desktop',
+    device_vendor: result.device.vendor || 'unknown',
+    device_model: result.device.model || 'unknown',
+    device_fingerprint
   };
 }
 
@@ -116,3 +136,28 @@ export const send_verification_link = async (target, link) => {
 
   return await send_email(target, "ელფოსტის დადასტურება - Artra", html, text);
 };
+
+export const get_client_ip = (request) => {
+  const xff = request.headers.get("x-forwarded-for");
+  if (xff) return xff.split(",")[0].trim();
+
+  const real = request.headers.get("x-real-ip");
+  if (real) return real;
+
+  return request.socket?.remoteAddress || "0.0.0.0";
+}
+
+export const get_temporary_device = async (device_id) => {
+  try {
+    const {status, ip_address, ...rest} = await redisHGetAll(`temp_device:${device_id}`)
+    if (!status) return { message: 'დაფიქისირდა შეცდომა.' }
+    return new Response(JSON.stringify({...rest}), {
+      status: 200,
+      headers: {
+        "Content-Type": 'application/json'
+      }
+    })
+  } catch (error) {
+    console.log(error)
+  }
+}

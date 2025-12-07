@@ -5,6 +5,8 @@ import { pool } from "../../db";
 import { verify_email_for } from "./verify_email_for";
 import { getCookie } from "../../utils";
 import {createHmac} from "node:crypto"
+import { redisHGetAll } from "../../lib/redis/hash";
+import { redisDel } from "../../lib/redis/basic";
 
 export const verify_email_action = action(async (formData) => {
     "use server"
@@ -30,20 +32,13 @@ export const verify_email_action = action(async (formData) => {
 
     const client = await pool.connect();
     try {
-        await client.query('BEGIN');
-        const user_input_hash = createHmac('sha256', process.env.CODE_PEPPER).update(code).digest('hex')
-
-        const verification_result = await client.query(`
-            SELECT name, email, password_hash, remember_me, verification_code, verification_type, user_id, salt FROM email_verifications
-            WHERE id=$1 AND verification_code=$2
-        `, [vid, user_input_hash])
-
-        if (verification_result.rowCount === 0) {
-            return json({ error_message: "ვერიფიკაციის მცდელობა არასწორია, სცადეთ ხელახლა." }, {
-                status: 404
-            });
-        }
-        const result = await verify_email_for(verification_result.rows[0], client, event)
+        const user_input_hash = createHmac('sha256', process.env.CODE_PEPPER).update(code).digest('hex')        
+        const verification_fields = await redisHGetAll(`verify:email:${vid}`)
+        if (!verification_fields || verification_fields.code !== user_input_hash) return json({ error_message: "ვერიფიკაციის მცდელობა არასწორია, სცადეთ ხელახლა." }, {
+            status: 404
+        });
+        client.query('BEGIN')
+        const result = await verify_email_for(verification_fields, client, event)
 
         if (!result.ok) {
             await client.query('ROLLBACK')
@@ -52,17 +47,16 @@ export const verify_email_action = action(async (formData) => {
             })
         }
 
-        await client.query(`
-            DELETE FROM email_verifications WHERE id=$1
-        `, [vid])
-
         await client.query('COMMIT')
-        if (result.response_type === 'redirect') throw redirect(result.location, {
-            status: result.status,
-            headers: result.headers
-        })
+        if (result.response_type === 'redirect') {
+            try {await redisDel(`verify:email:${vid}`)} catch (error) {console.log(error)}
+            throw redirect(result.location, {
+                status: result.status,
+                headers: result.headers
+            })
+        }
+        return json(result, {status: 200})
     } catch (error) {
-        console.log(error)
         if (error instanceof Response) throw error
         await client.query('ROLLBACK');
         return json({ error_message: 'ვერიფიკაცია შეცდომით დასრულდა, სცადეთ ხელახლა.' }, {

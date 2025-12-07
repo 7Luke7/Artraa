@@ -1,8 +1,9 @@
 import { action, json } from "@solidjs/router";
 import { FormDataValidator } from "../../validate/validation-service";
-import { createHash, randomBytes } from "node:crypto";
+import {createHmac, randomBytes } from "node:crypto";
 import { pool } from "../../db";
 import { send_verification_link } from "../../utils";
+import { redisSet } from "../../lib/redis/basic";
 
 export const findUserForReset = action(async (formData) => {
     "use server"
@@ -15,23 +16,16 @@ export const findUserForReset = action(async (formData) => {
 
     try {
         const res = await pool.query(`SELECT id FROM "User" WHERE email = $1`, [email]);
-        if (res.rowCount === 0) return json({ message: "თუ მეილი არსებობს, მიიღებთ ბმულს." });
+        if (!res.rowCount) return json({ message: "თუ მეილი არსებობს, მიიღებთ ბმულს." });
 
         const token = randomBytes(48).toString("hex");
-        const hashed_code = createHash('sha256').update(token).digest('hex')
+        const hashed_code = createHmac('sha256', process.env.PASSWORD_RESET_SECRET).update(token).digest('hex')
 
         const {id} = res.rows[0];
 
-        await pool.query(`
-            DELETE FROM email_verifications WHERE verification_type='reset-password' AND user_id=$1
-        `, [id])
+        const insert_hash = await redisSet(`verify:email:${hashed_code}`, id, 600)
 
-        const insert_hash = await pool.query(`
-            INSERT INTO email_verifications (verification_type, verification_code, user_id)
-            VALUES ('reset-password', $1, $2)
-        `, [hashed_code, id])
-
-        if (insert_hash.rowCount === 0) return json({ message: 'მოძებნა ვერ განხორციელდა' }, { status: 400 })
+        if (!insert_hash) return json({ message: 'მოძებნა ვერ განხორციელდა' }, { status: 400 })
         const base = process.env.VITE_URL
         const reset_link = `${base}/api/auth/issue_session?token=${token}`;
 

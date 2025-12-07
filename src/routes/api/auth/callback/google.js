@@ -2,7 +2,9 @@
 import { oauth_session } from "../sessions";
 import * as jose from "jose"
 import { pool } from "../../db";
+import { exctract_client_info, get_client_ip } from "../../utils";
 import { randomUUID } from "node:crypto"
+import { redisSet } from "../../lib/redis/basic";
 
 export async function GET({ request }) {
     const session = await oauth_session()
@@ -77,17 +79,29 @@ export async function GET({ request }) {
                     const user = await client.query(`SELECT id FROM "User" WHERE (google_id=$1 OR email=$2)`, [payload.sub, payload.email]);
 
                     if (user.rowCount === 1) {
-                        const sessionToken = randomUUID();
                         await session.clear()
-                        const durationSeconds = 14 * 86400
-                        const durationInterval = '14 days'
+                        const ip = get_client_ip(request)
+                        const { ip_address, user_agent, browser, browser_version, os, os_version, device_type, device_model, device_vendor, device_fingerprint } = exctract_client_info(request, ip)
 
-                        const create_session = await client.query(`
-                            INSERT INTO "Session" (session_token, user_id, expires)
-                            VALUES ($1, $2, NOW() AT TIME ZONE 'UTC' + $3::interval)
-                        `, [sessionToken, user.rows[0].id, durationInterval])
+                        const create_user_device = await client.query(`
+                            INSERT INTO user_devices (
+                                user_id, user_agent, ip_address, browser, browser_version, os, os_version,
+                                device_type, device_vendor, device_model, device_fingerprint, status
+                            )
+                            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'active') 
+                            ON CONFLICT (user_id, device_fingerprint)
+                            DO UPDATE
+                            SET 
+                                user_agent=$2, ip_address=$3, browser=$4, browser_version=$5,
+                                os=$6, os_version=$7, device_type=$8, device_vendor=$9, device_model=$10,
+                                device_fingerprint=$11, last_used=NOW(), status='active'
+                            WHERE user_devices.status != 'blocked'
+                        `, [
+                            user.rows[0].id, user_agent, ip_address, browser, browser_version, os, os_version,
+                            device_type, device_vendor, device_model, device_fingerprint
+                        ])
 
-                        if (create_session.rowCount === 0) {
+                        if (!create_user_device.rowCount) {
                             await client.query('ROLLBACK')
                             return new Response(`
                                 <script>
@@ -96,18 +110,37 @@ export async function GET({ request }) {
                                 </script>
                             `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure' } });
                         }
+
+                        const durationSeconds = 14 * 86400
+                        const rand_id = randomUUID()
+
+                        const create_session = await redisSet(`user:session:${rand_id}`, JSON.stringify({
+                            user_id: user.rows[0].id,
+                            device_id: create_user_device.rows[0].id
+                        }), durationSeconds)
+
+                        if (!create_session) {
+                            await client.query('ROLLBACK')
+                            return new Response(`
+                                <script>
+                                    window.opener.postMessage({ success: false }, window.origin);
+                                    window.close();
+                                </script>
+                            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure' } });
+                        }
+
                         await client.query('COMMIT')
                         return new Response(`
-                <script>
-                    window.opener.postMessage({ success: true }, window.origin);
-                    window.close();
-                </script>
-            `, {
+                                <script>
+                                    window.opener.postMessage({ success: true }, window.origin);
+                                    window.close();
+                                </script>
+                            `, {
                             status: 200,
                             headers: {
                                 'Content-Type': 'text/html',
                                 'Set-Cookie': [
-                                    `auth.session-token=${sessionToken}; HttpOnly; Path=/; Secure; SameSite=Strict; Max-Age=${durationSeconds}`,
+                                    `auth.session-token=${rand_id}; HttpOnly; Path=/; Secure; SameSite=Strict; Max-Age=${durationSeconds}`,
                                     'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure',
                                 ],
                             }
@@ -118,9 +151,9 @@ export async function GET({ request }) {
                         INSERT INTO "User" (email, name, google_id, email_verified, profile_picture_link)
                         VALUES ($1, $2, $3, $4, $5)
                         RETURNING id
-                `, [payload.email, payload.name, payload.sub, payload.email_verified, payload.picture])
+                    `, [payload.email, payload.name, payload.sub, payload.email_verified, payload.picture])
 
-                    if (create_user.rowCount === 0) {
+                    if (!create_user.rowCount) {
                         await client.query('ROLLBACK')
                         await session.clear()
                         return new Response(`
@@ -130,24 +163,47 @@ export async function GET({ request }) {
                 </script>
             `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure' } });
                     } else {
-                        const sessionToken = randomUUID();
                         await session.clear()
-                        const durationSeconds = 14 * 86400
-                        const durationInterval = '14 days'
+                        const ip = get_client_ip(request)
+                        const { ip_address, user_agent, browser, browser_version, os, os_version, device_type, device_model, device_vendor, device_fingerprint } = exctract_client_info(request, ip)
 
-                        const create_session = await client.query(`
-                            INSERT INTO "Session" (session_token, user_id, expires)
-                            VALUES ($1, $2, NOW() AT TIME ZONE 'UTC' + $3::interval)
-                        `, [sessionToken, create_user.rows[0].id, durationInterval])
+                        const create_user_device = await client.query(`
+                            INSERT INTO user_devices (
+                                user_id, user_agent, ip_address, browser, browser_version, os, os_version,
+                                device_type, device_vendor, device_model, device_fingerprint
+                            )
+                            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id
+                        `, [
+                            user.rows[0].id, user_agent, ip_address, browser, browser_version, os, os_version,
+                            device_type, device_vendor, device_model, device_fingerprint
+                        ])
 
-                        if (create_session.rowCount === 0) {
+                        if (!create_user_device.rowCount) {
                             await client.query('ROLLBACK')
                             return new Response(`
-                <script>
-                    window.opener.postMessage({ success: false }, window.origin);
-                    window.close();
-                </script>
-            `, {
+                                <script>
+                                    window.opener.postMessage({ success: false }, window.origin);
+                                    window.close();
+                                </script>
+                            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure' } });
+                        }
+
+                        const durationSeconds = 14 * 86400
+                        const rand_id = randomUUID()
+
+                        const create_session = await redisSet(`user:session:${rand_id}`, JSON.stringify({
+                            user_id: create_user.rows[0].id,
+                            device_id: create_user_device.rows[0].id
+                        }), durationSeconds)
+
+                        if (!create_session) {
+                            await client.query('ROLLBACK')
+                            return new Response(`
+                                <script>
+                                    window.opener.postMessage({ success: false }, window.origin);
+                                    window.close();
+                                </script>
+                            `, {
                                 status: 401,
                                 headers: {
                                     'Content-Type': 'text/html',
@@ -158,16 +214,16 @@ export async function GET({ request }) {
 
                         await client.query('COMMIT')
                         return new Response(`
-                <script>
-                    window.opener.postMessage({ success: true }, window.origin);
-                    window.close();
-                </script>
-            `, {
+                                <script>
+                                    window.opener.postMessage({ success: true }, window.origin);
+                                    window.close();
+                                </script>
+                            `, {
                             status: 200,
                             headers: {
                                 'Content-Type': 'text/html',
                                 'Set-Cookie': [
-                                    `auth.session-token=${sessionToken}; HttpOnly; Path=/; Secure; SameSite=Strict; Max-Age=${durationSeconds}`,
+                                    `auth.session-token=${rand_id}; HttpOnly; Path=/; Secure; SameSite=Strict; Max-Age=${durationSeconds}`,
                                     'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure'
                                 ],
                             }
