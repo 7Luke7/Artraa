@@ -20,7 +20,13 @@ export const EmailVerification = () => {
                 const recursive_func = async () => {
                     try {
                         const res = await act_on_login_response(device_id())
-                        if (!res.ok) return
+                        if (!res.ok) {
+                            if (res.redirectTo) { 
+                                window.location = res.redirectTo
+                                return
+                            }
+                            return
+                        }
                         window.location = res.redirectTo
                     } catch (err) {
 

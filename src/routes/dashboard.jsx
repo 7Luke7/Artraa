@@ -1,131 +1,92 @@
-import { A, createAsync, query } from "@solidjs/router"
-import { For } from "solid-js/web"
+import { A } from "@solidjs/router"
 import { logout } from "./api/auth/logout"
-
-const get_user = query(async () => {
-    'use server'
-    try {
-        return true
-    } catch (error) {
-        console.log(error)
-    }
-}, 'dashboard')
-
-export const route = {
-    preload: () => get_user()
-}
+import { RenderProtectedRoute } from "~/components/RenderProtectedRoute"
 
 const User = (props) => {
-    createAsync(() => get_user(), { deferStream: true })
-
-    const sidebar_content = [
-        {
-            content: 'მთავარი',
-            icon: '/svg/dashboard-icon.svg',
-            link: '/dashboard',
-        },
-        {
-            content: 'კურსები',
-            icon: '/svg/courses.svg',
-            link: '/dashboard/courses',
-        },
-    ]
-
-    const settings = [
-        { icon: '/svg/dashboard-icon.svg', link: '/dashboard', content: 'მთავარი' },
-        { icon: '/svg/security.svg', link: '/security', content: 'უსაფრთხოება' },
-    ]
-
-    return <div class="relative bg-[#f7f6f9] h-full min-h-screen">
-        <div class="flex items-start">
-            <nav class="bg-white h-screen overflow-auto bg-gray-500 lg:min-w-[266px]">
-                <div class="flex items-center gap-2 justify-center pt-6 pb-2 px-4 sticky top-0 min-h-[64px]">
-                    <A href="/" class="text-[#E85A4F] text-4xl tracking-[0.2em] font-sans font-bold">
+    return <RenderProtectedRoute>
+        <div class="relative flex items-start h-full min-h-screen bg-gray-50">
+            <aside class="h-screen overflow-auto sticky top-0 lg:min-w-[280px] bg-white border-r border-gray-200">
+                <header class="text-center py-4 bg-white border-b border-gray-100">
+                    <A href="/" class="text-[#E85A4F] text-3xl tracking-[0.15em] font-medium-tbc font-bold">
                         ARTRA
                     </A>
-                    {/* <button class="lg:hidden ml-auto">
-                            <img src='/svg/close.svg' />
-                        </button> */}
-                </div>
+                </header>
 
-                <div class="py-4 px-4">
+                <nav class="py-6 px-4">
                     <ul class="space-y-2">
-                        <For each={sidebar_content}>
-                            {(sc, i) => (
-                                <li>
-                                    <A href={sc.link}
-                                    activeClass="bg-gray-100"
-                                    inactiveClass="hover:bg-gray-100"
-                                    end
-                                        class="text-slate-800 text-[15px] font-medium flex items-center cursor-pointer rounded-md px-3 py-2.5">
-                                        <img src={sc.icon} class="mr-3" />
-                                        <span class="overflow-hidden text-ellipsis font-medium-tbc font-bold whitespace-nowrap">{sc.content}</span>
-                                        <img src='/svg/arrow-right.svg' class="ml-auto" />
-                                    </A>
-                                </li>
-                            )}
-                        </For>
+                        <li>
+                            <A href='/dashboard'
+                                activeClass="bg-gray-100 text-[#E85A4F] border-l-3 border-[#E85A4F]"
+                                inactiveClass="hover:bg-gray-50"
+                                end
+                                class="text-slate-800 text-[15px] font-medium-tbc flex items-center cursor-pointer rounded-lg px-4 py-3 transition-colors">
+                                <div class="w-8 h-8 flex items-center justify-center mr-3 bg-gray-100 rounded-lg">
+                                    <img src='/svg/dashboard-icon.svg' width={24} height={24} />
+                                </div>
+                                <span class="overflow-hidden text-ellipsis font-medium-tbc font-medium whitespace-nowrap flex-1">
+                                    მთავარი
+                                </span>
+                                <img src='/svg/arrow-right.svg' width={24} height={24} />
+                            </A>
+                        </li>
+                        <li>
+                            <A href='courses'
+                                activeClass="bg-gray-100 text-[#E85A4F] border-l-3 border-[#E85A4F]"
+                                inactiveClass="hover:bg-gray-50"
+                                end
+                                class="text-slate-800 text-[15px] font-medium-tbc flex items-center cursor-pointer rounded-lg px-4 py-3 transition-colors">
+                                <div class="w-8 h-8 flex items-center justify-center mr-3 bg-gray-100 rounded-lg">
+                                    <img src='/svg/courses.svg' width={24} height={24} />
+                                </div>
+                                <span class="overflow-hidden text-ellipsis font-medium-tbc font-medium whitespace-nowrap flex-1">
+                                    კურსები
+                                </span>
+                                <img src='/svg/arrow-right.svg' width={24} height={24} />
+                            </A>
+                        </li>
                     </ul>
-                </div>
-            </nav>
+                </nav>
+            </aside>
 
-            {/* <button class="lg:hidden ml-4 mt-4 fixed top-0 left-0 bg-white z-[50]">
-                <img src='/src/menu-burger.svg' />
-            </button> */}
             <section class="w-full">
-                <header class="z-50 sticky top-0">
-                    <div
-                        class="flex flex-wrap items-center px-6 py-2 bg-white min-h-[56px] w-full relative tracking-wide">
-                        <div class="flex items-center flex-wrap gap-x-8 gap-y-4 z-50 w-full">
-                            <div class="flex items-center gap-8 ml-auto">
-                                <div class="flex items-center space-x-6">
-                                    <A href='/dashboard'>
-                                        <img src='/svg/dashboard-icon.svg' class="cursor-pointer" />
-                                    </A>
-                                    <button>
-                                        <img src='/svg/notification.svg' class="cursor-pointer" />
-                                    </button>
-                                </div>
+                <header class="flex items-center justify-between px-8 py-4 sticky top-0 z-10 bg-white border-b border-gray-200">
+                    <h1 class="text-md font-semibold text-gray-800">კეთილი იყოს თქვენი მობრძანება ლუკა!</h1>
+                    <div class="flex items-center gap-6">
+                        <div class="flex items-center space-x-5">
+                            <A href='/dashboard' class="p-2 rounded-lg hover:bg-gray-100">
+                                <img src='/svg/dashboard-icon.svg' width={20} height={20} />
+                            </A>
+                            <button class="relative p-2 rounded-lg hover:bg-gray-100">
+                                <img src='/svg/notification.svg' width={20} height={20} />
+                                <div class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></div>
+                            </button>
+                        </div>
 
-                                <div class="relative flex shrink-0 group">
-                                    <img src="/default_profile.png" alt="profile-pic"
-                                        class="w-9 h-9 rounded-full border-2 border-gray-300 cursor-pointer" />
-                                    <div
-                                        class="hidden group-hover:block shadow-md p-2 bg-white rounded-md absolute top-9 right-0 w-56">
-                                        <div class="w-full">
-                                            <A href='/account'
-                                                class="text-[15px] text-slate-800 font-medium cursor-pointer flex items-center p-2 rounded-md hover:bg-gray-100">
-                                                <img src='/svg/gear.svg' class="mr-3" />
-                                                <span class="font-regular-tbc text-sm">ექაუნთი</span>
-                                            </A>
-                                            <hr class="my-2 -mx-2 border-gray-200" />
-                                            <For each={settings}>
-                                                {(s) => (
-                                                    <A href={s.link}
-                                                        class="text-[15px] text-slate-800 font-medium cursor-pointer flex items-center p-2 rounded-md hover:bg-gray-100">
-                                                        <img src={s.icon} class="mr-3" />
-                                                        <span class="font-regular-tbc text-sm">{s.content}</span>
-                                                    </A>
-                                                )}
-                                            </For>
-                                            <form action={logout} method="POST" class="text-[15px] text-slate-800 font-medium cursor-pointer rounded-md hover:bg-gray-100">
-                                                <button type='submit' class="w-full cursor-pointer flex items-center p-2 font-regular-tbc text-sm">
-                                                    <img src='/svg/logout.svg' class="mr-3" />
-                                                    <span>გასვლა</span>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div class="relative group">
+                            <button class="flex items-center focus:outline-none">
+                                <img src="/default_profile.png" alt="profile-pic" width={32} height={32} class="rounded-full border-2 border-gray-200" />
+                            </button>
+
+                            <div class="absolute hidden right-0 overflow-hidden top-full w-56 bg-white rounded-lg shadow-lg border border-gray-200 group-hover:block transition-all duration-150">
+                                <A href='/account'
+                                    class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
+                                    <img src='/svg/gear.svg' class="bg-gray-100 rounded-lg mr-3" width={20} height={20} />
+                                    <span class="font-regular-tbc">ექაუნთი</span>
+                                </A>
+                                <form action={logout} method="POST" class="border-t border-gray-200">
+                                    <button type='submit' class="w-full flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
+                                        <img src='/svg/logout.svg' class="bg-gray-100 rounded-lg mr-3" width={20} height={20} />
+                                        <span class="font-regular-tbc">გასვლა</span>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
                 </header>
-
                 {props.children}
             </section>
         </div>
-    </div>
+    </RenderProtectedRoute>
 }
 
 export default User

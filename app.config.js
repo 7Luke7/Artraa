@@ -12,7 +12,7 @@ export default defineConfig({
     allowedHosts: ['dale-nonoxidizing-cordelia.ngrok-free.dev'],
     port: 3000,
     experimental: {
-      websocket: true,
+      websocket: true
     }
   },
   build: {

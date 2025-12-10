@@ -13,9 +13,7 @@ export const logout = action(async () => {
     const id = getCookie("auth.session-token", cookie);
     if (!id) return 'no cookie available';
 
-    const sess = await redisDel(`user:session:${id}`)
-
-    if (!sess) return json({ error_message: "აქაუნთიდან გასვლა ვერ მოხერხდა." }, {status: 500});
+    await redisDel(`user:session:${id}`)
     throw redirect('/login', {
       status: 303,
       headers: {

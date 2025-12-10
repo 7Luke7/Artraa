@@ -14,7 +14,7 @@ const ResetPassword = () => {
 
     return (
         <ProtectAnonymousRoute>
-            <Show when={authResult()}>
+            <Show when={authResult()} fallback='იტვირთება...'>
                 <HttpStatusCode code={authResult().status}></HttpStatusCode>
                 <Title>Artra - პაროლის აღდგენა</Title>
                 <Meta name="description" content="Artra - პაროლის აღდგენა" />
@@ -105,7 +105,6 @@ const ResetPassword = () => {
                         </div>
                     </Match>
                 </Switch>
-
                 <Footer />
             </Show>
         </ProtectAnonymousRoute>

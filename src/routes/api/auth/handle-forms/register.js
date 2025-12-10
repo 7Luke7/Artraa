@@ -42,9 +42,9 @@ export const register = action(async (formData) => {
         if (!hash_result.ok) throw new Error(hash_result.err)
         const verification_code = randomInt(100000, 1000000).toString();
         const hashed_verification_code = createHmac('sha256', process.env.CODE_PEPPER).update(verification_code).digest('hex')
-        const rand_id = randomUUID()                
+        const rand_id = randomBytes(32).toString("hex")                
         
-        const set_verify = await redisHSet(`verify:email:${rand_id}`, {
+        await redisHSet(`verify:email:${rand_id}`, {
             name: firstname + ' ' + lastname, 
             email, 
             password: hash_result.key, 
@@ -53,20 +53,7 @@ export const register = action(async (formData) => {
             code: hashed_verification_code, 
             salt: salt.toString('hex')
         })
-        if (!set_verify) return json({
-            error_message: 'ვერიფიკაციის კოდის გაგზავნა ვერ მოხერხდა, სცადეთ ხელახლა.'
-        }, {
-            status: 400
-        })
-
-        const set_expire = await redis.expire(`verify:email:${rand_id}`, 600)
-        if (!set_expire) return json({
-            error_message: 'ვერიფიკაციის კოდის გაგზავნა ვერ მოხერხდა, სცადეთ ხელახლა.'
-        }, {
-            status: 400
-        })
-
-
+        await redis.expire(`verify:email:${rand_id}`, 600)
         try { await send_verification_code(email, verification_code) } catch (e) { }
 
         throw redirect('/verify', {

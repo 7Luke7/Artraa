@@ -24,14 +24,13 @@ const Login = () => {
 
         if (!popup) return alert('Popup blocked! Please allow popups.');
 
-        const listener = (event) => {
+        const listener = async (event) => {
             if (event.origin !== window.location.origin) return;
 
             const data = event.data;
             if (data.success) {
                 window.removeEventListener('message', listener);
-                window.location = '/dashboard'
-                revalidate('protect-anonymous-route')
+                await revalidate('protect-anonymous')
             } else if (data.success === false) {
                 window.removeEventListener('message', listener);
             }

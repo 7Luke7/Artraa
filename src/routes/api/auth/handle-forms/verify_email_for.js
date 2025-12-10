@@ -1,8 +1,7 @@
 'use server'
 import { notify_user_new_device } from "~/server/utils"
-import { redisSet } from "../../lib/redis/basic"
 import { exctract_client_info } from "../../utils"
-import { randomUUID } from "node:crypto"
+import { randomBytes } from "node:crypto"
 import { redisHSet } from "../../lib/redis/hash"
 import { redis } from "../../redis"
 
@@ -36,6 +35,7 @@ export const verify_email_for = async (verification, client, event) => {
                     create_user.rows[0].id, user_agent, ip_address, browser, browser_version, os, os_version,
                     device_type, device_vendor, device_model, device_fingerprint
                 ])
+
                 if (!create_user_device.rowCount) return {
                     error_message: "ვერიფიკაცია შეცდომით დასრულდა, სცადეთ ხელახლა.",
                     status: 500,
@@ -43,20 +43,16 @@ export const verify_email_for = async (verification, client, event) => {
                     response_type: 'json'
                 }
 
+                const user_device = create_user_device.rows[0]
                 const durationSeconds = remember_me === "1" ? 14 * 86400 : 7 * 86400;
-                const rand_id = randomUUID()
+                const rand_id = randomBytes(32).toString("hex")
 
-                const insert_user_session = await redisSet(`user:session:${rand_id}`, JSON.stringify({
-                    user_id: create_user.id,
-                    device_id: create_user_device.id
-                }), durationSeconds)
-
-                if (!insert_user_session) return {
-                    error_message: "ვერიფიკაცია შეცდომით დასრულდა, სცადეთ ხელახლა.",
-                    status: 500,
-                    ok: false,
-                    response_type: 'json'
-                }
+                await redisHSet(`user:session:${rand_id}`, {
+                    user_id: create_user.rows[0].id,
+                    name,
+                    device_id: user_device.id
+                })
+                await redis.expire(`user:session:${rand_id}`, durationSeconds)
 
                 return {
                     response_type: 'redirect',
@@ -70,7 +66,7 @@ export const verify_email_for = async (verification, client, event) => {
                 }
             }
             case 'login': {
-                const { user_id, remember_me } = verification
+                const { user_id, name, remember_me } = verification
                 const { ip_address, user_agent, browser, browser_version, os, os_version, device_type, device_model, device_vendor, device_fingerprint } = exctract_client_info(event.request, event.clientAddress)
 
                 const create_user_device = await client.query(`
@@ -97,10 +93,12 @@ export const verify_email_for = async (verification, client, event) => {
                     ok: false,
                     response_type: 'json'
                 }
-                
-                const is_new_device = create_user_device.rows[0].xmax === 0;
-                if (true) {
-                    await redisHSet(`temp_device:${create_user_device.rows[0].id}`, {
+
+                const user_device = create_user_device.rows[0]
+                const is_new_device = user_device.xmax === 0;
+
+                if (is_new_device) {
+                    await redisHSet(`temp_device:${user_device.id}`, {
                         ip_address,
                         user_agent,
                         browser,
@@ -113,28 +111,24 @@ export const verify_email_for = async (verification, client, event) => {
                         status: 'pending',
                         session_expiry: remember_me === "1" ? 14 * 86400 : 7 * 86400,
                     })
-                    await redis.expire(`temp_device:${create_user_device.rows[0].id}`, 300)
+                    await redis.expire(`temp_device:${user_device.id}`, 300)
                     await notify_user_new_device(user_id, {
                         type: 'new-device-login-request',
-                        temp_device_id: create_user_device.rows[0].id
+                        temp_device_id: user_device.id
                     })
 
-                    return { ok: true, waiting_for_approval: true, device_id: create_user_device.rows[0].id }
+                    return { ok: true, waiting_for_approval: true, device_id: user_device.id }
                 }
                 const durationSeconds = remember_me === "1" ? 14 * 86400 : 7 * 86400;
-                const rand_id = randomUUID()
+                const rand_id = randomBytes(32).toString("hex")
 
-                const insert_user_session = await redisSet(`user:session:${rand_id}`, JSON.stringify({
-                    user_id: user_id,
-                    device_id: create_user_device.rows[0].id
-                }), durationSeconds)
+                await redisHSet(`user:session:${rand_id}`, {
+                    user_id,
+                    name,
+                    device_id: user_device.id
+                })
+                await redis.expire(`user:session:${rand_id}`, durationSeconds)
 
-                if (!insert_user_session) return {
-                    error_message: "ვერიფიკაცია შეცდომით დასრულდა, სცადეთ ხელახლა.",
-                    status: 500,
-                    ok: false,
-                    response_type: 'json'
-                }
                 return {
                     response_type: 'redirect',
                     status: 303,
@@ -155,7 +149,7 @@ export const verify_email_for = async (verification, client, event) => {
                 }
         }
     } catch (error) {
-        console.log(error)
+        console.log('verify-email-for-error: ', error)
         return {
             error_message: "ვერიფიკაცია შეცდომით დასრულდა, სცადეთ ხელახლა.",
             status: 500,

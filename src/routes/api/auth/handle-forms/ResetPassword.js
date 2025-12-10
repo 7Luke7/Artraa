@@ -49,7 +49,7 @@ export const resetPasswordAction = action(async (formData) => {
         throw redirect('/login', { 
             status: 303,
             headers: {
-                'Set-Cookie': `reset_session=; Max-Age=600; HttpOnly; Secure; SameSite=Strict`
+                'Set-Cookie': `reset_session=; Path=/; Max-Age=600; HttpOnly; Secure; SameSite=Strict`
             } 
         })
     } catch (error) {

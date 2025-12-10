@@ -5,8 +5,7 @@ export async function redisHSet(key, object) {
   try {
     return await redis.hSet(key, object);
   } catch (error) {
-    console.log(error)
-    return null
+    throw error
   }
 }
 
@@ -16,8 +15,7 @@ export async function redisHGetAll(key) {
     if (!Object.keys(hash).length) return null
     return hash
   } catch (error) {
-    console.log(error)
-    return null
+    throw error
   }
 }
 
@@ -25,8 +23,7 @@ export async function redisHGet(key, field) {
   try {
     return await redis.hGet(key, field);
   } catch (error) {
-    console.log(error)
-    return null
+    throw error
   }
 }
 
@@ -34,7 +31,6 @@ export async function redisHDel(key, field) {
   try {
     return await redis.hDel(key, field);    
   } catch (error) {
-    console.log(error)
-    return null
+    throw error
   }
 }

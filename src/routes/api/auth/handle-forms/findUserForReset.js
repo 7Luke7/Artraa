@@ -23,9 +23,8 @@ export const findUserForReset = action(async (formData) => {
 
         const {id} = res.rows[0];
 
-        const insert_hash = await redisSet(`verify:email:${hashed_code}`, id, 600)
+        await redisSet(`verify:email:${hashed_code}`, id, 600)
 
-        if (!insert_hash) return json({ message: 'მოძებნა ვერ განხორციელდა' }, { status: 400 })
         const base = process.env.VITE_URL
         const reset_link = `${base}/api/auth/issue_session?token=${token}`;
 

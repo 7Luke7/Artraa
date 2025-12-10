@@ -3,8 +3,9 @@ import { oauth_session } from "../sessions";
 import * as jose from "jose"
 import { pool } from "../../db";
 import { exctract_client_info, get_client_ip } from "../../utils";
-import { randomUUID } from "node:crypto"
-import { redisSet } from "../../lib/redis/basic";
+import { randomBytes } from "node:crypto"
+import { redis } from "../../redis";
+import { redisHSet } from "../../lib/redis/hash";
 
 export async function GET({ request }) {
     const session = await oauth_session()
@@ -29,7 +30,7 @@ export async function GET({ request }) {
                     window.opener.postMessage({ success: false }, window.origin);
                     window.close();
                 </script>
-            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure' } });
+            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Domain=localhost; Path=/; Max-Age=0; HttpOnly; Secure' } });
         }
         if (!code || !state) {
             await session.clear()
@@ -38,7 +39,7 @@ export async function GET({ request }) {
                     window.opener.postMessage({ success: false }, window.origin);
                     window.close();
                 </script>
-            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure' } });
+            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Domain=localhost; Path=/; Max-Age=0; HttpOnly; Secure' } });
         }
 
         if (decoded.csrf === csrf) {
@@ -65,7 +66,7 @@ export async function GET({ request }) {
                     window.opener.postMessage({ success: false }, window.origin);
                     window.close();
                 </script>
-            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure' } });
+            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Domain=localhost; Path=/; Max-Age=0; HttpOnly; Secure' } });
             } else {
                 const jwks = jose.createRemoteJWKSet(new URL('https://www.googleapis.com/oauth2/v3/certs'));
                 const { payload } = await jose.jwtVerify(tokens.id_token, jwks, {
@@ -76,9 +77,9 @@ export async function GET({ request }) {
                 const client = await pool.connect()
                 try {
                     await client.query('BEGIN')
-                    const user = await client.query(`SELECT id FROM "User" WHERE (google_id=$1 OR email=$2)`, [payload.sub, payload.email]);
+                    const user = await client.query(`SELECT id, name FROM "User" WHERE (google_id=$1 OR email=$2)`, [payload.sub, payload.email]);
 
-                    if (user.rowCount === 1) {
+                    if (user.rowCount) {
                         await session.clear()
                         const ip = get_client_ip(request)
                         const { ip_address, user_agent, browser, browser_version, os, os_version, device_type, device_model, device_vendor, device_fingerprint } = exctract_client_info(request, ip)
@@ -96,6 +97,7 @@ export async function GET({ request }) {
                                 os=$6, os_version=$7, device_type=$8, device_vendor=$9, device_model=$10,
                                 device_fingerprint=$11, last_used=NOW(), status='active'
                             WHERE user_devices.status != 'blocked'
+                            RETURNING id
                         `, [
                             user.rows[0].id, user_agent, ip_address, browser, browser_version, os, os_version,
                             device_type, device_vendor, device_model, device_fingerprint
@@ -108,27 +110,18 @@ export async function GET({ request }) {
                                     window.opener.postMessage({ success: false }, window.origin);
                                     window.close();
                                 </script>
-                            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure' } });
+                            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Domain=localhost; Path=/; Max-Age=0; HttpOnly; Secure' } });
                         }
 
                         const durationSeconds = 14 * 86400
-                        const rand_id = randomUUID()
+                        const rand_id = randomBytes(32).toString("hex")
 
-                        const create_session = await redisSet(`user:session:${rand_id}`, JSON.stringify({
+                        await redisHSet(`user:session:${rand_id}`, {
                             user_id: user.rows[0].id,
+                            name: user.rows[0].name,
                             device_id: create_user_device.rows[0].id
-                        }), durationSeconds)
-
-                        if (!create_session) {
-                            await client.query('ROLLBACK')
-                            return new Response(`
-                                <script>
-                                    window.opener.postMessage({ success: false }, window.origin);
-                                    window.close();
-                                </script>
-                            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure' } });
-                        }
-
+                        })
+                        await redis.expire(`user:session:${rand_id}`, durationSeconds)
                         await client.query('COMMIT')
                         return new Response(`
                                 <script>
@@ -141,7 +134,7 @@ export async function GET({ request }) {
                                 'Content-Type': 'text/html',
                                 'Set-Cookie': [
                                     `auth.session-token=${rand_id}; HttpOnly; Path=/; Secure; SameSite=Strict; Max-Age=${durationSeconds}`,
-                                    'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure',
+                                    'oauth_state=; Domain=localhost; Path=/; Max-Age=0; HttpOnly; Secure',
                                 ],
                             }
                         });
@@ -161,7 +154,7 @@ export async function GET({ request }) {
                     window.opener.postMessage({ success: false }, window.origin);
                     window.close();
                 </script>
-            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure' } });
+            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Domain=localhost; Path=/; Max-Age=0; HttpOnly; Secure' } });
                     } else {
                         await session.clear()
                         const ip = get_client_ip(request)
@@ -174,7 +167,7 @@ export async function GET({ request }) {
                             )
                             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id
                         `, [
-                            user.rows[0].id, user_agent, ip_address, browser, browser_version, os, os_version,
+                            create_user.rows[0].id, user_agent, ip_address, browser, browser_version, os, os_version,
                             device_type, device_vendor, device_model, device_fingerprint
                         ])
 
@@ -185,32 +178,18 @@ export async function GET({ request }) {
                                     window.opener.postMessage({ success: false }, window.origin);
                                     window.close();
                                 </script>
-                            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure' } });
+                            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Domain=localhost; Path=/; Max-Age=0; HttpOnly; Secure' } });
                         }
 
                         const durationSeconds = 14 * 86400
-                        const rand_id = randomUUID()
+                        const rand_id = randomBytes(32).toString("hex")
 
-                        const create_session = await redisSet(`user:session:${rand_id}`, JSON.stringify({
+                        await redisHSet(`user:session:${rand_id}`, {
                             user_id: create_user.rows[0].id,
+                            name: payload.name,
                             device_id: create_user_device.rows[0].id
-                        }), durationSeconds)
-
-                        if (!create_session) {
-                            await client.query('ROLLBACK')
-                            return new Response(`
-                                <script>
-                                    window.opener.postMessage({ success: false }, window.origin);
-                                    window.close();
-                                </script>
-                            `, {
-                                status: 401,
-                                headers: {
-                                    'Content-Type': 'text/html',
-                                    'Set-Cookie': 'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure'
-                                }
-                            });
-                        }
+                        })
+                        await redis.expire(`user:session:${rand_id}`, durationSeconds)
 
                         await client.query('COMMIT')
                         return new Response(`
@@ -224,7 +203,7 @@ export async function GET({ request }) {
                                 'Content-Type': 'text/html',
                                 'Set-Cookie': [
                                     `auth.session-token=${rand_id}; HttpOnly; Path=/; Secure; SameSite=Strict; Max-Age=${durationSeconds}`,
-                                    'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure'
+                                    'oauth_state=; Domain=localhost; Path=/; Max-Age=0; HttpOnly; Secure'
                                 ],
                             }
                         });
@@ -237,7 +216,7 @@ export async function GET({ request }) {
                     window.opener.postMessage({ success: false }, window.origin);
                     window.close();
                 </script>
-            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure' } });
+            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Domain=localhost; Path=/; Max-Age=0; HttpOnly; Secure' } });
                 } finally {
                     client.release()
                 }
@@ -249,7 +228,7 @@ export async function GET({ request }) {
                     window.opener.postMessage({ success: false }, window.origin);
                     window.close();
                 </script>
-            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure' } });
+            `, { status: 401, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Domain=localhost; Path=/; Max-Age=0; HttpOnly; Secure' } });
         }
     } catch (error) {
         console.log(error)
@@ -259,6 +238,6 @@ export async function GET({ request }) {
                     window.opener.postMessage({ success: false }, window.origin);
                     window.close();
                 </script>
-            `, { status: 500, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure' } });
+            `, { status: 500, headers: { 'Content-Type': 'text/html', 'Set-Cookie': 'oauth_state=; Domain=localhost; Path=/; Max-Age=0; HttpOnly; Secure' } });
     }
 }

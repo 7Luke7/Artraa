@@ -57,6 +57,7 @@ export const verify_email_action = action(async (formData) => {
         }
         return json(result, {status: 200})
     } catch (error) {
+        console.log('verify-email-error: ', error)
         if (error instanceof Response) throw error
         await client.query('ROLLBACK');
         return json({ error_message: 'ვერიფიკაცია შეცდომით დასრულდა, სცადეთ ხელახლა.' }, {

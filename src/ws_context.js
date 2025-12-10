@@ -29,10 +29,9 @@ export const WebSocketContextProvider = (props) => {
     }
 
     onMount(() => {
-        const ws = new WebSocket(`${import.meta.env.VITE_WS_URL}`, [])
+        const ws = new WebSocket(`${import.meta.env.VITE_WS_URL}`, )
         setCtx(ws)
 
-        let ping_timeout
         const ws_open_handler = () => {
             ws.send(JSON.stringify({
                 type: 'ping'
@@ -43,10 +42,9 @@ export const WebSocketContextProvider = (props) => {
             const data = JSON.parse(msg.data)
             switch (data.type) {
                 case 'pong': {
-                    ping_timeout = setTimeout(() => ws.send(JSON.stringify({
+                    ws.send(JSON.stringify({
                         type: 'ping'
-                    })), 30000)
-                    break;
+                    }))
                 }
                 case 'new-device-login-request': {
                     setStore('login_requests', store.login_requests.length, data.temp_device_id)
@@ -59,7 +57,6 @@ export const WebSocketContextProvider = (props) => {
         ws.addEventListener('message', ws_message_handler)
 
         onCleanup(() => {
-            clearTimeout(ping_timeout)
             ws.removeEventListener('open', ws_open_handler)
             ws.removeEventListener('message', ws_message_handler)
         })

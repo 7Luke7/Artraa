@@ -1,6 +1,6 @@
 "use server"
 import { FormDataValidator } from "../validate/validation-service"
-import { createHmac, randomUUID } from "node:crypto"
+import { createHmac, randomBytes } from "node:crypto"
 import { redisDel, redisGet, redisSet } from "../lib/redis/basic"
 
 export async function GET({ request }) {
@@ -35,17 +35,15 @@ export async function GET({ request }) {
         const user_id = await redisGet(`verify:email:${user_token_hash}`)
         if (!user_id) return error_response
         
-        const sess = randomUUID()
-        const create_reset_session = await redisSet(`password:reset:${sess}`, user_id, 600)
-
-        if (!create_reset_session) return error_response
+        const sess = randomBytes(32).toString("hex")
+        await redisSet(`password:reset:${sess}`, user_id, 600)
 
         try {await redisDel(`verify:email:${user_token_hash}`)} catch (error) {console.log(error)}
         return new Response(null, { 
             status: 303,
             headers: {
-                'Refresh': `0, url=${import.meta.env.VITE_URL}/reset/password`,
-                'Set-Cookie': `reset_session=${sess}; Path=/; Max-Age=600; HttpOnly; Secure; SameSite=Strict`
+                'Set-Cookie': `reset_session=${sess}; Path=/; Max-Age=600; HttpOnly; Secure; SameSite=Strict`,
+                'Refresh': `0, url=${import.meta.env.VITE_URL}/reset/password`
             }, 
         })
     } catch (error) {

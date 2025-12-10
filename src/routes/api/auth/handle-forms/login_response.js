@@ -1,15 +1,15 @@
 'use server'
 
 import { json } from "@solidjs/router"
-import { randomUUID } from 'node:crypto'
-import { redisHGet } from "../../lib/redis/hash"
+import { randomBytes } from 'node:crypto'
+import { redisHGet, redisHSet } from "../../lib/redis/hash"
 import { pool } from "../../db"
-import { redisDel, redisSet } from "../../lib/redis/basic"
+import { redisDel } from "../../lib/redis/basic"
 import { getRequestEvent } from "solid-js/web"
 import { getCookie } from "../../utils"
+import { redis } from "../../redis"
 
 export const act_on_login_response = async (data) => {
-    console.log('device_id: ', data)
     const { request } = getRequestEvent()
     const pf_id = getCookie('pending_verification', request.headers.get('cookie'))
     if (!data) return json({ message: 'დაფიქსირდა შეცდომა.', ok: false }, { status: 400 })
@@ -29,20 +29,25 @@ export const act_on_login_response = async (data) => {
         }
 
         const user_device = await pool.query(`
-            SELECT user_id FROM user_devices WHERE id=$1 AND status=$2
+            SELECT 
+                u.user_id AS user_id,
+                u.name AS name
+            FROM "User" u
+            INNER JOIN user_devices ud ON ud.user_id = u.user_id
+            WHERE ud.id=$1 AND ud.status=$2
         `, [data, status])
         if (!user_device.rowCount) return json({ message: 'დაფიქსირდა შეცდომა.', ok: false }, { status: 500 })
-        const rand_id = randomUUID()
+        const rand_id = randomBytes(32).toString("hex")
 
         const user_id = user_device.rows[0].user_id
         const durationSeconds = await redisHGet(`temp_device:${data}`, 'session_expiry');
 
-        const insert_user_session = await redisSet(`user:session:${rand_id}`, JSON.stringify({
+        await redisHSet(`user:session:${rand_id}`, {
             user_id: user_id,
+            name: user_device.rows[0].name,
             device_id: data
-        }), durationSeconds)
-
-        if (!insert_user_session) return json({ message: 'დაფიქსირდა შეცდომა.', ok: false }, { status: 500 })
+        })
+        await redis.expire(`user:session:${rand_id}`, durationSeconds)
 
         await redisDel(`verify:email:${pf_id}`)
         await redisDel(`temp_device:${data}`)

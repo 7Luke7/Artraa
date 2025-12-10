@@ -86,7 +86,7 @@ export const CourseDisplay = ({ courses }) => {
                                                 <img src='/svg/price-tag.svg' width={28} height={28} />
                                                 <span class="font-bold-tbc font-bold text-base">ფასი: </span>
                                                 <div class="flex items-center">
-                                                    <img src='/svg/currency-lari.svg' width={20} height={20} />
+                                                    ₾
                                                     <span>{c.monthly_access_price}</span>
                                                 </div>
                                             </div>

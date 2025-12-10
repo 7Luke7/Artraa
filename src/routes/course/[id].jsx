@@ -108,11 +108,11 @@ const Course = (props) => {
                                     <div class="text-center mb-6">
                                         <div class="flex items-center justify-center gap-3 mb-2">
                                             <span class="text-4xl font-bold text-gray-900 flex items-center">
-                                                <img src='/svg/currency-lari.svg' width={32} height={32} class="mr-1" />
+                                                ₾
                                                 {course_detail().monthly_access_price}
                                             </span>
                                             <span class="text-xl text-gray-500 line-through flex items-center">
-                                                <img src='/svg/currency-lari.svg' width={20} height={20} class="mr-1" />
+                                                ₾
                                                 {course_detail().monthly_access_price + 5}
                                             </span>
                                         </div>
@@ -146,7 +146,7 @@ const Course = (props) => {
                                                             <div class="flex justify-between items-center mb-1">
                                                                 <span class="font-semibold text-gray-900">{plan.name}</span>
                                                                 <span class="font-bold text-gray-900 text-lg">
-                                                                    <img src='/svg/currency-lari.svg' width={16} height={16} class="inline mr-1" />
+                                                                    ₾
                                                                     {plan.price}
                                                                 </span>
                                                             </div>
