@@ -1,6 +1,6 @@
 import { action, json, redirect } from "@solidjs/router";
 import { getRequestEvent } from "solid-js/web";
-import { getCookie } from "../../utils";
+import { getCookie, logout_all_devices } from "../../utils";
 import { pool } from "../../db";
 import { FormDataValidator } from "../../validate/validation-service";
 import { randomBytes } from "node:crypto";
@@ -11,18 +11,18 @@ export const resetPasswordAction = action(async (formData) => {
     'use server'
     const {request} = getRequestEvent()
     const cookie = request.headers.get('cookie')
-    if (!cookie) return json({message: 'თქვენ არ გაქვთ გვერდზე წვდომის უფლება.'}, {status: 401})
+    if (!cookie) return json({field: 'global', message: 'თქვენ არ გაქვთ გვერდზე წვდომის უფლება.'}, {status: 401})
     const rs = getCookie('reset_session', cookie)
-    if (!rs) return json({message: 'თქვენ არ გაქვთ გვერდზე წვდომის უფლება.'}, {status: 401})
+    if (!rs) return json({field: 'global', message: 'თქვენ არ გაქვთ გვერდზე წვდომის უფლება.'}, {status: 401})
 
     const result = FormDataValidator.validateInput(formData)
-    if (!result.ok) return json({message: result.error_message}, {status: 400})
-    const {პაროლი: password, 'დაადასტურე პაროლი': confirm_password} = result.data
-    if (password !== confirm_password) return json({message: 'პაროლები ერთმანეთს არ ემთხვევა'}, {status: 400})
+    if (!result.ok) return json({field: result.field, message: result.message}, {status: 400})
+    const {password, confirm_password} = result.data
+    if (password !== confirm_password) return json({field: 'global', message: 'პაროლები ერთმანეთს არ ემთხვევა'}, {status: 400})
     
     try {
         const user_id = await redisGet(`password:reset:${rs}`)
-        if (!user_id) return json({message: 'სესიის დრო ამოიწურა.'}, {status: 401})
+        if (!user_id) return json({field: 'global', message: 'სესიის დრო ამოიწურა.'}, {status: 401})
 
         const salt = randomBytes(16); 
         const parameters = {
@@ -44,18 +44,20 @@ export const resetPasswordAction = action(async (formData) => {
             WHERE id = $1
         `, [user_id, hash_result.key, salt.toString('hex')])
 
-        if (!change_password.rowCount) return json({message: 'პაროლი ვერ განახლდა, სცადეთ ხელახლა'}, {status: 400})
+        if (!change_password.rowCount) return json({field: 'global', message: 'პაროლი ვერ განახლდა, სცადეთ ხელახლა'}, {status: 400})
         try {await redisDel(`password:reset:${rs}`)} catch (error) {console.log(error)}
+        
+        try {await logout_all_devices(user_id)} catch (error) {console.log(error)} 
         throw redirect('/login', { 
             status: 303,
             headers: {
-                'Set-Cookie': `reset_session=; Path=/; Max-Age=600; HttpOnly; Secure; SameSite=Strict`
+                'Set-Cookie': `reset_session=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict`,
+                'Cache-control': 'no-store'
             } 
         })
     } catch (error) {
         if (error instanceof Response) throw error
-        console.log(error)
-        return json({ message: 'პაროლის აღდგენა შეცდომით დასრულდა, სცადეთ ხელახლა.' }, {
+        return json({ field: 'global', message: 'პაროლის აღდგენა შეცდომით დასრულდა, სცადეთ ხელახლა.' }, {
             status: 500
         })
     }

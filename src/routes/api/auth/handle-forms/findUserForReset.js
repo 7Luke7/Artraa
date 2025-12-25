@@ -9,21 +9,22 @@ export const findUserForReset = action(async (formData) => {
     "use server"
     const validation_result = FormDataValidator.validateInput(formData)
 
-    if (!validation_result.ok) return json({ error_message: validation_result.error_message }, {
+    if (!validation_result.ok) return json({ field: validation_result.field, message: validation_result.message }, {
         status: 400
     })
-    const { მეილი: email } = validation_result.data
+    const { email } = validation_result.data
 
     try {
-        const res = await pool.query(`SELECT id FROM "User" WHERE email = $1`, [email]);
-        if (!res.rowCount) return json({ message: "თუ მეილი არსებობს, მიიღებთ ბმულს." });
+        const res = await pool.query(`SELECT google_id, password, id FROM "User" WHERE email = $1`, [email]);
+        if (!res.rowCount) return json({ ok: true, field: 'global', message: "ინსტრუქცია გამოგეგზავნათ, თუ ეს ელ.ფოსტა დარეგისტრირებულია ჩვენს სისტემაში." }, {status: 200});
+
+        const {google_id, password, id} = res.rows[0];
+
+        if (google_id && !password) return json({ type: 'hint', field: 'global', message: 'თქვენ რეგისტრირებული ხართ Google-ის მეშვეობით გთხოვთ შეხვიდეთ თქვენს ექაუნთში და დააყენოთ პაროლი' }, {status: 400});
 
         const token = randomBytes(48).toString("hex");
         const hashed_code = createHmac('sha256', process.env.PASSWORD_RESET_SECRET).update(token).digest('hex')
-
-        const {id} = res.rows[0];
-
-        await redisSet(`verify:email:${hashed_code}`, id, 600)
+        await redisSet(`pending:verification:${hashed_code}`, id, 900)
 
         const base = process.env.VITE_URL
         const reset_link = `${base}/api/auth/issue_session?token=${token}`;
@@ -31,15 +32,17 @@ export const findUserForReset = action(async (formData) => {
         const email_result = await send_verification_link(email, reset_link);
 
         if (email_result.status !== 200) return json(
-            { message: "მეილის გაგზავნა ვერ მოხერხდა, სცადეთ ხელახლა." },
+            { field: 'global', message: "მეილის გაგზავნა ვერ მოხერხდა, სცადეთ ხელახლა." },
             { status: 500 }
         );
 
         return json({
-            message: "თუ მეილი არსებობს, მიიღებთ ბმულს."
-        });
+            ok: true,
+            field: 'global',
+            message: "ინსტრუქცია გამოგეგზავნათ, თუ ეს ელ.ფოსტა დარეგისტრირებულია ჩვენს სისტემაში."
+        }, {status: 200});
     } catch (error) {
         console.log(error)
-        return json({ message: 'დაფიქსირდა შეცდომა, სცადეთ ხელახლა.' }, { status: 500 })
+        return json({ field: 'global', message: 'დაფიქსირდა შეცდომა, სცადეთ ხელახლა.' }, { status: 500 })
     }
 }, 'find-user-for-reset')

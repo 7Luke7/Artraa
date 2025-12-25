@@ -22,7 +22,7 @@ export const Accordion = ({ accordion_content = [
     return <div class="border border-gray-300 divide-y divide-gray-300 rounded-lg overflow-hidden">
             <For each={accordionContent()}>{(ac, i) => (
                 <div role="accordion">
-                    <button onClick={() => expandContent(i())} class="cursor-pointer w-full text-base text-left py-4 px-6 hover:bg-gray-100 text-slate-900 justify-between font-medium flex items-center transition-all">
+                    <button onClick={() => expandContent(i())} class="cursor-pointer w-full text-base text-left py-4 px-6 hover:bg-gray-100 text-slate-900 justify-between font-gsans font-medium flex items-center transition-all">
                         <h2 class="mr-4">{ac.title}</h2>
                         <img style={{transform: ac.is_selected && "rotate(180deg)"}} src='/svg/dropdown.svg' width={24} height={24} class="ml-auto shrink-0 transition-transform duration-300"></img>
                     </button>

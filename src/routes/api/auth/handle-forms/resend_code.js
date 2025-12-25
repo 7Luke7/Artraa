@@ -10,30 +10,37 @@ export const resend_code = action(async () => {
     "use server"
     const { request } = getRequestEvent()
     const cookies = request.headers.get('cookie')
-    if (!cookies) return json({ error_message: "არასწორი მონაცემები." }, { status: 401 })
+    if (!cookies) return json({ field: 'global', message: "არასწორი მონაცემები." }, { status: 401 })
     const pending = getCookie('pending_verification', cookies)
 
-    if (!pending) return json({ error_message: "ვერიფიკაციის იდენტიფიკატორი ვერ მოიძებნა." }, { status: 400 })
+    if (!pending) return json({ field: 'global', message: "ვერიფიკაციის იდენტიფიკატორი ვერ მოიძებნა." }, { status: 401 })
 
-    const result = FormDataValidator.validateField('vid', pending)
+    const validation_result = FormDataValidator.validateField('vid', pending)
 
-    if (!result.ok) return json({ error_message: result.error_message }, { status: 400 })  
+    if (!validation_result.ok) return json({ field: 'global', message: validation_result.message }, { status: 400 })  
+    const {value: vid} = validation_result
 
-    const {value: vid} = result
+    const email = await redisHGet(`pending:verification:${vid}`, 'email')
+    if (!email) return json({ field: 'global', message: "ვერიფიკაციის იდენტიფიკატორი ვერ მოიძებნა." }, { status: 401 })
+
     const verification_code = randomInt(100000, 1000000).toString();
     const hashed_verification_code = createHmac('sha256', process.env.CODE_PEPPER).update(verification_code).digest('hex')
     try {
-        await redisHSet(`verify:email:${vid}`, {code: hashed_verification_code})
-        await redis.expire(`verify:email:${vid}`, 600)
-        const result = await redisHGet(`verify:email:${vid}`, 'email')     
-        if (!result)return json({message: 'დაფიქსირდა შეცდომა კოდის გაგზავნისას, სცადეთ ხელახლა.'}, {status: 500}) 
-        const send_email_result = await send_verification_code(result, verification_code)
+        await redisHSet(`pending:verification:${vid}`, {code: hashed_verification_code})
+        await redis.expire(`pending:verification:${vid}`, 900)
+        const send_email_result = await send_verification_code(email, verification_code)
 
-        if (send_email_result.status !== 200) return json({message: 'დაფიქსირდა შეცდომა კოდის გაგზავნისას, სცადეთ ხელახლა.'}, {status: 500}) 
+        if (send_email_result.status !== 200) return json({field: 'global', message: 'დაფიქსირდა შეცდომა კოდის გაგზავნისას, სცადეთ ხელახლა.'}, {status: 500}) 
         
-        return json({ message: "კოდი ხელახლა გაიგზავნა." }, {status: 200})
+        return json({field: 'global', ok: true, message: "კოდი ხელახლა გაიგზავნა." }, {
+            status: 200,
+            headers: {
+                'Set-Cookie': `pending_verification=${vid}; Path=/; Max-Age=900; HttpOnly; Secure; SameSite=Strict`,
+                'Cache-control': 'no-store'
+            }
+        })
     } catch (error) {
         console.log(error)
-        return json({ error_message: "დაფიქსირდა შეცდომა, სცადეთ ხელახლა." }, { status: 500 })
+        return json({ field: 'global', field: "დაფიქსირდა შეცდომა, სცადეთ ხელახლა." }, { status: 500 })
     }
 }, 'resend-code')

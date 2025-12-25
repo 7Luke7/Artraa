@@ -1,57 +1,82 @@
 "use server"
 export const validation_rules = {
-    სახელი: {
+    given_name: {
         required: true,
         minLength: 2,
         type: 'string',
         maxLength: 50,
-        pattern: /^[a-zA-Z\u10D0-\u10F0\s'-]+$/,
+        local_name: 'სახელი',
+        pattern: /^\p{L}+$/u,
     },
-    გვარი: {
+    family_name: {
         required: true,
         type: 'string',
+        local_name: 'გვარი',
         minLength: 2,
         maxLength: 50,
-        pattern: /^[a-zA-Z\u10D0-\u10F0\s'-]+$/,
+        pattern: /^\p{L}+$/u,
     },
-    მეილი: {
+    email: {
         required: true,
+        local_name: 'მეილი',
         type: 'string',
         pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-        maxLength: 255,
+        maxLength: 254,
     },
-    პაროლი: {
+    password: {
         required: true,
+        local_name: 'პაროლი',
         type: 'string',
         minLength: 8,
-        pattern: /^(?=.*[\p{L}])(?=.*\d)[\p{L}\d!@#$%^&*()_+\-=\[\]{};':"\|,.<>\/?]+$/u,
+        pattern: /^[\S]+$/,
         maxLength: 128,
     },
-    'დაადასტურე პაროლი': {
+    new_password: {
         required: true,
+        local_name: 'ახალი პაროლი',
         type: 'string',
         minLength: 8,
-        pattern: /^(?=.*[\p{L}])(?=.*\d)[\p{L}\d!@#$%^&*()_+\-=\[\]{};':"\|,.<>\/?]+$/u,
+        pattern: /^[\S]+$/,
         maxLength: 128,
     },
-    დამიმახსოვრე: {
+    current_password: {
+        required: true,
+        local_name: 'ამჟამინდელი პაროლი',
+        type: 'string',
+        minLength: 8,
+        pattern: /^[\S]+$/,
+        maxLength: 128,
+    },
+    confirm_password: {
+        required: true,
+        local_name: 'დაადასტურე პაროლი',
+        type: 'string',
+        minLength: 8,
+        pattern: /^[\S]+$/,
+        maxLength: 128,
+    },
+    remember_me: {
         type: 'boolean',
+        local_name: 'დამიმახსოვრე'
     },
-    კოდი: {
+    'one-time-code': {
         required: true,
         type: 'string',
         exactLength: 6,
-        pattern: /\d/,
+        local_name: 'კოდი',
+        pattern: /^\d{6}$/,
     },
     vid: {
         required: true,
         type: 'string',
-        exactLength: 36,
-        pattern: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+        local_name: 'ID',
+        exactLength: 64,
+        pattern: /^[0-9a-f]{64}$/i,
     },
     token: {
         required: true,
         type: 'string',
+        local_name: 'ტოკენი',
         exactLength: 96,
         pattern: /^[0-9a-f]{96}$/i,
     }

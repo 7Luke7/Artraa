@@ -4,24 +4,24 @@ import solidPlugin from "vite-plugin-solid";
 
 export default defineConfig({
   vite: {
-    plugins: [tailwindcss(), solidPlugin({
-      ssr: true
-    })]
+    plugins: [
+      tailwindcss(),
+      solidPlugin({
+        ssr: true,
+      }),
+    ],
   },
   server: {
-    allowedHosts: ['dale-nonoxidizing-cordelia.ngrok-free.dev'],
     port: 3000,
+    allowedHosts: ["dale-nonoxidizing-cordelia.ngrok-free.dev"],
     experimental: {
-      websocket: true
-    }
-  },
-  build: {
-    target: 'esnext',
-  },
+      websocket: true,
+    },
+  }
 }).addRouter({
   name: "ws",
   type: "http",
-  handler: "./src/server/ws.js",
   target: "server",
   base: "/ws",
+  handler: "./src/server/ws.js"
 });

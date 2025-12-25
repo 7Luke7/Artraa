@@ -24,4 +24,4 @@ export const redis = createClient({
 });
 
 redis.on("error", (err) => console.error(err));
-await redis.connect();
+redis.connect();

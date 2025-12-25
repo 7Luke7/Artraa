@@ -1,0 +1,1 @@
+og:image - size: 1200×630px	"Used when user shares the webpage"

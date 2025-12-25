@@ -28,10 +28,10 @@ export class FormDataValidator {
 
     static validateField(fieldName, rawValue) {
         const rules = validation_rules[fieldName];
+        const localName = rules['local_name']
         if (!rules) return { ok: true, rawValue };
-
         const { isValid, value } = this.coerce(rawValue, rules.type);
-        if (!isValid) return { error_message: `${fieldName} მოითხოვს სწორ ტიპის მონაცემს.`, ok: false };
+        if (!isValid) return { field: fieldName, message: `${localName} მოითხოვს სწორ ტიპის მონაცემს.`, ok: false };
 
         if (rules.type === 'boolean') return { ok: true, value }
 
@@ -39,27 +39,32 @@ export class FormDataValidator {
 
         if (rules.required && (!val || !val.length)) return {
             ok: false,
-            error_message: `${fieldName} სავალდებულოა.`
+            message: `${localName} სავალდებულოა.`,
+            field: fieldName
         };
 
         if (rules.exactLength && val.length !== rules.exactLength) return {
             ok: false,
-            error_message: `${fieldName} უნდა იყოს ზუსტად ${rules.exactLength} სიმბოლო.`
+            field: fieldName,
+            message: `${localName} უნდა იყოს ზუსტად ${rules.exactLength} სიმბოლო.`
         };
 
         if (rules.minLength && val.length < rules.minLength) return {
             ok: false,
-            error_message: `${fieldName} უნდა შედგებოდეს მინიმუმ ${rules.minLength} სიმბოლოსგან.`
+            field: fieldName,
+            message: `${localName} უნდა შედგებოდეს მინიმუმ ${rules.minLength} სიმბოლოსგან.`
         };
 
         if (rules.maxLength && val.length > rules.maxLength) return {
             ok: false,
-            error_message: `${fieldName} არ უნდა აღემატებოდეს ${rules.maxLength} სიმბოლოს.`
+            field: fieldName,
+            message: `${localName} არ უნდა აღემატებოდეს ${rules.maxLength} სიმბოლოს.`
         };
 
         if (rules.pattern && !rules.pattern.test(val)) return {
             ok: false,
-            error_message: `${fieldName} ფორმატი არასწორია.`
+            field: fieldName,
+            message: `${localName} ფორმატი არასწორია.`
         };
 
         return { ok: true, value: val };
@@ -68,7 +73,8 @@ export class FormDataValidator {
 
     static validateInput(formData) {
         if (!(formData instanceof FormData)) return {
-            error_message: 'არასწორი მონაცემების ფორმატი.',
+            message: 'არასწორი მონაცემების ფორმატი.',
+            field: 'global',
             ok: false,
         };
 

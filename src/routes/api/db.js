@@ -7,7 +7,6 @@ import {Pool} from "pg"
 //     require: true,
 //   },
 // });
-
 export const pool = new Pool({
   user: 'artra',
   host: '127.0.0.1',

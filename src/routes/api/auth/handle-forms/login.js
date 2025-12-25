@@ -1,29 +1,42 @@
 import { action, json, redirect } from "@solidjs/router"
 import { pool } from "../../db"
 import { FormDataValidator } from "../../validate/validation-service"
-import { send_verification_code } from "../../utils"
-import { randomInt, createHmac, randomBytes } from "node:crypto"
+import { randomBytes } from "node:crypto"
 import { hash_password } from "../hash"
 import { redis } from "../../redis"
 import { redisHSet } from "../../lib/redis/hash"
+import { exctract_client_info } from "../../utils"
+import { getRequestEvent } from "solid-js/web"
 
 export const login = action(async (formData) => {
     "use server"
     const validation_result = FormDataValidator.validateInput(formData)
-    if (!validation_result.ok) return json({ error_message: validation_result.error_message }, {
+    if (!validation_result.ok) return json({ message: validation_result.message, field: validation_result.field }, {
         status: 400
     })
-    const { მეილი: email, პაროლი: password, დამიმახსოვრე: remember_me } = validation_result.data
+    const { email, password, remember_me } = validation_result.data
 
+    const event = getRequestEvent()
     try {
-        const res = await pool.query(`SELECT name, salt, password, id FROM "User" WHERE email = $1`, [email]);
+        const {device_fingerprint} = exctract_client_info(event.request, event.clientAddress)
+        const res = await pool.query(`
+            SELECT name, salt, password, id 
+            FROM "User" u
+            WHERE email = $1 AND NOT EXISTS (
+                SELECT 1
+                FROM user_devices ud
+                WHERE ud.user_id = u.id
+                AND ud.device_fingerprint = $2
+                AND ud.status = 'blocked'
+            )
+        `, [email, device_fingerprint]);
 
-        if (!res.rowCount) return json({ error_message: 'არასწორი მონაცემები, სცადეთ ხელახლა.' }, {
+        if (!res.rowCount) return json({ field: 'global', message: 'არასწორი მონაცემები, სცადეთ ხელახლა.' }, {
             status: 400
         })
         const user = res.rows[0];
 
-        if (!user.password) return json({ error_message: 'პაროლი არ არსებობს.' }, {
+        if (!user.password) return json({ field: 'global', message: 'პაროლი არ არსებობს.' }, {
             status: 400
         })
         const parameters = {
@@ -38,39 +51,36 @@ export const login = action(async (formData) => {
 
         const user_hash_key = await hash_password(parameters)
         if (!user_hash_key.ok) return json({
-            error_message: 'დაფიქსირდა შეცდომა, სცადეთ ხელახლა.'
+            field: 'global', message: 'დაფიქსირდა შეცდომა, სცადეთ ხელახლა.'
         }, {
             status: 500
         })
 
-        if (user.password !== user_hash_key.key) return json({ error_message: 'პაროლი არასწორია.' }, {
+        if (user.password !== user_hash_key.key) return json({ field: 'password', message: 'პაროლი არასწორია.' }, {
             status: 400
         })
-        const verification_code = randomInt(100000, 1000000).toString();
-        const hashed_verification_code = createHmac('sha256', process.env.CODE_PEPPER).update(verification_code).digest('hex')
-        const rand_id = randomBytes(32).toString("hex")
 
-        await redisHSet(`verify:email:${rand_id}`, {
+        const rand_id = randomBytes(32).toString("hex")
+        await redisHSet(`pending:verification:${rand_id}`, {
             remember_me: remember_me ? '1' : '0',
             type: 'login',
             email,
-            name: user.name,
+            name: user.name.split(' ')[0],
             user_id: user.id,
-            code: hashed_verification_code,
         })
-        await redis.expire(`verify:email:${rand_id}`, 600)
-        try { await send_verification_code(email, verification_code) } catch (e) { }
+        await redis.expire(`pending:verification:${rand_id}`, 900)
 
-        throw redirect("/verify", {
+        throw redirect("/verify/pending", {
             status: 303,
             headers: {
-                'Set-Cookie': `pending_verification=${rand_id}; Path=/; Max-Age=600; HttpOnly; Secure; SameSite=Strict`
+                'Set-Cookie': `pending_verification=${rand_id}; Path=/; Max-Age=900; HttpOnly; Secure; SameSite=Strict`,
+                'Cache-control': 'no-store, max-age=0'
             }
         })
     } catch (error) {
         if (error instanceof Response) throw error;
         return json({
-            error_message: 'დაფიქსირდა შეცდომა, სცადეთ ხელახლა.'
+            field: 'global', message: 'დაფიქსირდა შეცდომა, სცადეთ ხელახლა.'
         }, {
             status: 500
         })

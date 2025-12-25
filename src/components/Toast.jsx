@@ -4,7 +4,7 @@ const SuccessAlert = ({message}) => {
         <div class="mr-3 shrink-0">
           <img src='/svg/check.svg' width={20} height={20} />
         </div>
-        <span class="text-[15px] font-medium-tbc text-gray-800 tracking-wide">{message}</span>
+        <span class="text-[15px] font-gsans font-medium text-gray-800 tracking-wide">{message}</span>
       </div>
 }
 export default SuccessAlert

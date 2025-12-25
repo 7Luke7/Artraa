@@ -15,34 +15,34 @@ export async function GET({ request }) {
             <meta charset="UTF-8">
             <title>401 არაიდენტიფიცირებული</title>
             <style>
-                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-                a { color: #E85A4F; text-decoration: none; font-weight: bold; }
+                body { text-align: center; padding: 50px; }
+                a { color: #E85A4F; text-decoration: none; }
             </style>
         </head>
         <body>
-            <p>თქვენ არ გაქვთ წვდომის უფლება.</p>
-            <p><a href="/login">უკან შესვლის გვერდზე</a></p>
+            <p class='font-gsans font-normal'>თქვენ არ გაქვთ წვდომის უფლება.</p>
+            <p><a href="/login" class='font-gsans font-bold' target='_self'>უკან შესვლის გვერდზე</a></p>
         </body>
         </html>
     `, {
         status: 401,
-        headers: { 'Content-Type': 'text/html' }
+        headers: { 'Content-Type': 'text/html', 'Cache-control': 'no-store' }
     })
     if (!result.ok) return error_response
 
     try {
         const user_token_hash = createHmac('sha256', process.env.PASSWORD_RESET_SECRET).update(token).digest('hex')
-        const user_id = await redisGet(`verify:email:${user_token_hash}`)
+        const user_id = await redisGet(`pending:verification:${user_token_hash}`)
         if (!user_id) return error_response
         
         const sess = randomBytes(32).toString("hex")
-        await redisSet(`password:reset:${sess}`, user_id, 600)
+        await redisSet(`password:reset:${sess}`, user_id, 900)
 
-        try {await redisDel(`verify:email:${user_token_hash}`)} catch (error) {console.log(error)}
+        try {await redisDel(`pending:verification:${user_token_hash}`)} catch (error) {console.log(error)}
         return new Response(null, { 
             status: 303,
             headers: {
-                'Set-Cookie': `reset_session=${sess}; Path=/; Max-Age=600; HttpOnly; Secure; SameSite=Strict`,
+                'Set-Cookie': `reset_session=${sess}; Path=/; Max-Age=900; HttpOnly; Secure; SameSite=Strict`,
                 'Refresh': `0, url=${import.meta.env.VITE_URL}/reset/password`
             }, 
         })

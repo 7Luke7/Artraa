@@ -4,7 +4,7 @@ import { protect_anonymous } from "~/routes/api/auth/ProtectRoutes";
 
 export const ProtectAnonymousRoute = (props) => {
     const result = createAsync(protect_anonymous, {deferStream: true})
-    return <Show when={result()}>
+    return <Show when={result()?.status === 200}>
         {props.children}
     </Show>
 }

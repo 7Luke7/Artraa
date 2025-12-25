@@ -9,10 +9,10 @@ export const LessonCard = ({lesson}) => {
                 <div class="flex items-start space-x-4 w-full">
                     <img src={lesson.icon} width={56} height={56} alt={lesson.title} />
                     <div class="flex-1 min-w-0">
-                        <span class="text-xs font-medium-tbc text-gray-500 bg-gray-100 px-2 py-1 rounded inline-block">
+                        <span class="text-xs font-gsans font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded inline-block">
                             {lesson.category}
                         </span>
-                        <h3 class="text-lg font-semibold font-bold-tbc text-gray-800 mt-1 truncate">{lesson.title}</h3>
+                        <h3 class="text-lg font-gsans font-bold text-gray-800 mt-1 truncate">{lesson.title}</h3>
                     </div>
                 </div>
             </div>
@@ -22,7 +22,7 @@ export const LessonCard = ({lesson}) => {
             <div class="mb-4 flex-shrink-0">
                 <div class="flex justify-between text-sm mb-2">
                     <span class="text-gray-600">პროგრესი</span>
-                    <span class="font-medium-tbc text-gray-800">{lesson.progress}%</span>
+                    <span class="font-gsans font-medium text-gray-800">{lesson.progress}%</span>
                 </div>
                 <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div
@@ -36,17 +36,17 @@ export const LessonCard = ({lesson}) => {
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-x-2">
                         <img src="/svg/book.svg" width={20} height={20} />
-                        <span class="font-medium-tbc whitespace-nowrap">{lesson.lessons} გაკვეთილი</span>
+                        <span class="font-gsans font-medium whitespace-nowrap">{lesson.lessons} გაკვეთილი</span>
                     </div>
                     <div class="flex items-center gap-x-2">
                         <img src="/svg/clock.svg" width={20} height={20} />
-                        <span class="font-medium-tbc whitespace-nowrap">{lesson.duration}</span>
+                        <span class="font-gsans font-medium whitespace-nowrap">{lesson.duration}</span>
                     </div>
                 </div>
 
                 <A
                     href={`/dashboard/course/${lesson.id}`}
-                    class="w-full py-3 px-4 text-[15px] font-medium-tbc font-bold rounded-md text-white bg-[#E98074] hover:bg-[#E85A4F] duration-200 ease-in focus:outline-none cursor-pointer transition disabled:opacity-50 disabled:cursor-not-allowed text-center"
+                    class="w-full py-3 px-4 text-[15px] font-gsans font-medium rounded-md text-white bg-[#E98074] hover:bg-[#E85A4F] duration-200 ease-in focus:outline-none cursor-pointer transition disabled:opacity-50 disabled:cursor-not-allowed text-center"
                 >
                     {lesson.progress === 100 ? 'გადახედვა' : 'გაგრძელება'}
                 </A>
