@@ -1,8 +1,8 @@
 import { getRequestEvent } from "solid-js/web";
 import { getCookie } from "../../utils";
 import { query } from "@solidjs/router";
-import { get_session_data } from "../../auth/ProtectRoutes";
 import { redisExists } from "../../lib/redis/basic";
+import { redisHGet } from "../../lib/redis/hash";
 
 export const get_header = query(async () => {
     'use server'
@@ -16,8 +16,8 @@ export const get_header = query(async () => {
     const auth = await redisExists(`user:session:${id}`)
     if (!auth) return null
     try {
-        const data = await get_session_data(id, ['firstname', 'pfp'])
-        if (!data) null
+        const data = await redisHGet(`user:session:${id}`, 'pfp')
+        if (!data) return true
         
         return data
     } catch(error) {

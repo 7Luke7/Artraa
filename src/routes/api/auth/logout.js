@@ -48,7 +48,6 @@ export const logout = action(async () => {
       headers: new Headers([
         ['Set-Cookie', 'auth.session-token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict'],
         ['Set-Cookie', 'g_csrf_token=; Path=/; Max-age=0'],
-        ['Cache-control', 'no-store']
       ])
     })
   } catch (error) {

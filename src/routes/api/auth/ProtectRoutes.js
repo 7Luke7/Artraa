@@ -27,12 +27,7 @@ export const protect_anonymous = query(async () => {
   try {
     const auth_state = await auth()
     if (auth_state) throw redirect('/')
-    return new Response(true, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/html',
-      }
-    })
+    return true
   } catch (error) {
     if (error instanceof Response) throw error
     console.log(error)
@@ -45,8 +40,7 @@ export const protected_route = query(async () => {
     const auth_state = await auth()
     if (!auth_state) throw redirect('/login', {
       headers: {
-        'Set-Cookie': 'auth.session-token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict',
-        'Cache-control': 'no-cache, private, '
+        'Set-Cookie': 'auth.session-token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict'
       }
     })
     return true
@@ -66,6 +60,7 @@ export const get_session_data = query(async (id, field = []) => {
         return data ? { [f]: data } : null
       })
     )
+
     const filtered = results.filter(Boolean)
 
     return filtered.length ? Object.assign({}, ...filtered) : null
@@ -79,143 +74,36 @@ export const ProtectVerifyRoute = query(async () => {
   const { request } = getRequestEvent()
   const cookie = request.headers.get('cookie')
 
-  if (!cookie) return new Response(true, {
-    status: 401,
-    headers: {
-      'Content-Type': 'text/html',
-      'Cache-control': 'no-store'
-    }
-  })
+  if (!cookie) return 401
   const pending_verification_id = getCookie('pending_verification', cookie)
-  if (!pending_verification_id) return new Response(true, {
-    status: 401,
-    headers: {
-      'Content-Type': 'text/html',
-      'Cache-control': 'no-store'
-    }
-  })
+  if (!pending_verification_id) return 401
 
   try {
     const vid = await redisExists(`pending:verification:${pending_verification_id}`)
-    if (!vid) return new Response(true, {
-      status: 401,
-      headers: {
-        'Content-Type': 'text/html',
-        'Cache-control': 'no-store'
-      }
-    })
+    if (!vid) return 401
 
-    return new Response(true, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/html',
-        'Cache-control': 'no-store'
-      }
-    })
+    return 200
   } catch (error) {
-    return new Response(true, {
-      status: 500,
-      headers: {
-        'Content-Type': 'text/html',
-        'Cache-control': 'no-store'
-      }
-    })
+    return 401
   }
-}, 'protect-verify-route')
+}, 'protect-verify')
 
-export const ProtectPendingRoute = query(async () => {
-  'use server'
-  const { request } = getRequestEvent()
-  const cookie = request.headers.get('cookie')
-
-  if (!cookie) return new Response(true, {
-    status: 401,
-    headers: {
-      'Content-Type': 'text/html',
-      'Cache-control': 'no-store'
-    }
-  })
-  const pending_verification_id = getCookie('pending_verification', cookie)
-  if (!pending_verification_id) return new Response(true, {
-    status: 401,
-    headers: {
-      'Content-Type': 'text/html',
-      'Cache-control': 'no-store'
-    }
-  })
-
-  try {
-    const vid = await redisExists(`pending:verification:${pending_verification_id}`)
-    if (!vid) return new Response(true, {
-      status: 401,
-      headers: {
-        'Content-Type': 'text/html',
-        'Cache-control': 'no-store'
-      }
-    })
-    return new Response(true, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/html',
-        'Cache-control': 'no-store'
-      }
-    })
-  } catch (error) {
-    return new Response(true, {
-      status: 500,
-      headers: {
-        'Content-Type': 'text/html',
-        'Cache-control': 'no-store'
-      }
-    })
-  }
-}, 'protect-pending-route')
-
-export const ProtectResetPassword = async () => {
+export const ProtectResetPassword = query(async () => {
   "use server"
   const { request } = getRequestEvent()
   const cookie = request.headers.get('cookie')
 
-  if (!cookie) return new Response(true, {
-    status: 401,
-    headers: {
-      'Content-Type': 'text/html',
-      'Cache-control': 'no-store'
-    }
-  })
+  if (!cookie) return { allowed: false, message: 'თქვენ არ გაქვთ გვერდზე წვდომის უფლება.', status: 401 }
   const rs = getCookie('reset_session', cookie)
-  if (!rs) return new Response(true, {
-    status: 401,
-    headers: {
-      'Content-Type': 'text/html',
-      'Cache-control': 'no-store'
-    }
-  })
+  if (!rs) return { allowed: false, message: 'თქვენ არ გაქვთ გვერდზე წვდომის უფლება.', status: 401 }
+
   try {
     const password_reset_session = await redisExists(`password:reset:${rs}`)
-    if (!password_reset_session) return new Response(true, {
-      status: 401,
-      headers: {
-        'Content-Type': 'text/html',
-        'Cache-control': 'no-store'
-      }
-    })
+    if (!password_reset_session) return { allowed: false, message: 'თქვენ არ გაქვთ გვერდზე წვდომის უფლება.', status: 401 }
 
-    return new Response(true, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/html',
-        'Cache-control': 'no-store'
-      }
-    })
+    return { allowed: true, status: 200 }
   } catch (error) {
     console.log(error)
-    return new Response(true, {
-      status: 401,
-      headers: {
-        'Content-Type': 'text/html',
-        'Cache-control': 'no-store'
-      }
-    })
+    return { allowed: false, message: 'ათენთიფიკაცია შეცდომით დასრულდა, სცადეთ ხელახლა.', status: 500 }
   }
-}
+}, 'protect-reset-password')

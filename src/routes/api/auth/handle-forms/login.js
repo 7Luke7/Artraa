@@ -74,7 +74,6 @@ export const login = action(async (formData) => {
             status: 303,
             headers: {
                 'Set-Cookie': `pending_verification=${rand_id}; Path=/; Max-Age=900; HttpOnly; Secure; SameSite=Strict`,
-                'Cache-control': 'no-store, max-age=0'
             }
         })
     } catch (error) {

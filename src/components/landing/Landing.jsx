@@ -20,14 +20,13 @@ export const LandingContent = () => {
         <Meta property="og:description" content="პრაქტიკული ონლაინ კურსები ქართველებისთვის" />
         <Meta property="og:image" content={`${siteUrl}/hero-landing.jpg`} />
         <Meta property="og:url" content={siteUrl} />
-        <Meta name="twitter:card" content="summary_large_image" />
         <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ 
                 __html: generateLandingStructuredData(siteUrl)
             }}
         />
-        <div class="pt-10 w-10/12 mx-auto">
+        <div class="pt-10 w-full md:w-10/12 px-4 md:px-6 mx-auto">
             <Header></Header>
             <LandingHero></LandingHero>
             <HowItWorks></HowItWorks>

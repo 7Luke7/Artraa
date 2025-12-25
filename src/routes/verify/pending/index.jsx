@@ -1,12 +1,11 @@
 import { Title } from "@solidjs/meta"
-import { createAsync, useSubmission } from "@solidjs/router"
+import { useSubmission } from "@solidjs/router"
 import { HttpStatusCode } from "@solidjs/start"
+import ProtectVerify from "~/components/protectVerifyRoute"
 import { VerificationUnauthorized } from "~/components/VerificationUnauthorized"
 import { approve_with_device, approve_with_email } from "~/routes/api/auth/handle-forms/verification_options"
-import { ProtectPendingRoute } from "~/routes/api/auth/ProtectRoutes"
 
 const PendingLogin = () => {
-  const ProtectPending = createAsync(ProtectPendingRoute, { deferStream: true })
   const verificationMethods = [
     {
       action: approve_with_email,
@@ -29,16 +28,7 @@ const PendingLogin = () => {
 
   const is_pending = () => approve_with_email_submission.pending || approve_with_device_submission.pending
 
-  return <>
-    <HttpStatusCode
-      code={ProtectPending()?.status}
-    />
-    <Switch>
-      <Match when={ProtectPending()?.status === 401}>
-        <VerificationUnauthorized />
-      </Match>
-
-      <Match when={ProtectPending()?.status === 200}>
+  return <ProtectVerify>
         <Title>Artra - აირჩიე შესვლის მეთოდი</Title>
         <main class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-8">
           <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-8 relative">
@@ -106,9 +96,7 @@ const PendingLogin = () => {
             </div>
           </div>
         </main>
-      </Match>
-    </Switch>
-  </>
+  </ProtectVerify>
 }
 
 export default PendingLogin

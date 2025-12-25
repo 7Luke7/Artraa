@@ -9,6 +9,7 @@ export const HeaderNotification = ({ setDisplayModal }) => {
 
     const notification_count = () => ctx?.store?.notification_count || Number(new_notifications())
     onMount(() => {
+            console.log(!ctx?.store?.notification_count)
         if (!ctx?.store?.notification_count && Number(new_notifications())) {
             ctx?.setStore(
                 'notification_count', Number(new_notifications())
@@ -27,9 +28,9 @@ export const HeaderNotification = ({ setDisplayModal }) => {
         >
         <img
             src="/svg/notification.svg"
-            width={40}
+            width={24}
             class="md:w-8 md:h-8"
-            height={40}
+            height={24}
         />
 
         <Show when={notification_count()}>

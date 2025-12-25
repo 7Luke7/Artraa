@@ -3,7 +3,7 @@ import { CourseCard } from "../CourseCard";
 
 export const FeaturedCourses = () => {
     return (
-        <section class="container mb-20 md:mb-32 px-4 md:px-6">
+        <section class="container mb-20 md:mb-32">
             {/* Header with improved spacing */}
             <div class="mb-12 md:mb-16">
                 <div class="text-center mb-10">

@@ -1,6 +1,6 @@
-import { A, createAsync } from "@solidjs/router"
+import { createAsync } from "@solidjs/router"
 import { HttpStatusCode } from "@solidjs/start";
-import { Match, Switch } from "solid-js"
+import { Show } from "solid-js"
 import { ProtectVerifyRoute } from "~/routes/api/auth/ProtectRoutes"
 import { VerificationUnauthorized } from "./VerificationUnauthorized";
 
@@ -10,17 +10,11 @@ const ProtectVerify = (props) => {
   return (
     <>
       <HttpStatusCode
-        code={authResult()?.status}
+        code={authResult()}
       />
-      <Switch>
-        <Match when={authResult()?.status === 401}>
-          <VerificationUnauthorized />
-        </Match>
-
-        <Match when={authResult()?.status === 200}>
+      <Show fallback={<VerificationUnauthorized />} when={authResult() === 200}>
           {props.children}
-        </Match>
-      </Switch>
+      </Show>
     </>
   );
 }

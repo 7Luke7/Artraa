@@ -36,7 +36,6 @@ export const resend_code = action(async () => {
             status: 200,
             headers: {
                 'Set-Cookie': `pending_verification=${vid}; Path=/; Max-Age=900; HttpOnly; Secure; SameSite=Strict`,
-                'Cache-control': 'no-store'
             }
         })
     } catch (error) {

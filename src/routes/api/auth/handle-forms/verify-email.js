@@ -52,7 +52,7 @@ export const verify_email_action = action(async (formData) => {
             try { await redisDel(`pending:verification:${vid}`) } catch (error) { }
             throw redirect(result.location, {
                 status: result.status,
-                revalidate: ['auth', 'protect-verify-route', 'protect-anonymous', 'protect-pending-route'],
+                revalidate: ['auth', 'protect-verify', 'protect-anonymous'],
                 headers: result.headers
             });
         }

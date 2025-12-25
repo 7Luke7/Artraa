@@ -32,7 +32,7 @@ export const LandingHero = () => {
                 <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
             </div>
 
-            <div class="container px-4 md:px-6 pt-8 md:pt-16 pb-16 md:pb-24">
+            <div class="container pt-8 md:pt-16 pb-16 md:pb-24">
                 <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
                     {/* Left Content */}
                     <div class="text-center lg:text-left">

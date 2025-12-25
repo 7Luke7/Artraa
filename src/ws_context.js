@@ -8,7 +8,6 @@ import { getRequestEvent } from "solid-js/web"
 
 export const WSContext = createContext({})
 
-// we could cache this way longer
 const get_device_id = query(async () => {
     'use server'
     const event = getRequestEvent();
@@ -51,7 +50,7 @@ export const WebSocketContextProvider = (props) => {
                     break;
                 }
                 case `logout-device-${device_id()}`: {
-                    revalidate('protected')
+                    revalidate(['auth'])
                     break;
                 }
             }

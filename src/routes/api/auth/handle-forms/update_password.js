@@ -208,7 +208,6 @@ export const set_password = action(async (formData) => {
             status: 200,
             headers: {
                 'Set-Cookie': `auth.session-token=${id}; Path=/; Max-Age=${14 * 86400}; HttpOnly; Secure; SameSite=Strict`,
-                'Cache-control': 'no-store'
             }
         })
     } catch (error) {

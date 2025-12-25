@@ -33,7 +33,7 @@ export const HowItWorks = () => {
   ];
 
   return (
-    <section class="container mb-16 md:mb-32 px-4 md:px-6">
+    <section class="container mb-16 md:mb-32">
       {/* Header Section */}
       <div class="text-center mb-12 md:mb-20">
         <h2 class="text-3xl md:text-4xl lg:text-5xl font-gsans font-bold text-gray-900 mb-4 md:mb-6">

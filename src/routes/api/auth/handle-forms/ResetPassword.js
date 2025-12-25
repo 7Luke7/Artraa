@@ -52,7 +52,6 @@ export const resetPasswordAction = action(async (formData) => {
             status: 303,
             headers: {
                 'Set-Cookie': `reset_session=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict`,
-                'Cache-control': 'no-store'
             } 
         })
     } catch (error) {

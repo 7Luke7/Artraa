@@ -85,7 +85,6 @@ export const act_on_login_response = query(async () => {
             ]),
         })
     } catch (error) {
-        console.log(error)
         return json({ message: 'დაფიქსირდა შეცდომა.', ok: false }, { status: 500 })
     }
 }, 'act-on-login-response')

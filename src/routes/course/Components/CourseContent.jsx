@@ -23,10 +23,6 @@ export const CourseContent = (props) => {
         <Meta property="og:description" content={metaDescription} />
         <Meta property="og:image" content={metaImage} />
         <Meta property="og:url" content={courseUrl} />
-        <Meta name="twitter:card" content="summary_large_image" />
-        <Meta name="twitter:title" content={metaTitle} />
-        <Meta name="twitter:description" content={metaDescription} />
-        <Meta name="twitter:image" content={metaImage} />
         <script type="application/ld+json" innerHTML={structuredData} />
         <Header></Header>
         <CourseDetailUI course={course}></CourseDetailUI>
