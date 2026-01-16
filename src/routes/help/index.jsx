@@ -1,4 +1,4 @@
-export const Faq = () => {
+const Help = () => {
     return <section class="bg-white rounded-lg p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-6">
             ხშირად დასმული კითხვები
@@ -40,3 +40,5 @@ export const Faq = () => {
         </div>
     </section>
 }
+
+export default Help

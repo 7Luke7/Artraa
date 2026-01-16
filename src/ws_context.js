@@ -1,10 +1,11 @@
-import { batch, createContext, createSignal, For, onCleanup, onMount } from "solid-js"
+import { batch, createContext, createSignal, For, lazy, onCleanup, onMount } from "solid-js"
 import { createStore } from "solid-js/store"
-import { LoginAttemptOverlay } from "./components/loginAttemptOverlay"
 import { createAsync, query, revalidate} from "@solidjs/router"
 import { getCookie } from "vinxi/http"
 import { redisHGet } from "./routes/api/lib/redis/hash"
 import { getRequestEvent } from "solid-js/web"
+
+const LazyLoginAttemptOverlay = lazy(() => import('./components/loginAttemptOverlay'))
 
 export const WSContext = createContext({})
 
@@ -50,7 +51,7 @@ export const WebSocketContextProvider = (props) => {
                     break;
                 }
                 case `logout-device-${device_id()}`: {
-                    revalidate(['auth'])
+                    revalidate(['auth', 'protected', 'get-user-header', 'protect-anonymous'])
                     break;
                 }
             }
@@ -76,7 +77,7 @@ export const WebSocketContextProvider = (props) => {
     return <WSContext.Provider value={{ ctx, store, setStore }}>
         <Show when={store.login_requests.length}>
             <For each={store.login_requests}>
-                {(pending_verification_id) => <LoginAttemptOverlay
+                {(pending_verification_id) => <LazyLoginAttemptOverlay
                     pending_verification_id={pending_verification_id}
                 />}
             </For>

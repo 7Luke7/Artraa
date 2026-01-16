@@ -1,7 +1,7 @@
 import { A, useLocation } from "@solidjs/router"
 import { logout } from "~/routes/api/auth/logout"
 
-export const AccountOptions = () => {
+const AccountOptions = () => {
     const location = useLocation();
 
     return <div class="overflow-hidden w-50 border border-gray-200 bg-white shadow-lg border border-gray-200 transition-all duration-150">
@@ -24,3 +24,5 @@ export const AccountOptions = () => {
         </form>
     </div>
 }
+
+export default AccountOptions

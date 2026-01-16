@@ -7,7 +7,7 @@ import { MainNotificationTools } from "./MainNotificationTools";
 import { createStore, produce } from "solid-js/store";
 import { createVirtualizer } from "@tanstack/solid-virtual";
 
-export const Notifications = (props) => {
+const Notifications = () => {
   const [store, setStore] = createStore({
     'notifications': [],
     'loading': true,
@@ -341,3 +341,5 @@ export const Notifications = (props) => {
     </div>
   );
 };
+
+export default Notifications

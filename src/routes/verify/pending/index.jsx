@@ -1,8 +1,6 @@
 import { Title } from "@solidjs/meta"
 import { useSubmission } from "@solidjs/router"
-import { HttpStatusCode } from "@solidjs/start"
 import ProtectVerify from "~/components/protectVerifyRoute"
-import { VerificationUnauthorized } from "~/components/VerificationUnauthorized"
 import { approve_with_device, approve_with_email } from "~/routes/api/auth/handle-forms/verification_options"
 
 const PendingLogin = () => {

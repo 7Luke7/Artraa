@@ -193,9 +193,10 @@ export const logout_all_devices = async (user_id) => {
     }
 
     await redisDel(`user:sessions:${user_id}`)
-    publish_to_device(user_id)
+    await publish_to_device(user_id)
     return true
   } catch (error) {
+    console.log(error)
     return false
   }
 }
@@ -215,9 +216,13 @@ export const logout_other_devices = async (user_id, current_session, device_id) 
     }
 
     redis.expire(`user:sessions:${user_id}`, 14 * 86400)
-    publish_to_device(user_id, device_id)
+    await publish_to_device(user_id, device_id)
     return true
   } catch (error) {
     return false
   } 
+}
+
+export const get_course_level = (level = 'beginner') => {
+  return level === 'advanced' ? 'რთული' : level === 'intermediate' ? 'საშუალო' : 'დამწყები'
 }

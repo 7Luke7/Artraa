@@ -123,7 +123,7 @@ export const update_password = action(async (formData) => {
         console.log(error)
         return json({
             ok: false,
-            message: 'დაფიქსირდა შეცდომა, სცადეთ ხელახლა.'
+            message: 'დაფიuser_id, id, device_idქსირდა შეცდომა, სცადეთ ხელახლა.'
         }, {
             status: 500
         })

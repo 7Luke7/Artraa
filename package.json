@@ -11,7 +11,6 @@
     "@solidjs/router": "^0.15.4",
     "@solidjs/start": "^1.2.0",
     "@tanstack/solid-virtual": "^3.13.13",
-    "dotenv": "^17.2.3",
     "jose": "^6.1.2",
     "nodemailer": "^7.0.11",
     "pg": "^8.16.3",

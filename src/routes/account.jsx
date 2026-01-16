@@ -129,7 +129,6 @@ const AccountLayout = (props) => {
                                             alt=""
                                             aria-hidden="true"
                                         />
-                                        {/* Top line indicator */}
                                         <Show when={props.location.pathname === item.href}>
                                             <span
                                                 class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-[#E85A4F] rounded-full"

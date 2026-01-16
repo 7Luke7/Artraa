@@ -9,11 +9,8 @@ const WaitingForApproval = () => {
         const interval_id = setInterval(async () => {
             try {
                 const res = await act_on_login_response()
-                if (!res.ok && !res.pending) revalidate('protect-verify')
-                if (res.ok) {
-                    revalidate('protect-anonymous')
-                    revalidate('auth')
-                }
+                if (res.pending) return
+                revalidate(['auth', 'protect-verify'])
             } catch (err) { }
         }, 2000)
 

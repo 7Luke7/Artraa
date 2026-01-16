@@ -8,18 +8,18 @@ export const get_header = query(async () => {
     'use server'
     const { request } = getRequestEvent()
     const cookie = request.headers.get("cookie");
-    if (!cookie) return null
+    if (!cookie) return {status: 401}
 
     const id = getCookie("auth.session-token", cookie);
-    if (!id) return null
+    if (!id) return {status: 401}
 
     const auth = await redisExists(`user:session:${id}`)
-    if (!auth) return null
+    if (!auth) return {status: 401}
     try {
         const data = await redisHGet(`user:session:${id}`, 'pfp')
-        if (!data) return true
+        if (!data) return {status: 200}
         
-        return data
+        return {status: 200, data: data}
     } catch(error) {
         console.log(error)
     }

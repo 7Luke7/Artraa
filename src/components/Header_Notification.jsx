@@ -9,7 +9,6 @@ export const HeaderNotification = ({ setDisplayModal }) => {
 
     const notification_count = () => ctx?.store?.notification_count || Number(new_notifications())
     onMount(() => {
-            console.log(!ctx?.store?.notification_count)
         if (!ctx?.store?.notification_count && Number(new_notifications())) {
             ctx?.setStore(
                 'notification_count', Number(new_notifications())
@@ -25,7 +24,7 @@ export const HeaderNotification = ({ setDisplayModal }) => {
         md:h-9 md:w-9 h-[40px] w-[40px] rounded-xl
         transition
         hover:bg-gray-100 active:bg-gray-200"
-        >
+    >
         <img
             src="/svg/notification.svg"
             width={24}

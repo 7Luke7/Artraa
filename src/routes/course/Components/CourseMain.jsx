@@ -1,110 +1,153 @@
 export const CourseMain = (props) => {
+    const { course } = props;
     return (
-        <div class="flex flex-col gap-6 rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300">
+        <div class="flex flex-col overflow-hidden">
             <div class="relative">
                 <img
-                    src={props.course.thumbnail_url || "https://placehold.co/960x540"}
+                    src={course.thumbnail_url || "https://placehold.co/800x450"}
                     srcSet={`
-                        ${props.course.thumbnail_url}?w=360 360w,
-                        ${props.course.thumbnail_url}?w=640 640w,
-                        ${props.course.thumbnail_url}?w=960 960w,
-                        ${props.course.thumbnail_url}?w=1280 1280w,
-                        ${props.course.thumbnail_url}?w=1920 1920w
+                        ${course.thumbnail_url}?w=300 300w,
+                        ${course.thumbnail_url}?w=600 600w,
+                        ${course.thumbnail_url}?w=800 800w
                     `}
-                    sizes="(max-width: 640px) 360px,
-                    (max-width: 1024px) 50vw, 
-                    540px"
-                    alt={`${props.course.title} - სასწავლო კურსი`}
+                    sizes="(max-width: 1024px) 50vw, 400px"
+                    alt={`${course.title} - სასწავლო კურსი`}
                     class="w-full aspect-video object-cover"
                     itemprop="image"
+                    loading="lazy"
                 />
-                <div class="absolute top-3 right-3 bg-[#E85A4F] text-white text-xs font-gsans font-bold px-2 py-1 rounded-md shadow-sm">
+                <div class="absolute top-3 right-3 bg-[#E85A4F] text-white text-xs font-bold px-2 py-1 rounded-full">
                     ხელმისაწვდომი
                 </div>
             </div>
 
-            {/* Content Section */}
-            <div class="px-5 pb-5">
-                {/* Price Section */}
-                <div class="mb-6 pb-4 border-b border-gray-100" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
-                    <div class="flex items-end gap-2 mb-1">
-                        <div 
-                            class="text-3xl font-gsans font-bold"
+            <div class="p-5">
+                <div class="mb-4 pb-4 border-b border-gray-100" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                    <div class="flex items-baseline gap-2 mb-1">
+                        <div
+                            class="text-3xl font-bold"
                             style={{ color: "#E85A4F" }}
                             itemprop="price"
-                            content={props.course.price}
+                            content={course.price}
                         >
-                            ₾{props.course.price}
+                            ₾{course.price}
                         </div>
-                        <div class="text-sm text-gray-500 line-through mb-1">
-                            ₾{props.course.original_price || Math.round(props.course.price * 1.3)}
-                        </div>
+                        {course.discount && (
+                            <div class="text-base text-gray-400 line-through">
+                                ₾{course.original_price}
+                            </div>
+                        )}
                     </div>
                     <div class="flex items-center justify-between">
-                        <div class="text-gray-600 text-sm">
+                        <span class="text-sm text-gray-600">
                             სამუდამო წვდომა
-                        </div>
-                        <div class="text-xs font-medium bg-green-50 text-green-700 px-2 py-1 rounded">
-                            -{props.course.discount || 20}%
-                        </div>
+                        </span>
+                        {course.discount > 0 && (
+                            <span class="text-xs font-bold bg-gradient-to-r from-[#E85A4F] to-[#E98074] text-white px-2 py-1 rounded-full">
+                                -{course.discount}%
+                            </span>
+                        )}
                     </div>
                     <meta itemprop="priceCurrency" content="GEL" />
                     <meta itemprop="availability" content="https://schema.org/InStock" />
                 </div>
-
-                {/* Course Stats */}
-                <div class="space-y-5 mb-6">
-                    {/* Duration */}
-                    <div 
-                        class="flex items-center gap-3"
-                        itemprop="timeRequired" 
-                        content={`PT${props.course.total_duration}M`}
-                    >
-                        <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50">
-                            <img src="/svg/clock.svg" width={20} height={20} class="text-blue-600" />
+                <div class="grid grid-cols-2 gap-3 mb-5">
+                    <div class="flex items-center gap-2 text-sm">
+                        <div class="w-8 h-8 rounded-md bg-blue-50 flex items-center justify-center">
+                            <img
+                                src="/svg/clock-black.svg"
+                                alt=""
+                                class="w-4 h-4"
+                                aria-hidden="true"
+                                loading="lazy"
+                            />
                         </div>
                         <div>
-                            <div class="text-sm text-gray-500">მთლიანი ხანგრძლივობა</div>
-                            <div class="font-gsans font-bold text-gray-800">{Math.floor(props.course.total_duration / 60)} საათი {props.course.total_duration % 60} წუთი</div>
+                            <div class="text-gray-600">ხანგრძლივობა</div>
+                            <div class="font-bold">{course.durationHours} საათი</div>
                         </div>
                     </div>
 
-                    {/* Lessons */}
-                    <div class="flex items-center gap-3" itemprop="numberOfCredits">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-purple-50">
-                            <img src="/svg/book.svg" width={20} height={20} class="text-purple-600" />
+                    <div class="flex items-center gap-2 text-sm">
+                        <div class="w-8 h-8 rounded-md bg-green-50 flex items-center justify-center">
+                            <img
+                                src="/svg/book-2.svg"
+                                alt=""
+                                class="w-4 h-4"
+                                aria-hidden="true"
+                                loading="lazy"
+                            />
                         </div>
                         <div>
-                            <div class="text-sm text-gray-500">ლექციების რაოდენობა</div>
-                            <div class="font-gsans font-bold text-gray-800">{props.course.total_lessons} ლექცია</div>
+                            <div class="text-gray-600">გაკვეთილები</div>
+                            <div class="font-bold">{course.total_lessons}</div>
                         </div>
                     </div>
 
-                    {/* Optional: Add difficulty level */}
-                    <div class="flex items-center gap-3">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-50">
-                            <img src="/svg/levels.svg" width={20} height={20} class="text-amber-600" />
+                    <div class="flex items-center gap-2 text-sm">
+                        <div class="w-8 h-8 rounded-md bg-purple-50 flex items-center justify-center">
+                            <img
+                                src="/svg/users-group.svg"
+                                alt=""
+                                class="w-4 h-4"
+                                aria-hidden="true"
+                                loading="lazy"
+                            />
                         </div>
                         <div>
-                            <div class="text-sm text-gray-500">სირთულე</div>
-                            <div class="font-gsans font-bold text-gray-800">
-                                {props.course.difficulty === 'beginner' && 'დამწყები'}
-                                {props.course.difficulty === 'intermediate' && 'საშუალო'}
-                                {props.course.difficulty === 'advanced' && 'მაღალი'}
-                                {!props.course.difficulty && 'ყველა დონის'}
-                            </div>
+                            <div class="text-gray-600">მსმენელები</div>
+                            <div class="font-bold">{course.enrollment_count}</div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 text-sm">
+                        <div class="w-8 h-8 rounded-md bg-yellow-50 flex items-center justify-center">
+                            <img
+                                src="/svg/star-filled.svg"
+                                alt=""
+                                class="w-4 h-4"
+                                aria-hidden="true"
+                                loading="lazy"
+                            />
+                        </div>
+                        <div>
+                            <div class="text-gray-600">რეიტინგი</div>
+                            <div class="font-bold">{course.average_rating || 0}<span class="text-xs font-normal text-gray-500 ml-1">({course.review_count || 0})</span></div>
                         </div>
                     </div>
                 </div>
-
-                {/* CTA Button */}
-                <button
-                    class="w-full py-3.5 px-4 text-base font-gsans font-bold rounded-lg text-white bg-gradient-to-r from-[#E85A4F] to-[#E98074] hover:from-[#D84A3F] hover:to-[#D87064] duration-200 ease-in focus:outline-none cursor-pointer transition-all active:scale-[0.98]"
-                    aria-label={`შეიძინეთ კურსი: ${props.course.title} ფასად ₾${props.course.price}`}
-                >
-                    კურსის შეძენა
-                </button>
+                <div class="pt-4 border-t border-gray-100">
+                    <div class="flex items-center justify-around">
+                        <button aria-label="გააზიარე" class="flex flex-col items-center gap-1 text-gray-600 hover:text-[#E85A4F] transition-colors group">
+                            <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-[#E85A4F]/10 transition-colors">
+                                <img
+                                    src="/svg/share-2.svg"
+                                    class="w-4 h-4"
+                                    loading="lazy"
+                                />
+                            </div>
+                            <span class="text-xs">გააზიარე</span>
+                        </button>
+                        <button aria-label="აჩუქე" class="flex flex-col items-center gap-1 text-gray-600 hover:text-[#E85A4F] transition-colors group">
+                            <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-[#E85A4F]/10 transition-colors">
+                                <img
+                                    src="/svg/gift.svg"
+                                    class="w-4 h-4"
+                                    loading="lazy"
+                                />
+                            </div>
+                            <span class="text-xs">აჩუქე</span>
+                        </button>
+                    </div>
+                </div>
             </div>
+            <button
+                onClick={}
+                class="w-full py-3 px-4 text-base font-bold rounded-lg text-white bg-gradient-to-r from-[#E85A4F] to-[#E98074] hover:from-[#D84A3F] hover:to-[#D87064] shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] mb-5"
+                aria-label={`შეიძინეთ კურსი: ${course.title} ფასად ₾${course.price}`}
+            >
+                კურსის შეძენა
+            </button>
         </div>
     )
 }

@@ -1,143 +1,264 @@
 import { A } from "@solidjs/router"
+import { Show } from "solid-js"
 
-export const CourseCard = () => {
-    const courseData = {
-        title: "AutoCAD - საფუძვლები სამშენებლო დიზაინისთვის",
-        slug: "autocad-foundations-for-construction-design",
-        price: 1699,
-        originalPrice: 2599,
-        discount: 35,
-        rating: 5.0,
-        reviews: 455,
-        stars: 3,
-        image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-        imageAlt: "AutoCAD სამშენებლო დიზაინის კურსი - 3D მოდელირება და პროექტირება"
-    };
-
-    const calculateDiscount = () => {
-        return Math.round(((courseData.originalPrice - courseData.price) / courseData.originalPrice) * 100);
-    };
-
+export const CourseCard = (props) => {
+    const { course } = props
     return (
-        <article 
-            class="group relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
+        <article
+            id={course.id}
+            class="relative overflow-hidden rounded-xl border border-gray-200 bg-white flex flex-col"
             itemScope
             itemType="https://schema.org/Course"
+            tabindex="0"
+            role="article"
+            aria-labelledby={`${course.id}-title`}
+            aria-describedby={`${course.id}-rating`}
         >
-            {/* Discount Badge */}
-            <div class="absolute top-3 left-3 z-10">
-                <span 
-                    class="inline-block rounded-full bg-gradient-to-r from-red-600 to-orange-500 px-3 py-1 text-xs font-gsans font-medium text-white shadow-sm"
+            <div
+                class="absolute top-3 left-3 z-10"
+                role="status"
+                aria-label={`${course.discount} პროცენტიანი ფასდაკლება`}
+            >
+                <span
+                    class="inline-block rounded-full bg-gradient-to-r from-red-600 to-orange-500 px-3 py-1 text-xs font-gsans font-medium text-white"
                     itemProp="offers"
                     itemScope
                     itemType="https://schema.org/Offer"
                 >
-                    <span itemProp="price">₾{courseData.price}</span>
-                    <span class="ml-1">({courseData.discount}% ფასდაკლება)</span>
+                    <span itemProp="price" class="font-bold font-gsans">₾{course.price}</span>
+                    <span class="ml-1 sr-only">ფასდაკლება</span>
+                    <span class="ml-1 font-gsans font-bold" aria-hidden="true">({course.discount}%)</span>
                     <meta itemProp="priceCurrency" content="GEL" />
+                    <meta itemProp="availability" content="https://schema.org/InStock" />
                 </span>
             </div>
 
-            {/* Course Image */}
-            <figure class="relative h-64 w-full overflow-hidden bg-gray-100">
-                <A 
-                    href={`/course/${courseData.slug}`}
+            <figure class="relative h-64 w-full overflow-hidden bg-gray-100 flex-shrink-0">
+                <A
+                    href={`/course/${course.slug}`}
+                    target="_self"
                     class="block h-full w-full"
-                    aria-label={`გადადით ${courseData.title} კურსის გვერდზე`}
+                    aria-label={`${course.title} - გადადით კურსის დეტალურ გვერდზე`}
+                    tabindex="-1"
                 >
                     <img
-                        src={courseData.image}
-                        alt={courseData.imageAlt}
+                        alt={`${course.title} - ${course.subtitle}`}
                         class="h-full w-full object-cover"
                         loading="lazy"
-                        width={400}
-                        height={256}
+                        src={course.thumbnail_url}
+                        srcSet={`
+                            ${course.thumbnail_url}?w=200 200w,
+                            ${course.thumbnail_url}?w=400 400w,
+                            ${course.thumbnail_url}?w=600 600w,
+                            ${course.thumbnail_url}?w=800 800w
+                        `}
+                        sizes="(max-width: 640px) 100vw,
+                            (max-width: 768px) 50vw,
+                            (max-width: 1024px) 33vw,
+                            400px"
                         itemProp="image"
                     />
                 </A>
             </figure>
 
-            {/* Course Content */}
-            <div class="p-6">
-                {/* Title */}
-                <h2 class="mb-3">
-                    <A 
-                        href={`/course/${courseData.slug}`}
-                        class="text-xl font-gsans font-bold leading-tight text-gray-900 hover:text-[#E85A4F] line-clamp-2"
-                        itemProp="name"
-                    >
-                        {courseData.title}
-                    </A>
-                </h2>
+            <div class="p-5 flex-grow flex flex-col">
+                <div class="mb-3 flex gap-2" aria-hidden="true">
+                    <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-gsans font-medium text-blue-700">
+                        {course.category_name}
+                    </span>
+                    <span class="rounded-full bg-green-50 px-3 py-1 text-xs font-gsans font-medium text-green-700">
+                        {course.level}
+                    </span>
+                </div>
 
-                {/* Rating */}
-                <div class="mb-4 flex items-center gap-2" itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating">
-                    <div class="flex items-center">
-                        {[...Array(5)].map((_, i) => (
-                            i < courseData.stars ? 
-                                <img src='/svg/star-filled.svg' width={20} height={20} alt="filled star" /> : 
-                                <img src='/svg/star-outline.svg' width={20} height={20} alt="outline star" />
-                        ))}
+                <div class="mb-3 flex items-start gap-2 min-h-[40px]">
+                    <div class="flex-shrink-0">
+                        <img
+                            src={course.instructor_avatar_url || '/default_profile.png'}
+                            alt={`${course.instructor_name} - ინსტრუქტორი`}
+                            class="w-8 h-8 rounded-full object-cover"
+                            loading="lazy"
+                            width={32}
+                            height={32}
+                        />
                     </div>
-                    <div class="flex items-center gap-1 text-sm">
-                        <span class="font-gsans font-medium text-gray-900" itemProp="ratingValue">{courseData.rating.toFixed(1)}</span>
-                        <span class="font-gsans font-normal text-gray-500">({courseData.reviews} მიმოხილვა)</span>
-                        <meta itemProp="reviewCount" content={courseData.reviews.toString()} />
-                        <meta itemProp="bestRating" content="5" />
+                    <div class="flex flex-col min-w-0 flex-1">
+                        <A
+                            href={`/instructor/${course.instructor_slug}`}
+                            class="text-sm font-gsans font-medium text-gray-700 hover:text-[#E85A4F] truncate"
+                            aria-label={`ინსტრუქტორი: ${course.instructor_name}`}
+                        >
+                            {course.instructor_name}
+                        </A>
+                        <Show when={course.instructor_headline}>
+                            <span
+                                class="text-xs text-gray-500 truncate mt-0.5"
+                                aria-hidden="true"
+                            >
+                                {course.instructor_headline}
+                            </span>
+                        </Show>
                     </div>
                 </div>
 
-                {/* Price & CTA */}
-                <div class="flex items-center justify-between border-t border-gray-100 pt-4">
+                <h2 class="mb-3 min-h-[56px]">
+                    <A
+                        href={`/course/${course.slug}`}
+                        id={`${course.id}-title`}
+                        class="text-lg font-gsans font-bold leading-tight text-gray-900 hover:text-[#E85A4F] line-clamp-2"
+                        itemProp="name"
+                        tabindex="-1"
+                    >
+                        {course.title}
+                    </A>
+                </h2>
+
+                <p
+                    class="text-gray-600 font-gsans font-normal text-sm mb-4 line-clamp-2 min-h-[40px] flex-grow-0"
+                    itemProp="description"
+                >
+                    {course.subtitle}
+                </p>
+
+                <div class="mb-4 flex flex-wrap items-center gap-3 text-sm text-gray-600 min-h-[24px]">
+                    <div class="flex items-center gap-1">
+                        <img loading="lazy" src='/svg/clock-black.svg' width={16} height={16} alt='' aria-hidden='true' />
+                        <span>{course.durationHours} საათი</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <img loading="lazy" src='/svg/book-2.svg' width={16} height={16} alt='' aria-hidden='true' />
+                        <span>{course.total_lessons} გაკვეთილი</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <img loading="lazy" src='/svg/users-group.svg' width={16} height={16} alt='' aria-hidden='true' />
+                        <span>{course.enrollment_count} მსმენელი</span>
+                    </div>
+                </div>
+
+                <div
+                    id={`${course.id}-rating`}
+                    class="mb-4 flex items-center gap-2 min-h-[28px]"
+                    itemProp="aggregateRating"
+                    itemScope
+                    itemType="https://schema.org/AggregateRating"
+                >
+                    <div
+                        class="flex items-center"
+                        aria-hidden="true"
+                        role="img"
+                        aria-label={`${course.average_rating} ვარსკვლავი 5-დან`}
+                    >
+                        {[...Array(5)].map((_, i) => (
+                            <img
+                                key={i}
+                                src={
+                                    i === 4 && Number(course.average_rating) > 4 && Number(course.average_rating) < 5 ?
+                                        '/svg/star-half.svg'
+                                        : i < Number(course.average_rating)
+                                            ? '/svg/star-filled.svg' :
+                                            '/svg/star-outline.svg'
+                                } width={20}
+                                height={20}
+                                alt=""
+                                class="w-5 h-5"
+                                loading="lazy"
+                                decoding="async"
+                            />
+                        ))}
+                    </div>
+                    <div class="flex items-center gap-1 text-sm">
+                        <span
+                            class="font-gsans font-medium text-gray-900"
+                            itemProp="ratingValue"
+                        >
+                            {course.average_rating}
+                        </span>
+                        <span class="sr-only">
+                            რეიტინგი: {course.average_rating} ვარსკვლავი {course.review_count} მიმოხილვიდან
+                        </span>
+                        <span
+                            class="font-gsans font-normal text-gray-500"
+                            aria-hidden="true"
+                        >
+                            ({course.review_count} მიმოხილვა)
+                        </span>
+                        <meta itemProp="reviewCount" content={course.review_count.toString()} />
+                        <meta itemProp="bestRating" content="5" />
+                        <meta itemProp="worstRating" content="1" />
+                    </div>
+                </div>
+
+                <div class="flex md:flex-row flex-col md:items-center gap-y-2 md:gap-y-0 md:justify-between border-t border-gray-100 pt-4 mt-auto min-h-[60px]">
                     <div class="flex flex-col">
                         <div class="flex items-center gap-2">
-                            <span class="text-2xl font-gsans font-bold text-gray-900">₾{courseData.price}</span>
-                            <span class="text-sm font-gsans font-normal text-gray-500 line-through">₾{courseData.originalPrice}</span>
-                            <span class="rounded-full bg-red-50 px-2 py-1 text-xs font-gsans font-medium text-[#E85A4F]">
-                                -{calculateDiscount()}%
+                            <span
+                                class="text-xl font-gsans font-bold text-gray-900"
+                                aria-label={`ახლანდელი ფასი: ${course.price} ლარი`}
+                            >
+                                ₾{course.price}
                             </span>
+                            <Show when={course.discount}>
+                                <span
+                                    class="text-sm font-gsans font-normal text-gray-500 line-through"
+                                    aria-label={`ორიგინალური ფასი: ${course.original_price} ლარი`}
+                                >
+                                    ₾{course.original_price}
+                                </span>
+                                <span
+                                    class="rounded-full bg-red-50 px-2 py-1 text-xs font-gsans font-medium text-[#E85A4F]"
+                                    aria-label={`${course.discount} პროცენტიანი ფასდაკლება`}
+                                >
+                                    -{course.discount}%
+                                </span>
+                            </Show>
                         </div>
-                        <span class="text-xs font-gsans font-normal text-gray-500 mt-1">ერთჯერადი გადასახადი</span>
+                        <span
+                            class="text-xs font-gsans font-normal text-gray-500 mt-1"
+                            aria-hidden="true"
+                        >
+                            ერთჯერადი გადასახადი
+                        </span>
                     </div>
 
                     <A
-                        href={`/course/${courseData.slug}`}
-                        class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#E85A4F] px-5 py-3 text-sm font-gsans font-medium text-white"
-                        aria-label={`იხილეთ დეტალები ${courseData.title} კურსის შესახებ`}
+                        href={`/course/${course.slug}`}
+                        class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#E85A4F] px-4 py-2.5 text-sm font-gsans font-medium text-white hover:bg-[#D84A3F]"
+                        aria-label={`იხილეთ დეტალები ${course.title} კურსის შესახებ`}
                         itemProp="url"
+                        tabindex="-1"
                     >
                         კურსის ნახვა
-                        <img src='/svg/arrow-narrow-right.svg' width={20} height={20} alt="arrow right" />
+                        <img
+                            src='/svg/arrow-narrow-right.svg'
+                            width={20}
+                            height={20}
+                            alt=""
+                            aria-hidden="true"
+                            loading="lazy"
+                            decoding="async"
+                        />
                     </A>
                 </div>
             </div>
 
-            {/* Schema.org Structured Data */}
-            <script type="application/ld+json">
-                {JSON.stringify({
-                    "@context": "https://schema.org",
-                    "@type": "Course",
-                    "name": courseData.title,
-                    "description": "AutoCAD-ის პროფესიონალური კურსი სამშენებლო დიზაინისთვის",
-                    "image": courseData.image,
-                    "url": `https://yoursite.com/course/${courseData.slug}`,
-                    "provider": {
-                        "@type": "Organization",
-                        "name": "Your Academy Name"
-                    },
-                    "offers": {
-                        "@type": "Offer",
-                        "price": courseData.price,
-                        "priceCurrency": "GEL",
-                        "availability": "https://schema.org/InStock"
-                    },
-                    "aggregateRating": {
-                        "@type": "AggregateRating",
-                        "ratingValue": courseData.rating,
-                        "reviewCount": courseData.reviews
-                    }
-                })}
-            </script>
+            <div class="sr-only">
+                <p>ინსტრუქტორი: {course.instructor_name}</p>
+                <p>ინსტრუქტორის სპეციალიზაცია: {course.instructor_headline}</p>
+                <p>
+                    კატეგორია: {course.category_name}, ხანგრძლივობა: {course.durationHours} საათი, დონე: {course.level}
+                </p>
+                <p>
+                    {course.total_lessons} გაკვეთილი, {course.enrollment_count} მსმენელი
+                </p>
+                <Show when={course.discount > 0}>
+                    <p>
+                        ფასდაკლება: {course.discount} პროცენტი, ორიგინალური ფასი {course.original_price} ლარიდან
+                    </p>
+                </Show>
+                <p>
+                    რეიტინგი: {course.average_rating} 5 ვარსკვლავიდან, {course.review_count} მიმოხილვის საფუძველზე
+                </p>
+            </div>
         </article>
-    );
+    )
 }

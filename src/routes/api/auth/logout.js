@@ -17,20 +17,20 @@ export const logout = action(async () => {
 
     if (!id) throw redirect('/login', {
       status: 303,
+      revalidate: ['auth', 'protect-anonymous', 'protected', 'get-user-header'],
       headers: new Headers([
         ['Set-Cookie', 'auth.session-token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict'],
         ['Set-Cookie', 'g_csrf_token=; Path=/; Max-age=0'],
-        ['Cache-control', 'no-store']
       ])
     })
 
     const user_id = await redisHGet(`user:session:${id}`, 'user_id')
     if (!user_id) throw redirect('/login', {
       status: 303,
+      revalidate: ['auth', 'protect-anonymous', 'protected', 'get-user-header'],
       headers: new Headers([
         ['Set-Cookie', 'auth.session-token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict'],
         ['Set-Cookie', 'g_csrf_token=; Path=/; Max-age=0'],
-        ['Cache-control', 'no-store']
       ])
     })
 
@@ -44,7 +44,7 @@ export const logout = action(async () => {
 
     throw redirect('/login', {
       status: 303,
-      revalidate: 'auth',
+      revalidate: ['auth', 'protect-anonymous', 'protected', 'get-user-header'],
       headers: new Headers([
         ['Set-Cookie', 'auth.session-token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict'],
         ['Set-Cookie', 'g_csrf_token=; Path=/; Max-age=0'],

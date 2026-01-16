@@ -1,4 +1,4 @@
-import { For } from "solid-js"
+import { createMemo, For } from "solid-js"
 import { SessionRow } from "./SingleSession"
 import { createSignal, useContext } from "solid-js"
 import {
@@ -10,7 +10,7 @@ import { WSContext } from "~/ws_context"
 export default function SessionsList(props) {
     const ctx = useContext(WSContext)
     const { security } = props
-    const session_list = () => security().sessions
+    const session_list = createMemo(() => security().sessions)
     const [sessions, setSessions] = createSignal(session_list())
 
     const wsSend = (payload) => {
@@ -23,7 +23,7 @@ export default function SessionsList(props) {
             s.pending_verification_id === pending_verification_id ? {
                 ...s,
                 status: 'trusted'
-            } : sess
+            } : s
         )))
 
         wsSend({ type: "approve-login", pending_verification_id })
@@ -31,8 +31,8 @@ export default function SessionsList(props) {
 
     const blockDevice = async (device_id, session_id, status) => {
         setSessions(prev => prev.map(s => (
-            s.id === device_id ? { ...sess, status: "blocked", session_id: null }
-                : sess
+            s.id === device_id ? { ...s, status: "blocked", session_id: null }
+                : s
         )))
 
         try {
@@ -46,8 +46,8 @@ export default function SessionsList(props) {
             }
         } catch {
             setSessions(prev => prev.map(s => (
-                s.id === device_id ? { ...sess, status: session_list().find(ss => ss.id === device_id)['status'], session_id: null }
-                    : sess
+                s.id === device_id ? { ...s, status: session_list().find(ss => ss.id === device_id)['status'], session_id: null }
+                    : s
             )))
         }
     }

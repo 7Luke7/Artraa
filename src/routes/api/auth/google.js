@@ -1,5 +1,5 @@
 'use server'
-import { redirect, revalidate } from "@solidjs/router";
+import { redirect } from "@solidjs/router";
 import { jwtVerify, createRemoteJWKSet } from "jose";
 import { randomBytes } from "node:crypto"
 import { redis } from "../redis";
@@ -31,10 +31,10 @@ async function verifyGoogleIdToken(idToken) {
     }
 }
 
-
 export async function POST({ request }) {
     const form = await request.formData();
     const credential = form.get("credential");
+    console.log(request)
     try {
         if (typeof credential !== "string") return redirect('/login', {
             status: 303,
@@ -95,7 +95,7 @@ export async function POST({ request }) {
 
             return redirect('/', {
                 status: 303,
-                revalidate: 'auth',
+                revalidate: ['auth', 'get-user-header'],
                 headers: {
                     'Set-Cookie': `auth.session-token=${rand_id}; Path=/; Max-Age=${durationSeconds}; HttpOnly; Secure; SameSite=Lax`,
                 }
@@ -157,8 +157,8 @@ export async function POST({ request }) {
 
             client.query('COMMIT')
             return redirect('/', {
-                status: 303,
-                revalidate: 'auth',
+                status: 201,
+                revalidate: ['auth', 'get-user-header'],
                 headers: {
                     'Set-Cookie': `auth.session-token=${rand_id}; Path=/; Max-Age=${durationSeconds}; HttpOnly; Secure; SameSite=Lax`,
                 }

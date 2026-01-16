@@ -31,9 +31,9 @@ export const VerificationUnauthorized = () => {
                 <A
                     href="/login"
                     class="inline-block bg-[#E85A4F] px-6 py-3 rounded-lg text-white font-gsans font-medium transition-all hover:bg-[#d04a40] focus:outline-none focus:ring-4 focus:ring-[#E85A4F] focus:ring-opacity-50 shadow-md hover:shadow-lg"
-                    aria-label="მთავარ გვერდზე გადასვლა"
+                    aria-label="შესვლის გვერდზე გადასვლა"
                 >
-                    მთავარ გვერდზე დაბრუნება
+                    შესვლის გვერდზე დაბრუნება
                 </A>
 
                 <p class="mt-4 text-sm text-gray-500">

@@ -19,14 +19,6 @@ export const pool = new Pool({
   allowExitOnIdle: true       // Allow process exit when pool is idle
 })
 
-pool.on('connect', (client) => {
-  console.log('Client connected, total:', pool.totalCount)
-})
-
-pool.on('remove', (client) => {
-  console.log('Client removed, total:', pool.totalCount)
-})
-
 pool.on('error', (err) => {
   console.error('Database connection error:', err)
 })

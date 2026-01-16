@@ -93,7 +93,7 @@ export const get_security_details = query(async () => {
             SELECT
             jsonb_build_object(
                 'google', u.google_id IS NOT NULL,
-                'password', u.password,
+                'password', u.password IS NOT NULL,
                 'sessions', COALESCE(
                     jsonb_agg(jsonb_build_object(
                         'id', ud.id,
@@ -146,6 +146,7 @@ export const get_security_details = query(async () => {
 
         return security
     } catch (error) {
+        console.log(error)
         if (error instanceof Response) throw error
         return json({ok: false, message: "დაფიქსირდა შეცდომა"}, {status: 500})
     }

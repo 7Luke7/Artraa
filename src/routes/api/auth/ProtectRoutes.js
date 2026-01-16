@@ -75,6 +75,12 @@ export const ProtectVerifyRoute = query(async () => {
   const cookie = request.headers.get('cookie')
 
   if (!cookie) return 401
+
+  const session = getCookie('auth.session-token', cookie)
+
+  const existsSession = await redisExists(`user:session:${session}`)
+  if (existsSession) throw redirect('/')
+
   const pending_verification_id = getCookie('pending_verification', cookie)
   if (!pending_verification_id) return 401
 

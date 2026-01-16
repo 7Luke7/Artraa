@@ -1,5 +1,6 @@
 import { CourseDetailUI } from "./CourseDetailUI";
 import { Meta, Title } from "@solidjs/meta";
+import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
 
 export const CourseContent = (props) => {
@@ -8,7 +9,6 @@ export const CourseContent = (props) => {
     const course = data.course;
     const structuredData = data.structuredData;
 
-    console.log(data.structuredData)
     const metaTitle = `${course.title} - Artra`;
     const metaDescription = course.description.slice(0, 160);
     const metaImage =
@@ -24,7 +24,10 @@ export const CourseContent = (props) => {
         <Meta property="og:image" content={metaImage} />
         <Meta property="og:url" content={courseUrl} />
         <script type="application/ld+json" innerHTML={structuredData} />
-        <Header></Header>
-        <CourseDetailUI course={course}></CourseDetailUI>
+        <div class="pt-10 w-full md:w-10/12 px-2 sm:px-4 md:px-6 mx-auto">
+            <Header></Header>
+            <CourseDetailUI course={course}></CourseDetailUI>
+        </div>
+        <Footer></Footer>
     </>
 }

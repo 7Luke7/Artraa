@@ -80,23 +80,14 @@ export const Footer = () => {
                         />
                         <div aria-label="გადახდის მეთოდები">
                             <ul className="space-y-3">
-                                <li>
-                                    <A 
-                                        href="/payments" 
-                                        className="text-base font-gsans font-normal text-gray-700 hover:text-[#E85A4F] transition-colors block py-1 focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
-                                        aria-label="გადახდის მეთოდები"
-                                    >
-                                        გადახდის მეთოდები
-                                    </A>
-                                </li>
-                                <li className="text-base font-gsans font-normal text-gray-700 py-1 flex items-center">
+                                {/* <li className="text-base font-gsans font-normal text-gray-700 py-1 flex items-center">
                                     <span className="mr-2" aria-hidden="true">💳</span>
                                     ბარათით გადახდა
                                 </li>
                                 <li className="text-base font-gsans font-normal text-gray-700 py-1 flex items-center">
                                     <span className="mr-2" aria-hidden="true">🏦</span>
                                     ბანკის გადარიცხვა
-                                </li>
+                                </li> */}
                             </ul>
                         </div>
                     </div>
@@ -120,15 +111,15 @@ export const Footer = () => {
                                         aria-label="Artra Facebook-ზე (ახალ ფანჯარაში გაიხსნება)"
                                     >
                                         <div 
-                                            className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg"
-                                            aria-hidden="true"
+                                            className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-lg"
                                         >
                                             <img 
                                                 src='/svg/facebook.svg' 
+                                                aria-hidden="true"
                                                 alt="" 
                                                 loading="lazy" 
-                                                width={20} 
-                                                height={20}
+                                                width={24} 
+                                                height={24}
                                             />
                                         </div>
                                         Facebook
@@ -143,15 +134,15 @@ export const Footer = () => {
                                         aria-label="Artra Instagram-ზე (ახალ ფანჯარაში გაიხსნება)"
                                     >
                                         <div 
-                                            className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg"
-                                            aria-hidden="true"
+                                            className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-lg"
                                         >
                                             <img 
                                                 src='/svg/instagram.svg' 
                                                 alt="" 
+                                                aria-hidden="true"
                                                 loading="lazy" 
-                                                width={20} 
-                                                height={20}
+                                                width={24} 
+                                                height={24}
                                             />
                                         </div>
                                         Instagram
@@ -166,15 +157,15 @@ export const Footer = () => {
                                         aria-label="Artra TikTok-ზე (ახალ ფანჯარაში გაიხსნება)"
                                     >
                                         <div 
-                                            className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg"
-                                            aria-hidden="true"
+                                            className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-lg"
                                         >
                                             <img 
                                                 src='/svg/tiktok.svg' 
+                                                aria-hidden="true"
                                                 alt="" 
                                                 loading="lazy" 
-                                                width={20} 
-                                                height={20}
+                                                width={24} 
+                                                height={24}
                                             />
                                         </div>
                                         TikTok
@@ -189,15 +180,15 @@ export const Footer = () => {
                                         aria-label="Artra YouTube-ზე (ახალ ფანჯარაში გაიხსნება)"
                                     >
                                         <div 
-                                            className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg"
-                                            aria-hidden="true"
+                                            className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-lg"
                                         >
                                             <img 
                                                 src='/svg/youtube.svg' 
                                                 alt="" 
+                                                aria-hidden="true"
                                                 loading="lazy" 
-                                                width={20} 
-                                                height={20}
+                                                width={24} 
+                                                height={24}
                                             />
                                         </div>
                                         YouTube
@@ -219,15 +210,15 @@ export const Footer = () => {
                             <ul className="space-y-4">
                                 <li className="text-base font-gsans font-normal text-gray-700 flex items-start gap-3 py-2">
                                     <div 
-                                        className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg flex-shrink-0"
-                                        aria-hidden="true"
+                                        className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-lg flex-shrink-0"
                                     >
                                         <img 
                                             src='/svg/inbox-stroke.svg' 
                                             alt="" 
+                                            aria-hidden="true"
                                             loading="lazy" 
-                                            width={20} 
-                                            height={20}
+                                            width={24} 
+                                            height={24}
                                         />
                                     </div>
                                     <div>
@@ -243,15 +234,15 @@ export const Footer = () => {
                                 </li>
                                 <li className="text-base font-gsans font-normal text-gray-700 flex items-start gap-3 py-2">
                                     <div 
-                                        className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg flex-shrink-0"
-                                        aria-hidden="true"
+                                        className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-lg flex-shrink-0"
                                     >
                                         <img 
                                             src='/svg/telephone.svg' 
                                             alt="" 
+                                            aria-hidden="true"
                                             loading="lazy" 
-                                            width={20} 
-                                            height={20}
+                                            width={24} 
+                                            height={24}
                                         />
                                     </div>
                                     <div>
@@ -267,15 +258,15 @@ export const Footer = () => {
                                 </li>
                                 <li className="text-base font-gsans font-normal text-gray-700 flex items-start gap-3 py-2">
                                     <div 
-                                        className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg flex-shrink-0"
-                                        aria-hidden="true"
+                                        className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-lg flex-shrink-0"
                                     >
                                         <img 
                                             src='/svg/map-pin.svg' 
                                             alt="" 
+                                            aria-hidden="true"
                                             loading="lazy" 
-                                            width={20} 
-                                            height={20} 
+                                            width={24} 
+                                            height={24} 
                                         />
                                     </div>
                                     <div>

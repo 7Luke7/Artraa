@@ -9,9 +9,6 @@ const Register = () => {
     const submission = useSubmission(register)
     const [googleLoaded, setGoogleLoaded] = createSignal(false)
     const [showPassword, setShowPassword] = createSignal(false);
-    onMount(() => {
-        if (window?.google?.accounts?.id) setGoogleLoaded(true)
-    });
 
     const message = () => submission.result?.message
     const PasswordField = () => submission.result?.field === 'password'
@@ -19,7 +16,13 @@ const Register = () => {
     const GivenNameField = () => submission.result?.field === 'given_name'
     const FamilyNameField = () => submission.result?.field === 'family_name'
     const GlobalField = () => submission.result?.field === 'global'
-
+    onMount(() => {
+        const script = document.createElement("script");
+        script.src = "https://accounts.google.com/gsi/client?hl=ka";
+        script.defer = true;
+        script.onload = () => setGoogleLoaded(true);
+        document.head.appendChild(script);
+    });
     return (
         <ProtectAnonymousRoute>
             <Title>Artra - რეგისტრაცია</Title>
@@ -30,12 +33,6 @@ const Register = () => {
             <Meta property="og:url" content={`${import.meta.env.VITE_URL}/register`} />
             <Meta property="og:image" content={`${import.meta.env.VITE_URL}/og-register.jpg`} />
             <Meta property="og:image:alt" content="Artra რეგისტრაციის გვერდი" />
-            <script
-                src="https://accounts.google.com/gsi/client?hl=ka"
-                async
-                defer
-            />
-            <Link rel="preconnect" href="https://accounts.google.com" />
             <script type="application/ld+json">
                 {JSON.stringify({
                     "@context": "https://schema.org",
@@ -345,7 +342,7 @@ const Register = () => {
                                                 id="remember-me"
                                                 type="checkbox"
                                                 name="remember_me"
-                                                class="h-4 w-4 accent-[#E85A4F] focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2"
+                                                class="h-4 w-4 accent-[#E85A4F]"
                                                 disabled={submission.pending}
                                             />
                                             <label
@@ -379,7 +376,7 @@ const Register = () => {
                                         aria-label={submission.pending ? "რეგისტრაცია მუშავდება" : "რეგისტრაცია"}
                                         aria-busy={submission.pending}
                                         aria-describedby={GlobalField() ? 'global-error' : undefined}
-                                        class={`w-full py-3 px-4 text-[15px] font-gsans font-bold rounded-md text-white bg-[#E98074] hover:bg-[#E85A4F] duration-200 ease-in cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-[#E98074] focus:ring-opacity-50`}
+                                        class='w-full py-3 px-4 text-[15px] font-gsans font-bold rounded-md text-white bg-[#E98074] hover:bg-[#E85A4F] duration-200 ease-in cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed'
                                     >
                                         {submission.pending ? (
                                             <span class="flex items-center justify-center">
