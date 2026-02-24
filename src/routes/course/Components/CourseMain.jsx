@@ -142,7 +142,7 @@ export const CourseMain = (props) => {
                 </div>
             </div>
             <button
-                onClick={}
+                // onClick={}
                 class="w-full py-3 px-4 text-base font-bold rounded-lg text-white bg-gradient-to-r from-[#E85A4F] to-[#E98074] hover:from-[#D84A3F] hover:to-[#D87064] shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] mb-5"
                 aria-label={`შეიძინეთ კურსი: ${course.title} ფასად ₾${course.price}`}
             >

@@ -7,6 +7,8 @@ export const HeaderNotification = ({ setDisplayModal }) => {
     const new_notifications = createAsync(get_new_notification_count, { deferStream: false })
     const ctx = useContext(WSContext)
 
+    console.log('ctx', ctx)
+
     const notification_count = () => ctx?.store?.notification_count || Number(new_notifications())
     onMount(() => {
         if (!ctx?.store?.notification_count && Number(new_notifications())) {
