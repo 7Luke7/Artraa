@@ -8,7 +8,6 @@ import { Title } from "@solidjs/meta"
 
 const ResetPassword = () => {
     const authResult = createAsync(ProtectResetPassword, { deferStream: true })
-    console.log(authResult())
     const submission = useSubmission(resetPasswordAction)
     const [showPassword, setShowPassword] = createSignal(false)
     const [showConfirmPassword, setShowConfirmPassword] = createSignal(false)

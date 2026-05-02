@@ -283,9 +283,9 @@ const Login = () => {
                                     <A
                                         href="/terms"
                                         class="text-[#E85A4F] hover:underline"
-                                        aria-label="მომსახურების პირობები"
+                                        aria-label="წესები და პირობები"
                                     >
-                                        მომსახურების პირობებს
+                                        წესებს და პირობებს
                                     </A>{" "}
                                     და{" "}
                                     <A

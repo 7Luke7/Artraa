@@ -16,12 +16,6 @@ const AccountLayout = (props) => {
             href: '/account/security',
             description: 'პაროლი და უსაფრთხოება'
         },
-        {
-            icon: '/svg/billing.svg',
-            label: 'გადახდები',
-            href: '/account/billing',
-            description: 'გადახდების ისტორია'
-        },
     ]
 
     return (
@@ -155,7 +149,7 @@ const AccountLayout = (props) => {
                             id="page-title"
                             class="lg:sr-only text-xl font-bold-gsans text-gray-900 mb-6"
                         >
-                            ანგარიშის მენეჯმენტი
+                            ანგარიშის მართვა
                         </h1>
 
                         {props.children}

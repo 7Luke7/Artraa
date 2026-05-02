@@ -8,14 +8,12 @@ export const unauthenticated_landing_data = query(async () => {
     try {
         const get_courses = await pool.query(`
             SELECT
-             cc.name AS category_name,
              c.*,
              u.name AS instructor_name,
              ip.headline AS instructor_headline,
              u.profile_picture_link AS instructor_avatar_url,
              ip.public_slug AS instructor_slug
             FROM course c
-            LEFT JOIN course_category cc ON c.category_id = cc.id 
             LEFT JOIN instructor_profile ip ON c.instructor_user_id = ip.user_id
             LEFT JOIN "User" u ON u.id = c.instructor_user_id
             WHERE status='published'

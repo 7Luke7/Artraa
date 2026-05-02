@@ -8,7 +8,6 @@ import { get_course_level } from "./utils";
 
 export const get_course_detail = query(async (slug) => {
     'use server'
-    console.log(slug)
     const { request } = getRequestEvent()
     const cookie = request.headers.get("cookie");
 
@@ -24,15 +23,6 @@ export const get_course_detail = query(async (slug) => {
             ip.headline as instructor_headline,
             ip.public_slug as instructor_slug,
             ip.specialization,
-            cc.name as category_name,
-            cc.slug as category_slug,
-            (
-                SELECT JSONB_BUILD_OBJECT(
-                    'parent_category_name', ccp.name,
-                    'parent_category_slug', ccp.slug
-                ) FROM course_category ccp
-                WHERE cc.parent_id = ccp.id
-            ) AS cp,
             CASE 
                 WHEN $1::uuid IS NOT NULL THEN 
                 (SELECT 1 FROM enrollment WHERE course_id = c.id AND user_id = $1 LIMIT 1)
@@ -42,7 +32,6 @@ export const get_course_detail = query(async (slug) => {
             FROM course c
             INNER JOIN "User" u ON c.instructor_user_id = u.id
             LEFT JOIN instructor_profile ip ON u.id = ip.user_id
-            LEFT JOIN course_category cc ON c.category_id = cc.id
             LEFT JOIN LATERAL (
                 SELECT 
                     COALESCE(
@@ -98,7 +87,7 @@ export const get_course_detail = query(async (slug) => {
         courses['price'] = Number(courses['price'])
         if (average_rating) {
             courses['starRating'] = courses['average_rating']
-            courses[i]['hasHalfStar'] = average_rating % 1 >= 0.25
+            courses['hasHalfStar'] = average_rating % 1 >= 0.25
         }
 
         if (courses['original_price'] > courses['price']) courses['discount'] = Math.round((courses['original_price'] - courses['price']) / courses['original_price'] * 100)
@@ -122,47 +111,185 @@ export const get_course_detail = query(async (slug) => {
     }
 }, 'get-course-detail')
 
-export const recommended_courses = query(async (data) => {
-    'use server'
+export async function get_course_player(slug) {
     try {
-        const [cc_slug, pc_slug, course_slug] = [data[0], data[1], data[2]]
-        const query_courses = await pool.query(`
-           SELECT 
-                cc.name AS category_name,
-                c.*,
-                u.name AS instructor_name,
-                ip.headline AS instructor_headline,
-                u.profile_picture_link AS instructor_avatar_url,
-                ip.public_slug AS instructor_slug
-            FROM course c
-            INNER JOIN course_category cc ON cc.id = c.category_id OR cc.slug = $2
-            LEFT JOIN instructor_profile ip ON c.instructor_user_id = ip.user_id
-            LEFT JOIN "User" u ON u.id = c.instructor_user_id
-            WHERE c.status = 'published' AND c.slug != $3 AND (cc.slug = $1 OR cc.slug = $2)
-            ORDER BY 
-                CASE 
-                    WHEN cc.slug = $1 THEN 1
-                    WHEN cc.slug = $2 THEN 2
-                END,
-                c.created_at DESC 
-            LIMIT 8
-        `, [cc_slug, pc_slug, course_slug])
+        const { request } = getRequestEvent()
+        const cookie = request.headers.get("cookie");
 
-        if (!query_courses.rowCount) return { ok: false, message: 'კურსების ჩატვირთვა ვერ მოხერხდა' }
-
-        const courses = query_courses.rows
-
-        for (let i = 0; i < courses.length; i++) {
-            const original_price = Number(courses[i]['original_price'])
-            const price = Number(courses[i]['price'])
-
-            if (original_price > price) courses[i]['discount'] = Math.round((original_price - price) / original_price * 100)
-            courses[i]['level'] = get_course_level(courses[i]['level'])
-            courses[i]['durationHours'] = Math.round(courses[i]['total_duration'] / 60 * 10) / 10
+        const id = getCookie("auth.session-token", cookie);
+        const userId = await redisHGet(`user:session:${id}`, 'user_id')
+ 
+        // 1. Fetch course + lessons from your DB
+        const course = await db.course.findUnique({
+            where: { slug },
+            include: {
+                course_content: {
+                    orderBy: { position: "asc" },
+                    include: {
+                        lessons: { orderBy: { position: "asc" } }
+                    }
+                }
+            }
+        })
+ 
+        if (!course) return { ok: false, error: "კურსი ვერ მოიძებნა" }
+ 
+        // 2. Check if the user has purchased this course
+        const hasPurchase = userId
+            ? !!(await db.enrollment.findUnique({
+                where: { userId_courseId: { userId, courseId: course.id } }
+              }))
+            : false
+ 
+        // 3. Build lessons — attach signed URLs only where the user has access
+        const course_content = await Promise.all(
+            course.course_content.map(async (section) => ({
+                ...section,
+                lessons: await Promise.all(
+                    section.lessons.map(async (lesson) => {
+                        const canWatch = lesson.is_preview || hasPurchase
+ 
+                        let video_url = null
+                        if (canWatch && lesson.cf_video_id) {
+                            video_url = lesson.is_preview
+                                ? `https://iframe.cloudflarestream.com/${lesson.cf_video_id}`
+                                : await getSignedStreamUrl(lesson.cf_video_id)
+                        }
+ 
+                        return {
+                            id: lesson.id,
+                            lesson_title: lesson.lesson_title,
+                            description: lesson.description,
+                            is_preview: lesson.is_preview,
+                            video_url,
+                            video_duration: lesson.video_duration,
+                            completed: false, // wire up to a completions table later
+                        }
+                    })
+                )
+            }))
+        )
+ 
+        return {
+            ok: true,
+            course: {
+                title: course.title,
+                slug: course.slug,
+                thumbnail_url: course.thumbnail_url,
+                price: course.price,
+                has_access: hasPurchase,
+                course_content,
+            }
         }
-
-        return courses
-    } catch (error) {
-        console.log(error)
+    } catch (err) {
+        console.error("get_course_player error:", err)
+        return { ok: false, error: "სერვერის შეცდომა" }
     }
-})
+}
+ 
+/**
+ * submit_review({ courseSlug, rating, comment })
+ *
+ * Only runs server-side. Validates that the user has an active enrollment
+ * before inserting the review — prevents non-purchasers from reviewing.
+ */
+export async function submit_review({ courseSlug, rating, comment }) {
+    "use server"
+ 
+    const session = await getSession()
+    if (!session?.user?.id) throw new Error("უნდა იყოთ ავტორიზებული")
+ 
+    const course = await db.course.findUnique({ where: { slug: courseSlug } })
+    if (!course) throw new Error("კურსი ვერ მოიძებნა")
+ 
+    // Gate: must have purchased the course
+    const enrollment = await db.enrollment.findUnique({
+        where: {
+            userId_courseId: {
+                userId: session.user.id,
+                courseId: course.id
+            }
+        }
+    })
+    if (!enrollment) throw new Error("კურსი არ გაქვთ შეძენილი")
+ 
+    // Upsert — one review per user per course
+    await db.review.upsert({
+        where: {
+            userId_courseId: {
+                userId: session.user.id,
+                courseId: course.id
+            }
+        },
+        update: { rating, comment, updatedAt: new Date() },
+        create: {
+            userId: session.user.id,
+            courseId: course.id,
+            rating,
+            comment,
+        }
+    })
+ 
+    return { ok: true }
+}
+ 
+// ---------------------------------------------------------------------------
+// Cloudflare Stream signed URL helper
+// ---------------------------------------------------------------------------
+ 
+/**
+ * Generates a signed Cloudflare Stream iframe URL that expires in 1 hour.
+ *
+ * Required env vars:
+ *   CF_STREAM_ACCOUNT_ID
+ *   CF_STREAM_KEY_ID        (from Stream > Signing Keys)
+ *   CF_STREAM_PRIVATE_KEY   (PEM key, base64-encoded in env)
+ *
+ * Docs: https://developers.cloudflare.com/stream/viewing-videos/securing-your-stream/
+ */
+async function getSignedStreamUrl(videoId) {
+    const accountId = process.env.CF_STREAM_ACCOUNT_ID
+    const keyId     = process.env.CF_STREAM_KEY_ID
+    const keyData   = process.env.CF_STREAM_PRIVATE_KEY   // base64 PEM
+ 
+    // Decode the private key
+    const pemContents = atob(keyData)
+        .replace("-----BEGIN RSA PRIVATE KEY-----", "")
+        .replace("-----END RSA PRIVATE KEY-----", "")
+        .replace(/\s/g, "")
+ 
+    const privateKey = await crypto.subtle.importKey(
+        "pkcs8",
+        Uint8Array.from(atob(pemContents), c => c.charCodeAt(0)),
+        { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+        false,
+        ["sign"]
+    )
+ 
+    const expiry = Math.floor(Date.now() / 1000) + 3600  // 1 hour
+ 
+    // Build the token payload (Cloudflare's format)
+    const payload = {
+        sub: videoId,
+        kid: keyId,
+        exp: expiry,
+        accessRules: [
+            { type: "any", action: "allow" }
+        ]
+    }
+ 
+    const header  = btoa(JSON.stringify({ alg: "RS256", kid: keyId }))
+    const body    = btoa(JSON.stringify(payload))
+    const message = `${header}.${body}`
+ 
+    const signature = await crypto.subtle.sign(
+        "RSASSA-PKCS1-v1_5",
+        privateKey,
+        new TextEncoder().encode(message)
+    )
+ 
+    const token = `${message}.${btoa(String.fromCharCode(...new Uint8Array(signature)))}`
+ 
+    return `https://iframe.cloudflarestream.com/${token}`
+}
+

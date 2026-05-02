@@ -1,5 +1,5 @@
 {
-  "name": "example-with-tailwindcss",
+  "name": "Artra",
   "type": "module",
   "scripts": {
     "dev": "vinxi dev",
@@ -7,21 +7,20 @@
     "start": "vinxi start"
   },
   "dependencies": {
-    "@solidjs/meta": "^0.29.4",
-    "@solidjs/router": "^0.15.4",
-    "@solidjs/start": "^1.2.0",
     "@tanstack/solid-virtual": "^3.13.13",
     "jose": "^6.1.2",
     "nodemailer": "^7.0.11",
-    "pg": "^8.16.3",
-    "redis": "^5.10.0",
-    "solid-js": "^1.9.5",
-    "ua-parser-js": "^2.0.6",
-    "vinxi": "^0.5.7"
+    "ua-parser-js": "^2.0.6"
   },
   "devDependencies": {
+    "pg": "^8.16.3",
+    "redis": "^5.10.0",
+    "@solidjs/meta": "^0.29.4",
+    "@solidjs/router": "^0.15.4",
+    "@solidjs/start": "^1.2.0",
+    "solid-js": "^1.9.5",
+    "vinxi": "^0.5.7",
     "@tailwindcss/vite": "^4.0.7",
-    "baseline-browser-mapping": "^2.10.0",
     "tailwindcss": "^4.0.7"
   },
   "engines": {

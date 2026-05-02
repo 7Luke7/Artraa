@@ -47,7 +47,6 @@ export const get_bog_access_token = async () => {
 
         if (!refreshPromise) {
             refreshPromise = authenticate().then(async (res) => {
-                console.log(res, auth_retries)
                 if (!res.ok) {
                     if (auth_retries) await get_bog_access_token()
                     else {

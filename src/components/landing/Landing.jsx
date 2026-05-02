@@ -2,7 +2,6 @@ import { Meta, Title } from "@solidjs/meta";
 import { Footer } from "../Footer"
 import { Header } from "../Header"
 import { LandingHero } from "./Hero"
-import { ContactCTA } from "./ContactCTA";
 import { HowItWorks } from "./HowItWorks";
 import { FeaturedCourses } from "./FeaturedCourses";
 import { WhyChooseUs } from "./WhyChooseUs";
@@ -35,7 +34,6 @@ export const LandingContent = () => {
             <HowItWorks></HowItWorks>
             <FeaturedCourses courses={data().courses}></FeaturedCourses>
             <WhyChooseUs></WhyChooseUs>
-            <ContactCTA></ContactCTA>
         </div>
         <Footer></Footer>
     </Show>

@@ -1,4 +1,3 @@
-'use server'
 import { validation_rules } from "./validation-rules"
 
 export class FormDataValidator {

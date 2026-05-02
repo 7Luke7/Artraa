@@ -3,15 +3,11 @@ import { createSignal, Show, For } from "solid-js";
 export const CourseBlocks = (props) => {
     const [expandedSections, setExpandedSections] = createSignal(new Set([0]));
 
-    const toggleSection = (sectionIndex) => {
+    const toggleSection = (idx) => {
         setExpandedSections(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(sectionIndex)) {
-                newSet.delete(sectionIndex);
-            } else {
-                newSet.add(sectionIndex);
-            }
-            return newSet;
+            const next = new Set(prev);
+            next.has(idx) ? next.delete(idx) : next.add(idx);
+            return next;
         });
     };
 
@@ -19,201 +15,116 @@ export const CourseBlocks = (props) => {
         if (!seconds) return "0 წთ";
         const minutes = Math.floor(seconds / 60);
         const hours = Math.floor(minutes / 60);
-        const remainingMinutes = minutes % 60;
-
-        if (hours > 0) {
-            return `${hours}სთ ${remainingMinutes}წთ`;
-        }
-        return `${minutes} წთ`;
+        const rem = minutes % 60;
+        return hours > 0 ? `${hours}სთ ${rem}წთ` : `${minutes} წთ`;
     };
 
+    const sectionTotal = (section) =>
+        section.lessons?.reduce((acc, l) => acc + (l.video_duration || 0), 0) || 0;
+
     return (
-        <div
-            itemscope
-            itemtype="https://schema.org/ItemList"
-        >
+        <div itemscope itemtype="https://schema.org/ItemList">
             <meta itemprop="numberOfItems" content={props.course.course_content?.length || 0} />
 
             <For each={props.course.course_content}>
-                {(section, sectionIndex) => (
-                    <div
-                        class="border border-gray-200 overflow-hidden"
-                        itemprop="itemListElement"
-                        itemscope
-                        itemtype="https://schema.org/ListItem"
-                        aria-expanded={expandedSections().has(sectionIndex())}
-                    >
-                        <button
-                            onClick={() => toggleSection(sectionIndex())}
-                            class="flex items-center justify-between w-full p-2 md:p-4 text-left"
-                            aria-label={`ნაწილი ${sectionIndex() + 1}: ${section.section_title}`}
+                {(section, sectionIndex) => {
+                    const isOpen = () => expandedSections().has(sectionIndex())
+                    return (
+                        <div
+                            class={`border-b border-gray-100 last:border-b-0 transition-colors ${isOpen() ? 'bg-white' : 'bg-white hover:bg-gray-50/50'}`}
+                            itemprop="itemListElement"
+                            itemscope
+                            itemtype="https://schema.org/ListItem"
                         >
-                            <div class="flex-1 mr-4">
-                                <div class="flex items-start">
+                            <button
+                                onClick={() => toggleSection(sectionIndex())}
+                                class="flex items-center justify-between w-full px-4 py-4 text-left group"
+                                aria-expanded={isOpen()}
+                                aria-controls={`section-${sectionIndex()}`}
+                            >
+                                <div class="flex items-center gap-4 flex-1 min-w-0">
                                     <div
-                                        class="flex-shrink-0 bg-[#E85A4F] w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center mr-3 md:mr-4 text-white font-medium text-sm md:text-base"
+                                        class={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors ${isOpen() ? 'bg-[#E85A4F] text-white' : 'bg-gray-100 text-gray-600 group-hover:bg-[#E85A4F]/10 group-hover:text-[#E85A4F]'}`}
                                         aria-hidden="true"
                                     >
                                         {sectionIndex() + 1}
                                     </div>
-
-                                    <div>
-                                        <h3
-                                            class="font-gsans font-semibold text-gray-900 text-lg md:text-xl mb-1 md:mb-2"
-                                            itemprop="name"
-                                        >
-                                            <span class="text-gray-600 font-medium">ნაწილი {sectionIndex() + 1}:</span> {section.section_title}
+                                    <div class="min-w-0">
+                                        <h3 class="font-gsans font-semibold text-gray-900 text-base truncate" itemprop="name">
+                                            {section.section_title}
                                         </h3>
-
-                                        <Show when={section.section_description}>
-                                            <p class="font-gsans text-gray-600 text-sm md:text-base line-clamp-2">
-                                                {section.section_description}
-                                            </p>
-                                        </Show>
-
-                                        <div class="flex flex-wrap items-center gap-3 md:gap-4 mt-2 md:mt-3 text-sm text-gray-500">
-                                            <span class="flex items-center">
-                                                <img
-                                                    src='/svg/book-2.svg'
-                                                    aria-hidden='true'
-                                                    width={16}
-                                                    height={16}
-                                                    loading="lazy"
-                                                    class="mr-1"
-                                                />
-                                                {section.lessons?.length || 0} გაკვეთილი
-                                            </span>
-                                            <Show when={section.lessons?.some(l => l.video_duration)}>
-                                                <span class="flex items-center">
-                                                    <img
-                                                        src="/svg/clock-black.svg"
-                                                        class="w-4 h-4 mr-1"
-                                                        aria-hidden="true"
-                                                        loading="lazy"
-                                                    />
-                                                    {formatDuration(
-                                                        section.lessons?.reduce((acc, lesson) => acc + (lesson.video_duration || 0), 0) || 0
-                                                    )}
-                                                </span>
+                                        <div class="flex items-center gap-3 mt-0.5 text-xs text-gray-400 font-gsans">
+                                            <span>{section.lessons?.length || 0} გაკვეთილი</span>
+                                            <Show when={sectionTotal(section) > 0}>
+                                                <span>•</span>
+                                                <span>{formatDuration(sectionTotal(section))}</span>
                                             </Show>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div
-                                class={`flex-shrink-0 transition-transform duration-300 ${expandedSections().has(sectionIndex()) ? 'rotate-180' : ''
-                                    }`}
-                                aria-hidden="true"
-                            >
-                                <img 
-                                    src='/svg/dropdown.svg' 
-                                    alt="გახსნა/დახურვა"
-                                    loading="lazy"
-                                />
-                            </div>
+                                <div
+                                    class={`flex-shrink-0 ml-3 transition-transform duration-200 ${isOpen() ? 'rotate-180' : ''}`}
+                                    aria-hidden="true"
+                                >
+                                    <img src="/svg/dropdown.svg" width={16} height={16} alt="" />
+                                </div>
+                                <meta itemprop="position" content={sectionIndex() + 1} />
+                            </button>
 
-                            <meta itemprop="position" content={sectionIndex() + 1} />
-                        </button>
-
-                        <Show when={expandedSections().has(sectionIndex())}>
-                            <div
-                                class="bg-gray-50 border-t border-gray-200"
-                                role="region"
-                            >
-                                <div class="p-4 md:p-6 space-y-3">
+                            <Show when={isOpen()}>
+                                <div
+                                    id={`section-${sectionIndex()}`}
+                                    class="border-t border-gray-100 bg-gray-50/50"
+                                    role="region"
+                                    aria-label={section.section_title}
+                                >
                                     <For each={section.lessons}>
                                         {(lesson, lessonIndex) => (
                                             <a
-                                                href={lesson.video_url || "#"}
-                                                target="_blank"
+                                                href={lesson.is_preview ? (lesson.video_url || "#") : "#"}
+                                                target={lesson.is_preview ? "_blank" : undefined}
                                                 rel="noopener noreferrer"
-                                                class="flex items-center justify-between p-3 md:p-4 border border-gray-200"
+                                                class={`flex items-center gap-3 px-4 py-3 border-b border-gray-100/80 last:border-b-0 transition-colors group/lesson ${lesson.is_preview ? 'hover:bg-white cursor-pointer' : 'opacity-75 cursor-default'}`}
                                                 itemscope
                                                 itemtype="https://schema.org/CreativeWork"
+                                                onClick={e => !lesson.is_preview && e.preventDefault()}
                                             >
-                                                <div class="flex items-center flex-1 min-w-0">
-                                                    <div
-                                                        class="flex-shrink-0 w-8 h-8 rounded-md flex items-center justify-center mr-3 md:mr-4 text-sm font-medium text-gray-700 bg-gray-100"
-                                                        aria-hidden="true"
-                                                    >
-                                                        {lessonIndex() + 1}
-                                                    </div>
-
-                                                    <div class="min-w-0 flex-1">
-                                                        <h4
-                                                            class="font-gsans font-medium text-gray-900 truncate"
-                                                            itemprop="name"
-                                                        >
-                                                            {lesson.lesson_title}
-                                                        </h4>
-
-                                                        <Show when={lesson.lesson_description}>
-                                                            <p
-                                                                class="font-gsans text-gray-600 text-sm mt-1 line-clamp-2"
-                                                                itemprop="description"
-                                                            >
-                                                                {lesson.lesson_description}
-                                                            </p>
-                                                        </Show>
-                                                    </div>
+                                                <div class={`flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-medium transition-colors ${lesson.is_preview ? 'bg-[#E85A4F]/10 text-[#E85A4F] group-hover/lesson:bg-[#E85A4F] group-hover/lesson:text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                                    {!lesson.is_preview ? (
+                                                        <img src="/svg/player-play-lesson.svg" width={16} height={16}/>
+                                                    ) : (
+                                                        <img src="/svg/lock-course.svg" width={16} height={16} alt="" />
+                                                    )}
                                                 </div>
 
-                                                <div class="flex items-center gap-3 md:gap-4 ml-4 flex-shrink-0">
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="font-gsans font-medium text-gray-800 text-sm truncate" itemprop="name">
+                                                        {lesson.lesson_title}
+                                                    </p>
+                                                </div>
+
+                                                <div class="flex items-center gap-2 flex-shrink-0">
                                                     {lesson.is_preview && (
-                                                        <span
-                                                            class="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap"
-                                                            style={{
-                                                                color: "#E85A4F",
-                                                                backgroundColor: "rgba(232, 90, 79, 0.1)",
-                                                                border: "1px solid rgba(232, 90, 79, 0.2)"
-                                                            }}
-                                                        >
-                                                            უფასო წვდომა
+                                                        <span class="text-xs font-medium text-[#E85A4F] bg-[#E85A4F]/8 px-2 py-0.5 rounded-full border border-[#E85A4F]/20">
+                                                            უფასო
                                                         </span>
                                                     )}
-
                                                     <Show when={lesson.video_duration}>
-                                                        <div class="flex items-center text-gray-500 text-sm whitespace-nowrap">
-                                                            <img
-                                                                src="/svg/clock-black.svg"
-                                                                alt="გაკვეთილის ხანგრძლივობა"
-                                                                class="w-4 h-4 mr-1"
-                                                                aria-hidden="true"
-                                                                loading="lazy"
-                                                            />
+                                                        <span class="text-xs text-gray-400 font-gsans tabular-nums">
                                                             {formatDuration(lesson.video_duration)}
-                                                        </div>
+                                                        </span>
                                                     </Show>
-
-                                                    <div class="text-gray-400 rounded-full bg-[#E85A4F]/90 p-1 flex items-center justify-center">
-                                                        {lesson.is_preview ? <img
-                                                            src="/svg/player-play.svg"
-                                                            alt="ვიდეოს გაშვება"
-                                                            width={20}
-                                                            height={20}
-                                                            class="w-5 h-5"
-                                                            loading="lazy"
-                                                        /> : <img
-                                                            src="/svg/lock-white.svg"
-                                                            alt="ვიდეოს გაშვება"
-                                                            width={20}
-                                                            height={20}
-                                                            class="w-5 h-5"
-                                                            loading="lazy"
-                                                        />}
-                                                    </div>
                                                 </div>
-
                                                 <meta itemprop="learningResourceType" content="Video" />
                                             </a>
                                         )}
                                     </For>
                                 </div>
-                            </div>
-                        </Show>
-                    </div>
-                )}
+                            </Show>
+                        </div>
+                    )
+                }}
             </For>
         </div>
     );

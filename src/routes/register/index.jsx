@@ -65,7 +65,7 @@ const Register = () => {
                     <p class="sr-only">შექმენით ანგარიში ონლაინ კურსებისთვის</p>
 
                     <div class="lg:hidden mb-6">
-                        <h1 class="text-2xl font-gsans font-bold text-slate-900 mb-3">
+                        <h1 id="header" class="text-2xl font-gsans font-bold text-slate-900 mb-3">
                             Artra - რეგისტრაცია
                         </h1>
                         <p class="text-sm text-slate-600 font-gsans font-medium">
@@ -393,9 +393,9 @@ const Register = () => {
                                         <A
                                             href="/terms"
                                             class="text-[#E85A4F] hover:underline"
-                                            aria-label="მომსახურების პირობები"
+                                            aria-label="წესები და პირობები"
                                         >
-                                            მომსახურების პირობებს
+                                            წესებს და პირობებს
                                         </A>{" "}
                                         და{" "}
                                         <A

@@ -62,14 +62,9 @@ export const CourseCard = (props) => {
             </figure>
 
             <div class="p-5 flex-grow flex flex-col">
-                <div class="mb-3 flex gap-2" aria-hidden="true">
-                    <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-gsans font-medium text-blue-700">
-                        {course.category_name}
-                    </span>
-                    <span class="rounded-full bg-green-50 px-3 py-1 text-xs font-gsans font-medium text-green-700">
-                        {course.level}
-                    </span>
-                </div>
+                <span class="rounded-full bg-green-50 w-fit px-3 py-1 text-xs font-gsans mb-3 font-medium text-green-700">
+                    {course.level}
+                </span>
 
                 <div class="mb-3 flex items-start gap-2 min-h-[40px]">
                     <div class="flex-shrink-0">
@@ -245,7 +240,7 @@ export const CourseCard = (props) => {
                 <p>ინსტრუქტორი: {course.instructor_name}</p>
                 <p>ინსტრუქტორის სპეციალიზაცია: {course.instructor_headline}</p>
                 <p>
-                    კატეგორია: {course.category_name}, ხანგრძლივობა: {course.durationHours} საათი, დონე: {course.level}
+                    ხანგრძლივობა: {course.durationHours} საათი, დონე: {course.level}
                 </p>
                 <p>
                     {course.total_lessons} გაკვეთილი, {course.enrollment_count} მსმენელი

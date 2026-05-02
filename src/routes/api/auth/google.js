@@ -1,4 +1,3 @@
-'use server'
 import { redirect } from "@solidjs/router";
 import { jwtVerify, createRemoteJWKSet } from "jose";
 import { randomBytes } from "node:crypto"
@@ -34,7 +33,6 @@ async function verifyGoogleIdToken(idToken) {
 export async function POST({ request }) {
     const form = await request.formData();
     const credential = form.get("credential");
-    console.log(request)
     try {
         if (typeof credential !== "string") return redirect('/login', {
             status: 303,

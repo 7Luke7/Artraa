@@ -57,15 +57,6 @@ export const Footer = () => {
                                         კურსები
                                     </A>
                                 </li>
-                                <li>
-                                    <A 
-                                        href="/blog" 
-                                        className="text-base font-gsans font-normal text-gray-700 hover:text-[#E85A4F] transition-colors block py-1 focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
-                                        aria-label="ბლოგი"
-                                    >
-                                        ბლოგი
-                                    </A>
-                                </li>
                             </ul>
                         </nav>
                     </div>

@@ -133,8 +133,8 @@ export const approve_with_device = action(async () => {
             pending_verification_id
         })
         throw redirect('/verify/await')
+        
     } catch (error) {
-        console.log(error)
         if (error instanceof Response) throw error
     }
 }, 'verify-approve-device')

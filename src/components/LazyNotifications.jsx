@@ -53,6 +53,7 @@ const Notifications = () => {
       setStore('loading', false)
     }
   }
+
   const hasNotifications = createMemo(() => store.notifications.length > 0)
   const totalNotificationsBadge = createMemo(() => store.total_notifications)
   const hasMoreNotifications = createMemo(() => Number(store.total_notifications) !== store.notifications.length)
@@ -139,15 +140,22 @@ const Notifications = () => {
   })
 
   return (
-    <div class="md:top-full md:w-[420px] md:max-h-[70vh]
-         bg-white
-         md:shadow-2xl md:border md:border-gray-100
-         md:rounded-xl transition-all duration-150 overflow-auto">
-      <div class="p-0 relative">
+    <div class="
+      w-screen max-h-[80dvh]
+      md:w-[420px] md:max-h-[70vh]
+      bg-white
+      shadow-2xl border border-gray-100
+      md:rounded-xl
+      transition-all duration-150
+      flex flex-col
+      overflow-hidden
+    ">
+      <div class="flex flex-col flex-1 overflow-hidden relative">
+        {/* Sticky header */}
         <div class="sticky top-0 z-40 px-4 py-4
              font-gsans font-medium
              bg-white/95 backdrop-blur
-             border-b border-gray-100 flex justify-between items-center">
+             border-b border-gray-100 flex justify-between items-center shrink-0">
           <div class="flex items-center space-x-2">
             <h2 class="text-base text-gray-900">
               შეტყობინებები
@@ -157,13 +165,15 @@ const Notifications = () => {
             </span>
           </div>
           <Show when={hasNotifications()}>
-            <button onClick={() => batch(() => {
-              setDisplayMainTools(prev => !prev)
-              setNotificationTools(false)
-            })}
+            <button
+              onClick={() => batch(() => {
+                setDisplayMainTools(prev => !prev)
+                setNotificationTools(false)
+              })}
               class="p-1.5 rounded-full relative z-30
-                      text-gray-400 hover:text-gray-700
-                      hover:bg-gray-200/50 transition-colors">
+                     text-gray-400 hover:text-gray-700
+                     hover:bg-gray-200/50 transition-colors"
+            >
               <img src='/svg/dots.svg' width={24} height={24} />
               <Show when={displayMainTools()}>
                 <div ref={mainToolsRef} class="absolute right-0 top-full mt-2 z-50">
@@ -173,170 +183,165 @@ const Notifications = () => {
             </button>
           </Show>
         </div>
-        {hasNotifications ? 
-          <div
-          ref={el => scrollEl = el}
-          style={{
-            position: "relative",
-            "overflow-y": 'auto',
-            height: '60vh',
-          }}
-        >
-          <div
-            style={{
-              height: `${rowVirtualizer.getTotalSize()}px`,
-              width: '100%',
-              position: 'relative',
-            }}
-          >
-            <For each={rowVirtualizer.getVirtualItems()}>
-              {(virtualRow) => {
-                const isLoader = virtualRow.index === store.notifications.length;
-                const notif = store.notifications[virtualRow.index];
-
-                return (
-                  <div
-                    key={virtualRow.key}
-                    data-index={virtualRow.index}
-                    ref={(el) => {
-                      el.dataset.index = `${virtualRow.index}`;
-                      rowVirtualizer.measureElement(el)
-                    }}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: `${virtualRow.size}px`,
-                      transform: `translateY(${virtualRow.start}px)`,
-                    }}
-                  >
-                    {isLoader ? (
-                      hasMoreNotifications() ? InfiniteScrollLoader() : null
-                    ) : <div class='relative border-b border-gray-100 flex flex-col gap-2 p-4 text-sm text-gray-700
-                transition-all duration-200 group'
-                    >
-                      <Show when={!notif.seen}>
-                        <div class="absolute left-3.5 top-1/2 w-2.5 h-2.5 rounded-full bg-[#E85A4F]"></div>
-                      </Show>
-
-                      <div class="absolute left-2 top-4">
-                        <Switch>
-                          <Match when={notif.notif_type === "უსაფრთხოება"}>
-                            <div class="w-6 h-6 rounded-full bg-red-50 flex items-center justify-center">
-                              <img src='/svg/lock.svg' width={20} height={20} alt="" />
+ 
+        {/* Scrollable list */}
+        {hasNotifications()
+          ? <div
+              ref={el => scrollEl = el}
+              class="flex-1 overflow-y-auto overscroll-contain"
+            >
+              <div
+                style={{
+                  height: `${rowVirtualizer.getTotalSize()}px`,
+                  width: '100%',
+                  position: 'relative',
+                }}
+              >
+                <For each={rowVirtualizer.getVirtualItems()}>
+                  {(virtualRow) => {
+                    const isLoader = virtualRow.index === store.notifications.length;
+                    const notif = store.notifications[virtualRow.index];
+ 
+                    return (
+                      <div
+                        key={virtualRow.key}
+                        data-index={virtualRow.index}
+                        ref={(el) => {
+                          el.dataset.index = `${virtualRow.index}`;
+                          rowVirtualizer.measureElement(el)
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: `${virtualRow.size}px`,
+                          transform: `translateY(${virtualRow.start}px)`,
+                        }}
+                      >
+                        {isLoader ? (
+                          hasMoreNotifications() ? InfiniteScrollLoader() : null
+                        ) : (
+                          <div class='relative border-b border-gray-100 flex flex-col gap-2 p-4 text-sm text-gray-700
+                              transition-all duration-200 group'>
+                            <Show when={!notif.seen}>
+                              <div class="absolute left-3.5 top-1/2 w-2.5 h-2.5 rounded-full bg-[#E85A4F]"></div>
+                            </Show>
+ 
+                            <div class="absolute left-2 top-4">
+                              <Switch>
+                                <Match when={notif.notif_type === "უსაფრთხოება"}>
+                                  <div class="w-6 h-6 rounded-full bg-red-50 flex items-center justify-center">
+                                    <img src='/svg/lock.svg' width={20} height={20} alt="" />
+                                  </div>
+                                </Match>
+                                <Match when={notif.notif_type === "გადახდა"}>
+                                  <div class="w-6 h-6 rounded-full bg-green-50 flex items-center justify-center">
+                                    <img src='/svg/receipt.svg' width={20} height={20} alt="" />
+                                  </div>
+                                </Match>
+                                <Match when={notif.notif_type === "შეთავაზება"}>
+                                  <div class="w-6 h-6 rounded-full bg-purple-50 flex items-center justify-center">
+                                    <img src='/svg/gift.svg' width={20} height={20} alt="" />
+                                  </div>
+                                </Match>
+                              </Switch>
                             </div>
-                          </Match>
-                          <Match when={notif.notif_type === "გადახდა"}>
-                            <div class="w-6 h-6 rounded-full bg-green-50 flex items-center justify-center">
-                              <img src='/svg/receipt.svg' width={20} height={20} alt="" />
+ 
+                            <div class="flex items-start pr-6 justify-between gap-3 ml-8">
+                              <div class="flex-1 min-w-0">
+                                <span class="font-gsans font-medium text-sm leading-snug text-gray-900 block truncate">
+                                  {notif.title}
+                                </span>
+                                <div class="mt-1">
+                                  <span class={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-gsans font-medium
+                                    ${getNotificationTypeStyle(notif.notif_type)}`}>
+                                    {notif.notif_type}
+                                  </span>
+                                </div>
+                              </div>
+                              <span class="text-xs text-gray-400 whitespace-nowrap mt-0.5 font-gsans font-normal shrink-0 ml-2">
+                                {notif.parsed_notification}
+                              </span>
                             </div>
-                          </Match>
-                          <Match when={notif.notif_type === "შეთავაზება"}>
-                            <div class="w-6 h-6 rounded-full bg-purple-50 flex items-center justify-center">
-                              <img src='/svg/gift.svg' width={20} height={20} alt="" />
-                            </div>
-                          </Match>
-                        </Switch>
-                      </div>
-
-                      <div class="flex items-start pr-6 justify-between gap-3 ml-8">
-                        <div class="flex-1 min-w-0">
-                          <span class="font-gsans font-medium text-sm leading-snug text-gray-900 block truncate">
-                            {notif.title}
-                          </span>
-
-                          <div class="mt-1">
-                            <span class={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-gsans font-medium
-                          ${getNotificationTypeStyle(notif.notif_type)}`}>
-                              {notif.notif_type}
+ 
+                            <span class="font-gsans font-normal text-gray-600 leading-relaxed text-sm mt-2 ml-8">
+                              {notif.description}
                             </span>
+ 
+                            <Show when={notif.notif_type === "უსაფრთხოება"}>
+                              <div class="mt-3 ml-8">
+                                <A
+                                  class="inline-flex items-center gap-1.5 text-xs font-gsans font-medium
+                                    text-[#E85A4F] hover:text-[#D9534F] hover:underline underline-offset-2"
+                                  href="/account/security"
+                                >
+                                  <img src='/svg/external-link.svg' width={16} height={16} alt='' />
+                                  მართეთ სეანსები
+                                </A>
+                              </div>
+                            </Show>
+ 
+                            <Show when={notif.notif_type === "გადახდა"}>
+                              <div class="mt-3 ml-8">
+                                <A
+                                  class="inline-flex items-center gap-1.5 text-xs font-gsans font-medium
+                                    text-green-600 hover:text-green-700 hover:underline underline-offset-2"
+                                  href="/account/billing"
+                                >
+                                  <img src='/svg/external-green-link.svg' width={16} height={16} alt='' />
+                                  იხილეთ დეტალურად
+                                </A>
+                              </div>
+                            </Show>
+ 
+                            <Show when={notif.notif_type === "შეთავაზება"}>
+                              <div class="mt-3 ml-8">
+                                <A
+                                  class="inline-flex items-center gap-1.5 text-xs font-gsans font-medium px-3 py-1.5
+                                    bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg
+                                    hover:from-purple-600 hover:to-pink-600 transition-all shadow-sm hover:shadow"
+                                  href="/promotions"
+                                >
+                                  <img src='/svg/promotion.svg' width={16} height={16} alt='' />
+                                  იხილეთ შეთავაზება
+                                </A>
+                              </div>
+                            </Show>
+ 
+                            <div class="absolute right-2 top-3 flex items-center gap-x-1 z-20">
+                              <button
+                                type="button"
+                                onClick={() => batch(() => {
+                                  setNotificationTools(prev => prev === notif.id ? null : notif.id)
+                                  setDisplayMainTools(false)
+                                })}
+                                class="p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity
+                                  text-gray-400 hover:text-gray-700 hover:bg-gray-200/50"
+                              >
+                                <img src="/svg/dots.svg" width={16} height={16} />
+                              </button>
+                              <Show when={notificationTools() && notificationTools() === notif.id}>
+                                <div ref={itemToolsRef} class="absolute right-1 top-6 mt-2 z-50">
+                                  <NotificationTools
+                                    notification={notif}
+                                    store={store}
+                                    setStore={setStore}
+                                    ctx={ctx}
+                                  />
+                                </div>
+                              </Show>
+                            </div>
                           </div>
-                        </div>
-
-                        <span class="text-xs text-gray-400 whitespace-nowrap mt-0.5 font-gsans font-normal shrink-0 ml-2">
-                          {notif.parsed_notification}
-                        </span>
+                        )}
                       </div>
-
-                      <span class="font-gsans font-normal text-gray-600 leading-relaxed text-sm mt-2 ml-8">
-                        {notif.description}
-                      </span>
-
-                      <Show when={notif.notif_type === "უსაფრთხოება"}>
-                        <div class="mt-3 ml-8">
-                          <A
-                            class="inline-flex items-center gap-1.5 text-xs font-gsans font-medium
-        text-[#E85A4F] hover:text-[#D9534F]
-        hover:underline underline-offset-2"
-                            href="/account/security"
-                          >
-                            <img src='/svg/external-link.svg' width={16} height={16} alt='' />
-                            მართეთ სეანსები
-                          </A>
-                        </div>
-                      </Show>
-
-                      <Show when={notif.notif_type === "გადახდა"}>
-                        <div class="mt-3 ml-8">
-                          <A
-                            class="inline-flex items-center gap-1.5 text-xs font-gsans font-medium
-        text-green-600 hover:text-green-700
-        hover:underline underline-offset-2"
-                            href="/account/billing"
-                          >
-                            <img src='/svg/external-green-link.svg' width={16} height={16} alt='' />
-                            იხილეთ დეტალურად
-                          </A>
-                        </div>
-                      </Show>
-
-                      <Show when={notif.notif_type === "შეთავაზება"}>
-                        <div class="mt-3 ml-8">
-                          <A
-                            class="inline-flex items-center gap-1.5 text-xs font-gsans font-medium px-3 py-1.5
-        bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg
-        hover:from-purple-600 hover:to-pink-600 transition-all shadow-sm hover:shadow"
-                            href="/promotions"
-                          >
-                            <img src='/svg/promotion.svg' width={16} height={16} alt='' />
-                            იხილეთ შეთავაზება
-                          </A>
-                        </div>
-                      </Show>
-
-                      <div class="absolute right-2 top-3 flex items-center gap-x-1 z-20">
-                        <button
-                          type="button"
-                          onClick={() => batch(() => {
-                            setNotificationTools(prev => prev === notif.id ? null : notif.id)
-                            setDisplayMainTools(false)
-                          })}
-                          class="p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity
-                            text-gray-400 hover:text-gray-700
-                            hover:bg-gray-200/50"
-                        >
-                          <img src="/svg/dots.svg" width={16} height={16} />
-                        </button>
-                        <Show when={notificationTools() && notificationTools() === notif.id}>
-                          <div ref={itemToolsRef} class="absolute right-1 top-6 mt-2 z-50">
-                            <NotificationTools
-                              notification={notif}
-                              store={store}
-                              setStore={setStore}
-                              ctx={ctx}
-                            />
-                          </div>
-                        </Show>
-                      </div>
-                    </div>
-                    }
-                  </div>
-                );
-              }}
-            </For>
-          </div>
-        </div> : <p class="text-sm p-4 font-gsans font-medium text-gray-900">შეტყობინებები ცარიელია</p>}
+                    );
+                  }}
+                </For>
+              </div>
+            </div>
+          : <p class="text-sm p-4 font-gsans font-medium text-gray-900">შეტყობინებები ცარიელია</p>
+        }
       </div>
     </div>
   );

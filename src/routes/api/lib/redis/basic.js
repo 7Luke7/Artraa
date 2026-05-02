@@ -1,4 +1,3 @@
-'use server'
 import { redis } from "../../redis";
 
 export async function redisSet(key, value, ttlSeconds) {

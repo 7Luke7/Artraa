@@ -219,7 +219,6 @@ export const remove_notification = async (id, seen) => {
             WHERE user_id=$1 AND id=$2
         `, [data.user_id, id])
 
-        console.log(remove_notification)
         if (!remove_notification.rowCount) return json({ok: false, message: "დაფიქსირდა შეცდომა."}, {
             status: 500
         })

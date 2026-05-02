@@ -100,17 +100,6 @@ export const LandingHero = () => {
                             </div>
                             <div class="flex items-center gap-2 text-sm text-gray-600">
                                 <img 
-                                    src='/svg/security-green.svg' 
-                                    aria-hidden='true' 
-                                    width={24} 
-                                    height={24} 
-                                    alt="" 
-                                    loading="lazy"
-                                />
-                                <span class="font-gsans font-medium">30-დღიანი დაბრუნება</span>
-                            </div>
-                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <img 
                                     src='/svg/clock-green.svg' 
                                     aria-hidden='true' 
                                     width={24} 

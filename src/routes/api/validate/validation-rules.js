@@ -1,4 +1,3 @@
-"use server"
 export const validation_rules = {
     given_name: {
         required: true,
@@ -22,6 +21,18 @@ export const validation_rules = {
         type: 'string',
         pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
         maxLength: 254,
+    },
+    "topic-subject": {
+        required: true,
+        local_name: 'თემა',
+        type: 'string',
+        maxLength: 60,
+    },
+    "topic-message": {
+        required: true,
+        local_name: 'შეტყობინება',
+        type: 'string',
+        maxLength: 800,
     },
     password: {
         required: true,

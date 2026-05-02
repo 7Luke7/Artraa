@@ -1,4 +1,3 @@
-'use server'
 import { eventHandler } from "vinxi/http";
 import { getCookie } from '../routes/api/utils'
 import { redisHGet, redisHSet } from "../routes/api/lib/redis/hash";

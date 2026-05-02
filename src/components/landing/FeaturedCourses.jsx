@@ -67,37 +67,20 @@ export const FeaturedCourses = (props) => {
                                     </p>
                                 </div>
 
-                                <div class="flex flex-col sm:flex-row gap-4">
-                                    <A
-                                        href="/courses"
-                                        class="inline-flex items-center justify-center gap-2 bg-[#E85A4F] hover:bg-[#D84A3F] text-white px-8 py-4 rounded-lg font-gsans font-bold text-lg transition-colors shadow-md hover:shadow-lg"
-                                        aria-label="ყველა კურსის ნახვა - გადახვედი სრულ კატალოგზე"
-                                    >
-                                        <span>ყველა კურსის ნახვა</span>
-                                        <img
-                                            src='/svg/arrow-narrow-right.svg'
-                                            width={24}
-                                            height={24}
-                                            alt=""
-                                            aria-hidden="true"
-                                        />
-                                    </A>
-
-                                    <A
-                                        href="/categories"
-                                        class="inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 px-8 py-4 rounded-lg font-gsans font-bold text-lg transition-colors"
-                                        aria-label="კატეგორიების ნახვა - დაათვალიერე კურსები თემების მიხედვით"
-                                    >
-                                        <span>კატეგორიები</span>
-                                        <img
-                                            src='/svg/arrow-narrow-right-black.svg'
-                                            width={24}
-                                            height={24}
-                                            alt=""
-                                            aria-hidden="true"
-                                        />
-                                    </A>
-                                </div>
+                                <A
+                                    href="/courses"
+                                    class="inline-flex items-center justify-center gap-2 bg-[#E85A4F] hover:bg-[#D84A3F] text-white px-8 py-4 rounded-lg font-gsans font-bold text-lg transition-colors shadow-md hover:shadow-lg"
+                                    aria-label="ყველა კურსის ნახვა - გადახვედი სრულ კატალოგზე"
+                                >
+                                    <span>ყველა კურსის ნახვა</span>
+                                    <img
+                                        src='/svg/arrow-narrow-right.svg'
+                                        width={24}
+                                        height={24}
+                                        alt=""
+                                        aria-hidden="true"
+                                    />
+                                </A>
                             </div>
                         </div>
                     </div>

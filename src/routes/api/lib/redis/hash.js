@@ -1,4 +1,3 @@
-'use server'
 import { redis } from "../../redis";
 
 export async function redisHSet(key, object) {

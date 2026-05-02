@@ -1,4 +1,3 @@
-'use server'
 export function generateCourseStructuredData(course) {
   const siteUrl = import.meta.env.VITE_URL
   const courseUrl = `${siteUrl}/course/${course.slug}`;
@@ -50,39 +49,7 @@ export function generateCourseStructuredData(course) {
     }
   };
 
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "კურსები",
-        "item": `${siteUrl}/courses`
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": course.cp.parent_category_name,
-        "item": `${siteUrl}/courses/?category=${course.cp.parent_category_slug}`
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": course.category_name,
-        "item": `${siteUrl}/courses/?category=${course.category_slug}`
-      },
-      {
-        "@type": "ListItem",
-        "position": 4,
-        "name": course.title,
-        "item": courseUrl
-      }
-    ]
-  };
-
-  const schemas = [courseSchema, breadcrumbSchema];
-  return schemas.map(schema => JSON.stringify(schema, null, 2)).join('\n');
+  return JSON.stringify(courseSchema)
 }
 
 export function generateLandingStructuredData(siteUrl, courses) {

@@ -1,4 +1,3 @@
-'use server'
 import { BasicClientSideCache, createClient } from "redis";
 
 const cache = new BasicClientSideCache({

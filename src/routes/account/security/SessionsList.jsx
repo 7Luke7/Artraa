@@ -1,4 +1,4 @@
-import { createMemo, For } from "solid-js"
+import { createEffect, createMemo, For } from "solid-js"
 import { SessionRow } from "./SingleSession"
 import { createSignal, useContext } from "solid-js"
 import {

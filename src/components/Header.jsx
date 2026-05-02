@@ -31,10 +31,11 @@ export const Header = () => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 10);
         };
-        
+
         window.addEventListener("scroll", handleScroll);
         onCleanup(() => window.removeEventListener("scroll", handleScroll));
     });
+
     return (
         <header
             role="banner"
@@ -56,19 +57,25 @@ export const Header = () => {
                     </A>
                 </div>
 
-                <Suspense>
-                    <Switch>
-                        <Match when={data()?.status === 200}>
-                            <LazyHeaderActionsAuthorized data={data} />
-                        </Match>
-                        <Match when={data()?.status === 401}>
-                            <LazyHeaderLinks />
-                        </Match>
-                    </Switch>
-                </Suspense>
+                <div class="hidden xl:flex">
+                    <Suspense>
+                        <Switch>
+                            <Match when={data()?.status === 200}>
+                                <LazyHeaderActionsAuthorized data={data} />
+                            </Match>
+                            <Match when={data()?.status === 401}>
+                                <LazyHeaderLinks />
+                            </Match>
+                        </Switch>
+                    </Suspense>
+                </div>
+
                 <button
                     class="xl:hidden flex flex-col items-center justify-center w-10 h-10 rounded"
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen())}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsMobileMenuOpen(!isMobileMenuOpen());
+                    }}
                     aria-label={isMobileMenuOpen() ? "მენიუს დახურვა" : "მენიუს გახსნა"}
                     aria-expanded={isMobileMenuOpen()}
                     aria-controls="mobile-menu"
@@ -78,36 +85,39 @@ export const Header = () => {
                     <span class={`w-6 h-0.5 bg-gray-700 transition-transform ${isMobileMenuOpen() ? '-rotate-45 -translate-y-2' : ''}`}></span>
                 </button>
             </div>
+
             <Show when={isMobileMenuOpen()}>
                 <div
                     ref={el => (mobileMenuRef = el)}
-                    class="xl:hidden bg-white border-t border-gray-200 px-4 py-4"
+                    class="xl:hidden bg-white border-t border-gray-200 py-4"
                     id="mobile-menu"
                     role="dialog"
                     aria-label="მობილური მენიუ"
                 >
                     <nav
-                        class="flex flex-col gap-y-4"
+                        class="flex flex-col gap-y-2"
                         aria-label="მობილური ნავიგაცია"
                     >
-                        <A
-                            href="/about"
-                            class="text-gray-700 hover:text-[#E85A4F] font-gsans font-medium py-2 px-3 rounded-lg hover:bg-gray-50"
-                            aria-current="page"
-                        >
-                            ჩვენს შესახებ
-                        </A>
-                        <A
-                            href="/contact"
-                            class="text-gray-700 hover:text-[#E85A4F] font-gsans font-medium py-2 px-3 rounded-lg hover:bg-gray-50"
-                            aria-current="page"
-                        >
-                            კონტაქტი
-                        </A>
+                        <Show when={data().status === 401}>
+                            <A
+                                href="/about"
+                                class="text-gray-700 hover:text-[#E85A4F] font-gsans font-medium py-2 rounded-lg hover:bg-gray-50"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                ჩვენს შესახებ
+                            </A>
+                            <A
+                                href="/contact"
+                                class="text-gray-700 hover:text-[#E85A4F] font-gsans font-medium py-2 rounded-lg hover:bg-gray-50"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                კონტაქტი
+                            </A>
+                        </Show>
                         <A
                             href="/courses"
-                            class="text-gray-700 hover:text-[#E85A4F] font-gsans font-medium py-2 px-3 rounded-lg hover:bg-gray-50"
-                            aria-current="page"
+                            class="text-gray-700 hover:text-[#E85A4F] font-gsans font-medium py-2 rounded-lg hover:bg-gray-50"
+                            onClick={() => setIsMobileMenuOpen(false)}
                         >
                             კურსები
                         </A>
@@ -119,6 +129,7 @@ export const Header = () => {
                                     target="_self"
                                     class="block text-center bg-[#E85A4F] text-white font-gsans font-bold py-3 px-4 rounded-lg hover:bg-[#D84A3F]"
                                     rel="noopener"
+                                    onClick={() => setIsMobileMenuOpen(false)}
                                 >
                                     შესვლა
                                 </A>
@@ -127,6 +138,7 @@ export const Header = () => {
                                     target="_self"
                                     class="block text-center border border-gray-300 text-gray-800 font-gsans font-bold py-3 px-4 rounded-lg hover:border-[#E85A4F] hover:text-[#E85A4F]"
                                     rel="noopener"
+                                    onClick={() => setIsMobileMenuOpen(false)}
                                 >
                                     რეგისტრაცია
                                 </A>
@@ -134,17 +146,31 @@ export const Header = () => {
                         </Show>
 
                         <Show when={data()?.status === 200}>
-                            <div class="pt-4 border-t border-gray-200">
-                                <div class="flex items-center p-3">
-                                    <img
-                                        src={data()?.data ?? '/default_profile.png'}
-                                        alt='პროფილის სურათი'
-                                        class="rounded-full w-10 h-10 object-cover"
-                                        width={40}
-                                        height={40}
-                                        loading="lazy"
-                                    />
-                                </div>
+                            <div class="pt-4 border-t border-gray-200 space-y-1">
+                                <img
+                                    src={data()?.data ?? '/default_profile.png'}
+                                    alt='პროფილის სურათი'
+                                    class="rounded-full w-10 h-10 object-cover shrink-0"
+                                    width={40}
+                                    height={40}
+                                    loading="lazy"
+                                />
+                                <A
+                                    href="/account"
+                                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:text-[#E85A4F] font-gsans font-normal"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    <img src="/svg/gear.svg" alt="" width={18} height={18} />
+                                    აქაუნთი
+                                </A>
+                                <A
+                                    href="/notifications"
+                                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:text-[#E85A4F] font-gsans font-normal"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    <img src="/svg/notification.svg" alt="" width={18} height={18} />
+                                    შეტყობინებები
+                                </A>
                             </div>
                         </Show>
                     </nav>
