@@ -1,36 +1,13 @@
-/**
- * CourseMain.jsx — updated with BOG payment integration
- * Replace your existing CourseMain.jsx with this file.
- *
- * Changes from original:
- *  - "კურსის შეძენა" button now calls initiate_purchase server action
- *  - Shows loading state during redirect
- *  - "სცადე უფასოდ" links to the preview lesson in the course player
- *  - If user is already enrolled, buy button becomes "კურსზე გადასვლა"
- */
-import { createSignal, Show } from "solid-js"
-import { useAction, A } from "@solidjs/router"
-import { initiate_purchase } from "~/api/course-payment"
+import { Show } from "solid-js"
+import { A, useSubmission } from "@solidjs/router"
+import { initiate_purchase } from "~/routes/api/payment/course-payment"
 
 export const CourseMain = (props) => {
     const { course } = props
-    const purchase = useAction(initiate_purchase)
-    const [loading, setLoading] = createSignal(false)
-
-    const handleBuy = async () => {
-        setLoading(true)
-        try {
-            await purchase(course.slug)
-        } catch {
-            // redirect throws, which is fine — SolidStart handles it
-        } finally {
-            setLoading(false)
-        }
-    }
-
+    const submission = useSubmission(initiate_purchase)
+    
     return (
         <div class="flex flex-col">
-            {/* Thumbnail */}
             <div class="relative">
                 <img
                     src={course.thumbnail_url || "https://placehold.co/800x450"}
@@ -54,7 +31,6 @@ export const CourseMain = (props) => {
             </div>
 
             <div class="p-5">
-                {/* Price block */}
                 <div
                     class="mb-5"
                     itemprop="offers"
@@ -69,31 +45,10 @@ export const CourseMain = (props) => {
                             <span class="text-base text-gray-400 line-through">₾{course.original_price}</span>
                         )}
                     </div>
-                    <p class="text-xs text-gray-500 font-gsans">სამუდამო წვდომა • ყველა მასალა ჩართულია</p>
+                    <p class="text-xs text-gray-500 font-gsans">სამუდამო წვდომა • ყველა მასალა</p>
                     <meta itemprop="priceCurrency" content="GEL" />
                     <meta itemprop="availability" content="https://schema.org/InStock" />
                 </div>
-
-                {/* Payment method icons */}
-                <div class="flex items-center gap-2 mb-4 flex-wrap">
-                    {[
-                        { label: "Visa",        icon: "/svg/payment/visa.svg" },
-                        { label: "Mastercard",  icon: "/svg/payment/mastercard.svg" },
-                        { label: "Apple Pay",   icon: "/svg/payment/applepay.svg" },
-                        { label: "Google Pay",  icon: "/svg/payment/googlepay.svg" },
-                        { label: "BOG",         icon: "/svg/payment/bog.svg" },
-                    ].map(pm => (
-                        <img
-                            src={pm.icon}
-                            alt={pm.label}
-                            title={pm.label}
-                            class="h-6 object-contain opacity-70"
-                        />
-                    ))}
-                    <span class="text-[10px] text-gray-400 font-gsans">+განვადება</span>
-                </div>
-
-                {/* CTA */}
                 <Show
                     when={!course.is_enrolled}
                     fallback={
@@ -105,25 +60,26 @@ export const CourseMain = (props) => {
                         </A>
                     }
                 >
-                    <button
-                        onClick={handleBuy}
-                        disabled={loading()}
-                        class="w-full py-3.5 px-4 text-base font-bold rounded-xl text-white bg-[#E85A4F] hover:bg-[#D84A3F] shadow-sm hover:shadow-md transition-all duration-200 active:scale-[0.98] mb-3 font-gsans disabled:opacity-70 disabled:cursor-not-allowed"
-                        aria-label={`შეიძინეთ კურსი: ${course.title} ფასად ₾${course.price}`}
-                    >
-                        <Show when={loading()} fallback="კურსის შეძენა">
-                            <span class="flex items-center justify-center gap-2">
-                                <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                </svg>
-                                გადამისამართება...
-                            </span>
-                        </Show>
-                    </button>
+                    <form method="POST" action={initiate_purchase}>
+                        <button
+                            type="submit"
+                            disabled={submission.pending}
+                            class="w-full py-3.5 px-4 text-base font-bold rounded-xl text-white bg-[#E85A4F] hover:bg-[#D84A3F] shadow-sm hover:shadow-md transition-all duration-200 active:scale-[0.98] mb-3 font-gsans disabled:opacity-70 disabled:cursor-not-allowed"
+                            aria-label={`შეიძინეთ კურსი: ${course.title} ფასად ₾${course.price}`}
+                        >
+                            <Show when={submission.pending} fallback="კურსის შეძენა">
+                                <span class="flex items-center justify-center gap-2">
+                                    <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                    </svg>
+                                    გადამისამართება...
+                                </span>
+                            </Show>
+                        </button>
+                    </form>
                 </Show>
 
-                {/* Free preview button */}
                 <Show when={course.preview_lesson_slug || course.has_preview}>
                     <A
                         href={`/course/${course.slug}`}
@@ -133,13 +89,12 @@ export const CourseMain = (props) => {
                     </A>
                 </Show>
 
-                {/* Stats grid */}
                 <div class="grid grid-cols-2 gap-3 pt-4 border-t border-gray-100">
                     {[
-                        { icon: "/svg/clock-black.svg", label: "ხანგრძლივობა", value: `${course.durationHours} სთ`, color: "bg-blue-50" },
-                        { icon: "/svg/book.svg",         label: "გაკვეთილები",  value: course.total_lessons, color: "bg-green-50" },
-                        { icon: "/svg/users-group.svg",  label: "მსმენელები",  value: course.enrollment_count, color: "bg-purple-50" },
-                        { icon: "/svg/star-outline.svg", label: "რეიტინგი",    value: `${course.average_rating || 0} (${course.review_count || 0})`, color: "bg-yellow-50" },
+                        { icon: "/svg/clock-black.svg", label: "ხანგრძლივობა", value: course.durationHours, color: "bg-blue-50" },
+                        { icon: "/svg/book.svg", label: "გაკვეთილები", value: course.total_lessons, color: "bg-green-50" },
+                        { icon: "/svg/users-group.svg", label: "მსმენელები", value: course.enrollment_count, color: "bg-purple-50" },
+                        { icon: "/svg/star-outline.svg", label: "რეიტინგი", value: `${course.average_rating || 0} (${course.review_count || 0})`, color: "bg-yellow-50" },
                     ].map(stat => (
                         <div class="flex items-center gap-2.5 text-sm">
                             <div class={`w-8 h-8 rounded-lg ${stat.color} flex items-center justify-center flex-shrink-0`}>
@@ -153,12 +108,11 @@ export const CourseMain = (props) => {
                     ))}
                 </div>
 
-                {/* Trust badge */}
                 <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-center gap-1.5">
                     <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
-                    <span class="text-[11px] text-gray-400 font-gsans">უსაფრთხო გადახდა · Bank of Georgia</span>
+                    <span class="text-[11px] text-gray-400 font-gsans">უსაფრთხო გადახდა · საქართველოს ბანკი</span>
                 </div>
             </div>
         </div>

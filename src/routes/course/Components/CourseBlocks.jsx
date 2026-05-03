@@ -1,34 +1,26 @@
 import { createSignal, Show, For } from "solid-js";
 
 export const CourseBlocks = (props) => {
-    const [expandedSections, setExpandedSections] = createSignal(new Set([0]));
+    const [expandedSections, setExpandedSections] = createSignal([0])
 
     const toggleSection = (idx) => {
-        setExpandedSections(prev => {
-            const next = new Set(prev);
-            next.has(idx) ? next.delete(idx) : next.add(idx);
-            return next;
-        });
-    };
-
-    const formatDuration = (seconds) => {
-        if (!seconds) return "0 წთ";
-        const minutes = Math.floor(seconds / 60);
+        setExpandedSections(prev =>
+            prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
+        )
+    }
+    const formatDuration = (minutes) => {
         const hours = Math.floor(minutes / 60);
         const rem = minutes % 60;
         return hours > 0 ? `${hours}სთ ${rem}წთ` : `${minutes} წთ`;
     };
-
-    const sectionTotal = (section) =>
-        section.lessons?.reduce((acc, l) => acc + (l.video_duration || 0), 0) || 0;
-
     return (
         <div itemscope itemtype="https://schema.org/ItemList">
             <meta itemprop="numberOfItems" content={props.course.course_content?.length || 0} />
 
             <For each={props.course.course_content}>
                 {(section, sectionIndex) => {
-                    const isOpen = () => expandedSections().has(sectionIndex())
+                    const idx = sectionIndex()
+                    const isOpen = () => expandedSections().includes(idx)
                     return (
                         <div
                             class={`border-b border-gray-100 last:border-b-0 transition-colors ${isOpen() ? 'bg-white' : 'bg-white hover:bg-gray-50/50'}`}
@@ -37,17 +29,17 @@ export const CourseBlocks = (props) => {
                             itemtype="https://schema.org/ListItem"
                         >
                             <button
-                                onClick={() => toggleSection(sectionIndex())}
+                                onClick={() => toggleSection(idx)}
                                 class="flex items-center justify-between w-full px-4 py-4 text-left group"
                                 aria-expanded={isOpen()}
-                                aria-controls={`section-${sectionIndex()}`}
+                                aria-controls={`section-${idx}`}
                             >
                                 <div class="flex items-center gap-4 flex-1 min-w-0">
                                     <div
                                         class={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors ${isOpen() ? 'bg-[#E85A4F] text-white' : 'bg-gray-100 text-gray-600 group-hover:bg-[#E85A4F]/10 group-hover:text-[#E85A4F]'}`}
                                         aria-hidden="true"
                                     >
-                                        {sectionIndex() + 1}
+                                        {idx + 1}
                                     </div>
                                     <div class="min-w-0">
                                         <h3 class="font-gsans font-semibold text-gray-900 text-base truncate" itemprop="name">
@@ -55,10 +47,8 @@ export const CourseBlocks = (props) => {
                                         </h3>
                                         <div class="flex items-center gap-3 mt-0.5 text-xs text-gray-400 font-gsans">
                                             <span>{section.lessons?.length || 0} გაკვეთილი</span>
-                                            <Show when={sectionTotal(section) > 0}>
-                                                <span>•</span>
-                                                <span>{formatDuration(sectionTotal(section))}</span>
-                                            </Show>
+                                            <span>•</span>
+                                            <span>{section.section_duration}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -69,12 +59,12 @@ export const CourseBlocks = (props) => {
                                 >
                                     <img src="/svg/dropdown.svg" width={16} height={16} alt="" />
                                 </div>
-                                <meta itemprop="position" content={sectionIndex() + 1} />
+                                <meta itemprop="position" content={idx + 1} />
                             </button>
 
                             <Show when={isOpen()}>
                                 <div
-                                    id={`section-${sectionIndex()}`}
+                                    id={`section-${idx}`}
                                     class="border-t border-gray-100 bg-gray-50/50"
                                     role="region"
                                     aria-label={section.section_title}
@@ -82,19 +72,16 @@ export const CourseBlocks = (props) => {
                                     <For each={section.lessons}>
                                         {(lesson, lessonIndex) => (
                                             <a
-                                                href={lesson.is_preview ? (lesson.video_url || "#") : "#"}
-                                                target={lesson.is_preview ? "_blank" : undefined}
-                                                rel="noopener noreferrer"
+                                                href={lesson.is_preview ? `${props.course.slug}/lessons/${section.lesson_id}` : "#"}
                                                 class={`flex items-center gap-3 px-4 py-3 border-b border-gray-100/80 last:border-b-0 transition-colors group/lesson ${lesson.is_preview ? 'hover:bg-white cursor-pointer' : 'opacity-75 cursor-default'}`}
                                                 itemscope
                                                 itemtype="https://schema.org/CreativeWork"
-                                                onClick={e => !lesson.is_preview && e.preventDefault()}
                                             >
-                                                <div class={`flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-medium transition-colors ${lesson.is_preview ? 'bg-[#E85A4F]/10 text-[#E85A4F] group-hover/lesson:bg-[#E85A4F] group-hover/lesson:text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                                <div class={`flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-medium transition-colors ${lesson.is_preview ? 'bg-[#E85A4F]/10 text-[#E85A4F] group-hover/lesson:bg-[#E85A4F]/30 group-hover/lesson:text-white' : 'bg-gray-100 text-gray-400'}`}>
                                                     {!lesson.is_preview ? (
-                                                        <img src="/svg/player-play-lesson.svg" width={16} height={16}/>
-                                                    ) : (
                                                         <img src="/svg/lock-course.svg" width={16} height={16} alt="" />
+                                                    ) : (
+                                                        <img src="/svg/player-play-lesson.svg" width={16} height={16}/>
                                                     )}
                                                 </div>
 
@@ -105,16 +92,14 @@ export const CourseBlocks = (props) => {
                                                 </div>
 
                                                 <div class="flex items-center gap-2 flex-shrink-0">
-                                                    {lesson.is_preview && (
+                                                    <Show when={lesson.is_preview}>
                                                         <span class="text-xs font-medium text-[#E85A4F] bg-[#E85A4F]/8 px-2 py-0.5 rounded-full border border-[#E85A4F]/20">
                                                             უფასო
                                                         </span>
-                                                    )}
-                                                    <Show when={lesson.video_duration}>
-                                                        <span class="text-xs text-gray-400 font-gsans tabular-nums">
-                                                            {formatDuration(lesson.video_duration)}
-                                                        </span>
                                                     </Show>
+                                                    <span class="text-xs font-bold text-gray-800">
+                                                        {formatDuration(lesson.video_duration)}
+                                                    </span>
                                                 </div>
                                                 <meta itemprop="learningResourceType" content="Video" />
                                             </a>

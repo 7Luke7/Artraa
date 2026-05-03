@@ -14,9 +14,7 @@ export const authenticate = async () => {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Authorization': bog_auth_header
             },
-            body: {
-                'grant_type': 'client_credentials'
-            }
+            body: "grant_type=client_credentials"
         })
 
         if (!response.ok) return {
@@ -24,9 +22,9 @@ export const authenticate = async () => {
             ok: false
         }
 
-        const body = await response.json()
+        const data = await response.json()
         return {
-            ...body,
+            ...data,
             ok: true
         }
     } catch (error) {
@@ -38,7 +36,7 @@ export const authenticate = async () => {
 }
 
 export const get_bog_access_token = async () => {
-    const BUFFER = 60000 // 60 seconds
+    const BUFFER = 60000
     try {
         if (token && Date.now() < expires_at - BUFFER) return {
             ok: true,
@@ -63,7 +61,7 @@ export const get_bog_access_token = async () => {
                 auth_retries = 0
                 return {
                     ok: true,
-                    token: `Bearer <${access_token}>`
+                    token: `Bearer ${access_token}`
                 }
             })
         }

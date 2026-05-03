@@ -1,28 +1,28 @@
-"use server"
-/**
- * src/routes/api/payment/callback.js
- *
- * BOG calls this URL via POST after every payment (success or fail).
- * Must be HTTPS in production. Register this URL in businessmanager.bog.ge.
- */
+import { handleBogCallback } from "./payment"
 
-import { handleBogCallback } from "~/api/payment"
-
+const BOG_ALLOWED_IPS    = [
+    "91.239.195.",
+    "91.239.196.",
+    "185.65.243.",
+]
 export async function POST({ request }) {
+    const allowed = BOG_ALLOWED_IPS.some(prefix => ip.startsWith(prefix))
+    if (!allowed && PROD) {
+        console.warn(`[security] BOG callback from unknown IP: ${ip}`)
+        return new Response("Forbidden", { status: 403 })
+    }
     try {
         const body = await request.json()
         console.log("[BOG callback]", body)
 
         const result = await handleBogCallback(body)
 
-        // BOG requires HTTP 200 to consider callback delivered
         return new Response(JSON.stringify(result), {
             status: 200,
             headers: { "Content-Type": "application/json" },
         })
     } catch (err) {
         console.error("[BOG callback error]", err)
-        // Still return 200 so BOG doesn't retry infinitely
         return new Response(JSON.stringify({ ok: false }), { status: 200 })
     }
 }

@@ -1,7 +1,6 @@
 import { Title, Meta } from "@solidjs/meta"
 import { LegalPage } from "~/components/LegalPage"
  
-// ─── EDIT HERE ────────────────────────────────────────────────────────────────
 const LAST_UPDATED = "2024 წლის 1 იანვარი"
  
 const SECTIONS = [
@@ -48,7 +47,6 @@ const SECTIONS = [
         body: "ეს Cookie პოლიტიკა შეიძლება განახლდეს. ნებისმიერი მნიშვნელოვანი ცვლილების შემთხვევაში მომხმარებელს ვაცნობებთ ელ-ფოსტით ან პლატფორმაზე განცხადებით.",
     },
 ]
-// ──────────────────────────────────────────────────────────────────────────────
  
 export default function CookiesPage() {
     return (

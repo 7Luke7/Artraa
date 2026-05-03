@@ -32,7 +32,7 @@ export const Footer = () => {
                                 </li>
                                 <li>
                                     <A 
-                                        href="/rules" 
+                                        href="/terms" 
                                         className="text-base font-gsans font-normal text-gray-700 hover:text-[#E85A4F] transition-colors block py-1 focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
                                         aria-label="წესები და პირობები"
                                     >
@@ -59,28 +59,6 @@ export const Footer = () => {
                                 </li>
                             </ul>
                         </nav>
-                    </div>
-                    
-                    <div className="space-y-4">
-                        <h2 className="text-lg font-gsans font-bold text-gray-900">
-                            გადახდები
-                        </h2>
-                        <hr 
-                            className="border-2 border-[#E85A4F] w-12" 
-                            aria-hidden="true" 
-                        />
-                        <div aria-label="გადახდის მეთოდები">
-                            <ul className="space-y-3">
-                                {/* <li className="text-base font-gsans font-normal text-gray-700 py-1 flex items-center">
-                                    <span className="mr-2" aria-hidden="true">💳</span>
-                                    ბარათით გადახდა
-                                </li>
-                                <li className="text-base font-gsans font-normal text-gray-700 py-1 flex items-center">
-                                    <span className="mr-2" aria-hidden="true">🏦</span>
-                                    ბანკის გადარიცხვა
-                                </li> */}
-                            </ul>
-                        </div>
                     </div>
                     
                     <div className="space-y-4">
@@ -245,24 +223,6 @@ export const Footer = () => {
                                         >
                                             +995 (32) 2 60 30 60
                                         </a>
-                                    </div>
-                                </li>
-                                <li className="text-base font-gsans font-normal text-gray-700 flex items-start gap-3 py-2">
-                                    <div 
-                                        className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-lg flex-shrink-0"
-                                    >
-                                        <img 
-                                            src='/svg/map-pin.svg' 
-                                            alt="" 
-                                            aria-hidden="true"
-                                            loading="lazy" 
-                                            width={24} 
-                                            height={24} 
-                                        />
-                                    </div>
-                                    <div>
-                                        <div className="font-gsans font-medium">მისამართი</div>
-                                        <div>თბილისი, საქართველო</div>
                                     </div>
                                 </li>
                             </ul>

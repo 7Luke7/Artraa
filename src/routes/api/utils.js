@@ -79,7 +79,6 @@ const send_email = async (to, subject, html, text) => {
   }
 };
 
-
 export const send_verification_code = async (target, code) => {
   const html = `
   <div style="max-width:500px;margin:0 auto;font-family:Arial,sans-serif;border:1px solid #eee;border-radius:8px;overflow:hidden;">
@@ -133,16 +132,6 @@ export const send_verification_link = async (target, link) => {
 
   return await send_email(target, "პაროლის აღდგენა - Artra", html, text);
 };
-
-export const get_client_ip = (request) => {
-  const xff = request.headers.get("x-forwarded-for");
-  if (xff) return xff.split(",")[0].trim();
-
-  const real = request.headers.get("x-real-ip");
-  if (real) return real;
-
-  return request.socket?.remoteAddress || "0.0.0.0";
-}
 
 export const get_temporary_device = async (id) => {
   try {
@@ -226,3 +215,9 @@ export const logout_other_devices = async (user_id, current_session, device_id) 
 export const get_course_level = (level = 'beginner') => {
   return level === 'advanced' ? 'რთული' : level === 'intermediate' ? 'საშუალო' : 'დამწყები'
 }
+
+export const formatDuration = (minutes) => {
+  const hours = Math.floor(minutes / 60);
+  const rem = minutes % 60;
+  return hours > 0 ? `${hours}სთ ${rem}წთ` : `${minutes} წთ`;
+};

@@ -1,7 +1,7 @@
-import { createSignal, Show, For, createMemo } from "solid-js"
+import { createSignal, Show, createMemo } from "solid-js"
 import { A } from "@solidjs/router"
 import { LessonSidebar } from "./LessonSidebar"
-import { VideoPane } from "../../course/Components/VideoPane"
+import { VideoPane } from "./VideoPane"
 
 /**
  * CoursePlayer

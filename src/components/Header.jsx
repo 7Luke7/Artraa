@@ -106,13 +106,6 @@ export const Header = () => {
                             >
                                 ჩვენს შესახებ
                             </A>
-                            <A
-                                href="/contact"
-                                class="text-gray-700 hover:text-[#E85A4F] font-gsans font-medium py-2 rounded-lg hover:bg-gray-50"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                                კონტაქტი
-                            </A>
                         </Show>
                         <A
                             href="/courses"

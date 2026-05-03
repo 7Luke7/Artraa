@@ -1,7 +1,6 @@
 import { Title, Meta } from "@solidjs/meta"
 import { LegalPage } from "~/components/LegalPage"
 
-// ─── EDIT HERE ────────────────────────────────────────────────────────────────
 const LAST_UPDATED = "2024 წლის 1 იანვარი"
 
 const SECTIONS = [
@@ -57,7 +56,6 @@ const SECTIONS = [
         body: "წინამდებარე პირობები რეგულირდება საქართველოს კანონმდებლობით. ნებისმიერი დავა განიხილება საქართველოს სასამართლოების მიერ.",
     },
 ]
-// ──────────────────────────────────────────────────────────────────────────────
 
 export default function TermsPage() {
     return (

@@ -11,7 +11,7 @@ export function LegalPage(props) {
             <div class="w-full md:w-10/12 px-2 sm:px-4 md:px-6 mx-auto flex-1">
                 <Header />
 
-                <article class="py-10 md:py-14 max-w-3xl">
+                <article class="py-10 md:py-14">
                     <header class="mb-10">
                         <h1 class="text-3xl md:text-4xl font-gsans font-bold text-gray-900 mb-2">{props.title}</h1>
                         <p class="text-sm text-gray-400 font-gsans">
@@ -22,7 +22,7 @@ export function LegalPage(props) {
                     <div class="space-y-8">
                         <For each={props.sections}>
                             {(section, i) => (
-                                <section class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
+                                <section>
                                     <h2 class="text-lg font-gsans font-bold text-gray-900 mb-4 flex items-start gap-3">
                                         <span class="shrink-0 w-7 h-7 rounded-lg bg-[#E85A4F]/10 text-[#E85A4F] flex items-center justify-center text-xs font-bold">
                                             {i() + 1}

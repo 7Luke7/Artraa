@@ -17,17 +17,6 @@ const HeaderLinks = () => {
         </A>
 
         <A
-            href="/contact"
-            class="relative text-gray-700 hover:text-[#E85A4F] py-2 font-gsans font-medium text-sm xl:text-base transition-colors duration-200
-                                    after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-0.5 after:w-0 after:bg-[#E85A4F] 
-                                    after:transition-all after:duration-300 hover:after:w-full"
-            activeClass="text-[#E85A4F] after:w-full"
-            aria-current="page"
-        >
-            კონტაქტი
-        </A>
-
-        <A
             href="/courses"
             class="relative text-gray-700 hover:text-[#E85A4F] py-2 font-gsans font-medium text-sm xl:text-base transition-colors duration-200
                                     after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-0.5 after:w-0 after:bg-[#E85A4F] 

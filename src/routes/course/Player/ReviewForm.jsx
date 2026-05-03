@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js"
-import { submit_review } from "../api/course"
+import { submit_review } from "~/routes/api/course"
 
 const StarPicker = (props) => {
     const [hover, setHover] = createSignal(0)

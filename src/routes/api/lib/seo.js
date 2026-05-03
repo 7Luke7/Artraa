@@ -1,3 +1,4 @@
+"use server"
 export function generateCourseStructuredData(course) {
   const siteUrl = import.meta.env.VITE_URL
   const courseUrl = `${siteUrl}/course/${course.slug}`;

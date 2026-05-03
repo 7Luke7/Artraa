@@ -3,8 +3,9 @@ import { jwtVerify, createRemoteJWKSet } from "jose";
 import { randomBytes } from "node:crypto"
 import { redis } from "../redis";
 import { redisHSet } from "../lib/redis/hash";
-import { exctract_client_info, get_client_ip } from "../utils";
+import { exctract_client_info } from "../utils";
 import { pool } from "../db";
+import { getRequestEvent } from "solid-js/web";
 
 const GOOGLE_ISSUERS = new Set([
     "https://accounts.google.com",
@@ -32,6 +33,7 @@ async function verifyGoogleIdToken(idToken) {
 
 export async function POST({ request }) {
     const form = await request.formData();
+    const event = getRequestEvent()
     const credential = form.get("credential");
     try {
         if (typeof credential !== "string") return redirect('/login', {
@@ -47,8 +49,7 @@ export async function POST({ request }) {
 
         if (user.rowCount) {
             const rand_id = randomBytes(32).toString("hex")
-            const ip = get_client_ip(request)
-            const { ip_address, user_agent, browser, browser_version, os, os_version, device_type, device_model, device_vendor, device_fingerprint } = exctract_client_info(request, ip)
+            const { ip_address, user_agent, browser, browser_version, os, os_version, device_type, device_model, device_vendor, device_fingerprint } = exctract_client_info(request, event.clientAddress)
 
             const create_user_device = await pool.query(`
                 INSERT INTO user_devices (
@@ -114,8 +115,7 @@ export async function POST({ request }) {
                     status: 303,
                 });
             }
-            const ip = get_client_ip(request)
-            const { ip_address, user_agent, browser, browser_version, os, os_version, device_type, device_model, device_vendor, device_fingerprint } = exctract_client_info(request, ip)
+            const { ip_address, user_agent, browser, browser_version, os, os_version, device_type, device_model, device_vendor, device_fingerprint } = exctract_client_info(request, event.clientAddress)
             const rand_id = randomBytes(32).toString("hex")
 
             const create_user_device = await client.query(`
@@ -153,7 +153,7 @@ export async function POST({ request }) {
                 unseen_notification_count: 0
             })
 
-            client.query('COMMIT')
+            await client.query('COMMIT')
             return redirect('/', {
                 status: 201,
                 revalidate: ['auth', 'get-user-header'],
@@ -162,8 +162,7 @@ export async function POST({ request }) {
                 }
             });
         } catch (error) {
-            console.log(error)
-            client.query('ROLLBACK')
+            await client.query('ROLLBACK')
             return redirect('/login', {
                 status: 303
             })
@@ -171,7 +170,6 @@ export async function POST({ request }) {
             client.release()
         }
     } catch (error) {
-        console.log(error)
         return redirect('/login', {
             status: 303
         })

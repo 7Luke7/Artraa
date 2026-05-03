@@ -2,9 +2,9 @@ import { query } from "@solidjs/router";
 import { pool } from "./db";
 import { generateCourseStructuredData } from "./lib/seo";
 import { getRequestEvent } from "solid-js/web";
-import { getCookie } from "vinxi/http";
 import { redisHGet } from "./lib/redis/hash";
-import { get_course_level } from "./utils";
+import { formatDuration, get_course_level, getCookie } from "./utils";
+import crypto from "node:crypto"
 
 export const get_course_detail = query(async (slug) => {
     'use server'
@@ -16,7 +16,19 @@ export const get_course_detail = query(async (slug) => {
         const user_id = await redisHGet(`user:session:${id}`, 'user_id')
         const course = await pool.query(`
             SELECT 
-            c.*,
+            c.title,
+            c.slug,
+            c.description,
+            c.thumbnail_url,
+            c.price,
+            c.status,
+            c.original_price,
+            c.level,
+            c.total_duration,
+            c.total_lessons,
+            c.enrollment_count,
+            c.review_count,
+            c.preview_lesson_id,
             u.name as instructor_name,
             u.profile_picture_link as instructor_avatar_url,
             ip.bio as instructor_bio,
@@ -38,8 +50,8 @@ export const get_course_detail = query(async (slug) => {
                         JSONB_AGG(
                             JSONB_BUILD_OBJECT(
                                 'section_title', cs.title,
-                                'section_description', cs.description,
                                 'section_created_at', cs.created_at,
+                                'section_duration', cs.section_duration,
                                 'section_updated_at', cs.updated_at,
                                 'lessons', COALESCE(lesson_agg.lessons, '[]'::jsonb)
                             )
@@ -54,10 +66,9 @@ export const get_course_detail = query(async (slug) => {
                             'lesson_title', cl.title,
                             'lesson_id', cl.id,
                             'is_preview', CASE
-                                WHEN cl.id=c.preview_lesson_id THEN TRUE 
+                                WHEN cl.id=c.preview_lesson_id THEN TRUE
                                 ELSE FALSE
-                            END,  
-                            'lesson_description', cl.description,
+                            END,
                             'video_url', cl.video_url,
                             'video_duration', cl.video_duration,
                             'lesson_created_at', cl.created_at,
@@ -73,7 +84,7 @@ export const get_course_detail = query(async (slug) => {
             WHERE c.slug = $2 AND c.status = 'published'
             LIMIT 1
         `, [user_id, slug]);
-
+            
         if (!course.rowCount) return {
             ok: false,
             message: "დაფიქსირდა შეცდომა.",
@@ -92,7 +103,8 @@ export const get_course_detail = query(async (slug) => {
 
         if (courses['original_price'] > courses['price']) courses['discount'] = Math.round((courses['original_price'] - courses['price']) / courses['original_price'] * 100)
         courses['level'] = get_course_level(courses['level'])
-        courses['durationHours'] = Math.round(courses['total_duration'] / 60 * 10) / 10
+        courses['durationHours'] = formatDuration(courses['total_duration'])
+        courses.course_content.forEach((cs) => cs['section_duration'] = formatDuration(cs['section_duration']))
 
         return {
             ok: true,
@@ -111,81 +123,19 @@ export const get_course_detail = query(async (slug) => {
     }
 }, 'get-course-detail')
 
-export async function get_course_player(slug) {
-    try {
-        const { request } = getRequestEvent()
-        const cookie = request.headers.get("cookie");
+// export async function get_course_player(slug) {
+//     try {
+//         const { request } = getRequestEvent()
+//         const cookie = request.headers.get("cookie");
 
-        const id = getCookie("auth.session-token", cookie);
-        const userId = await redisHGet(`user:session:${id}`, 'user_id')
+//         const id = getCookie("auth.session-token", cookie);
+//         const userId = await redisHGet(`user:session:${id}`, 'user_id')
  
-        // 1. Fetch course + lessons from your DB
-        const course = await db.course.findUnique({
-            where: { slug },
-            include: {
-                course_content: {
-                    orderBy: { position: "asc" },
-                    include: {
-                        lessons: { orderBy: { position: "asc" } }
-                    }
-                }
-            }
-        })
- 
-        if (!course) return { ok: false, error: "კურსი ვერ მოიძებნა" }
- 
-        // 2. Check if the user has purchased this course
-        const hasPurchase = userId
-            ? !!(await db.enrollment.findUnique({
-                where: { userId_courseId: { userId, courseId: course.id } }
-              }))
-            : false
- 
-        // 3. Build lessons — attach signed URLs only where the user has access
-        const course_content = await Promise.all(
-            course.course_content.map(async (section) => ({
-                ...section,
-                lessons: await Promise.all(
-                    section.lessons.map(async (lesson) => {
-                        const canWatch = lesson.is_preview || hasPurchase
- 
-                        let video_url = null
-                        if (canWatch && lesson.cf_video_id) {
-                            video_url = lesson.is_preview
-                                ? `https://iframe.cloudflarestream.com/${lesson.cf_video_id}`
-                                : await getSignedStreamUrl(lesson.cf_video_id)
-                        }
- 
-                        return {
-                            id: lesson.id,
-                            lesson_title: lesson.lesson_title,
-                            description: lesson.description,
-                            is_preview: lesson.is_preview,
-                            video_url,
-                            video_duration: lesson.video_duration,
-                            completed: false, // wire up to a completions table later
-                        }
-                    })
-                )
-            }))
-        )
- 
-        return {
-            ok: true,
-            course: {
-                title: course.title,
-                slug: course.slug,
-                thumbnail_url: course.thumbnail_url,
-                price: course.price,
-                has_access: hasPurchase,
-                course_content,
-            }
-        }
-    } catch (err) {
-        console.error("get_course_player error:", err)
-        return { ok: false, error: "სერვერის შეცდომა" }
-    }
-}
+//     } catch (err) {
+//         console.error("get_course_player error:", err)
+//         return { ok: false, error: "სერვერის შეცდომა" }
+//     }
+// }
  
 /**
  * submit_review({ courseSlug, rating, comment })
