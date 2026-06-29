@@ -1,11 +1,12 @@
 import { createEffect, createSignal, lazy, on, onCleanup, Show, Suspense } from "solid-js";
 import { HeaderNotification } from "./Header_Notification";
+import { A } from "@solidjs/router";
 
 const LazyNotifications = lazy(() => import("./LazyNotifications.jsx"))
 const LazyAccountOptions = lazy(() => import("./LazyAccountOptions.jsx"))
 
-const HeaderActionsAuthorized = (props) => {
-    const { data } = props
+export default (props) => {
+    const { avatar } = props
     const [displayModal, setDisplayModal] = createSignal({ notification: false, account: false })
 
     let accountOptionsRef;
@@ -36,7 +37,17 @@ const HeaderActionsAuthorized = (props) => {
     }, { defer: true }))
 
     return (
-        <div class="hidden xl:flex items-center gap-x-4 md:gap-x-6">
+        <div class="hidden lg:flex items-center gap-x-4 md:gap-x-6">
+            <A
+                href="/courses"
+                class="relative text-gray-700 hover:text-[#E85A4F] py-2 font-gsans font-medium text-sm lg:text-base transition-colors duration-200
+                                        after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-0.5 after:w-0 after:bg-[#E85A4F] 
+                                        after:transition-all after:duration-300 hover:after:w-full"
+                activeClass="text-[#E85A4F] after:w-full"
+                aria-current="page"
+            >
+                კურსები
+            </A>
             <HeaderNotification setDisplayModal={setDisplayModal} />
 
             <div class="relative">
@@ -52,25 +63,21 @@ const HeaderActionsAuthorized = (props) => {
                     aria-controls="account-options"
                     aria-haspopup="true"
                 >
-                    <div class="relative">
-                        <img
-                            src={data()?.data ?? '/default_profile.png'}
-                            alt='პროფილის სურათი'
-                            onerror={(e) => e.target.src = '/default_profile.png'}
-                            class="rounded-full border-2 border-white shadow-sm w-10 h-10 md:w-12 md:h-12 object-cover"
-                            width={48}
-                            height={48}
-                            loading="lazy"
-                        />
-                        <span class="sr-only">ონლაინ მომხმარებელი</span>
-                        <div class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-white" aria-hidden="true"></div>
-                    </div>
+                    <img
+                        src={avatar}
+                        onError={(e) => e.currentTarget.src = '/default_profile.png'}
+                        alt='პროფილის სურათი'
+                        class="rounded-full border-2 border-white shadow-sm w-10 h-10 md:w-12 md:h-12 object-cover"
+                        width={48}
+                        height={48}
+                        loading="lazy"
+                    />
                 </button>
 
                 <Show when={displayModal().account}>
                     <div
                         ref={el => (accountOptionsRef = el)}
-                        class="absolute right-0 top-full mt-2 z-50"
+                        class="absolute right-[-50px] top-[64px] mt-2 z-50"
                         id="account-options"
                         role="menu"
                         aria-orientation="vertical"
@@ -100,5 +107,3 @@ const HeaderActionsAuthorized = (props) => {
         </div>
     )
 }
-
-export default HeaderActionsAuthorized

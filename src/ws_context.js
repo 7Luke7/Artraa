@@ -1,39 +1,20 @@
-import { batch, createContext, createSignal, For, lazy, onCleanup, onMount } from "solid-js"
+import { batch, createContext, createSignal, For, lazy, onCleanup, onMount, Suspense } from "solid-js"
 import { createStore } from "solid-js/store"
-import { createAsync, query, revalidate} from "@solidjs/router"
-import { getCookie } from "vinxi/http"
-import { redisHGet } from "./routes/api/lib/redis/hash"
-import { getRequestEvent } from "solid-js/web"
+import { createAsync, useNavigate } from "@solidjs/router"
+import { get_device_id } from "./routes/api/user/get_device_id.js"
 
-const LazyLoginAttemptOverlay = lazy(() => import('./components/loginAttemptOverlay'))
+const LazyLoginAttempOverlay = lazy(() => import('./components/loginAttemptOverlay.jsx'))
 
 export const WSContext = createContext({})
 
-const get_device_id = query(async () => {
-    'use server'
-    const event = getRequestEvent();
-    const cookie = event.request.headers.get("cookie");
-    if (!cookie) return null;
-
-    const id = getCookie("auth.session-token", cookie);
-    if (!id) return null
-
-    try {
-        const device_id = await redisHGet(`user:session:${id}`, 'device_id')
-        if (!device_id) return null
-        return device_id
-    } catch (error) {
-        return null
-    }
-}, 'device-id')
-
 export const WebSocketContextProvider = (props) => {
-    const device_id = createAsync(get_device_id, {deferStream: true})
+    const device_id = createAsync(get_device_id, { deferStream: false })
     const [ctx, setCtx] = createSignal()
     const [store, setStore] = createStore({
         login_requests: [],
         notification_count: 0,
     })
+    const navigate = useNavigate()
 
     onMount(() => {
         const ws = new WebSocket(import.meta.env.VITE_WS_URL)
@@ -51,24 +32,12 @@ export const WebSocketContextProvider = (props) => {
                     break;
                 }
                 case `logout-device-${device_id()}`: {
-                    revalidate(['auth', 'protected', 'get-user-header', 'protect-anonymous'])
+                    navigate("/login", {replace: true})
                     break;
                 }
             }
         }
         ws.addEventListener('message', ws_message_handler)
-
-        // const bc = new BroadcastChannel("login_state");
-        // const BroadcastChannelMessageHandler = (event) => {
-        //     console.log(event)
-        //     if (event.data?.type === 'logout') {
-        //         revalidate(['auth', 'protected'])
-        //         bc.removeEventListener('message', BroadcastChannelMessageHandler)
-        //         bc.close()
-        //     }
-        // }
-
-        // bc.addEventListener('message', BroadcastChannelMessageHandler)
         onCleanup(() => {
             ws.removeEventListener('message', ws_message_handler)
         })
@@ -76,11 +45,13 @@ export const WebSocketContextProvider = (props) => {
 
     return <WSContext.Provider value={{ ctx, store, setStore }}>
         <Show when={store.login_requests.length}>
-            <For each={store.login_requests}>
-                {(pending_verification_id) => <LazyLoginAttemptOverlay
-                    pending_verification_id={pending_verification_id}
-                />}
-            </For>
+            <Suspense>
+                <For each={store.login_requests}>
+                    {(pending_verification_id) => <LazyLoginAttempOverlay
+                        pending_verification_id={pending_verification_id}
+                    />}
+                </For>
+            </Suspense>
         </Show>
         {props.children}
     </WSContext.Provider>

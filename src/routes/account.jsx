@@ -24,13 +24,13 @@ const AccountLayout = (props) => {
                 <div class="lg:hidden border-b border-gray-200 px-4 py-3">
                     <A
                         href={typeof props.location.state === 'string' ? props.location.state : '/'}
-                        class="inline-flex items-center text-sm font-medium-gsans text-gray-700 hover:text-[#E85A4F]"
+                        class="inline-flex items-center text-sm font-medium font-gsans text-gray-700 hover:text-[#E85A4F]"
                         aria-label="დაბრუნება წინა გვერდზე"
                     >
                         <img
-                            src='/svg/arrow-back.svg'
-                            width={20}
-                            height={20}
+                            src='/svg/chevron-left-black.svg'
+                            width={14}
+                            height={14}
                             alt=""
                             aria-hidden="true"
                             class="mr-2"
@@ -40,19 +40,19 @@ const AccountLayout = (props) => {
                 </div>
 
                 <aside
-                    class="hidden lg:block w-full lg:w-1/4 xl:w-1/5 border-r border-gray-200 sticky top-0 h-screen"
+                    class="hidden lg:block w-[304px] border-r border-gray-200 sticky top-0 h-screen"
                     aria-label="ანგარიშის ნავიგაცია"
                 >
                     <div class="p-4 lg:p-6">
                         <A
                             href={typeof props.location.state === 'string' ? props.location.state : '/'}
-                            class="inline-flex items-center mb-6 lg:mb-8 text-sm font-medium-gsans text-gray-700 hover:text-[#E85A4F]"
+                            class="inline-flex items-center mb-6 lg:mb-8 text-sm font-medium font-gsans text-gray-700 hover:text-[#E85A4F]"
                             aria-label="დაბრუნება წინა გვერდზე"
                         >
                             <img
-                                src='/svg/arrow-back.svg'
-                                width={24}
-                                height={24}
+                                src='/svg/chevron-left-black.svg'
+                                width={14}
+                                height={14}
                                 alt=""
                                 aria-hidden="true"
                                 class="mr-2"
@@ -147,7 +147,7 @@ const AccountLayout = (props) => {
                     <div class="max-w-4xl mx-auto">
                         <h1
                             id="page-title"
-                            class="lg:sr-only text-xl font-bold-gsans text-gray-900 mb-6"
+                            class="lg:sr-only text-xl font-bold font-gsans text-gray-900 mb-6"
                         >
                             ანგარიშის მართვა
                         </h1>

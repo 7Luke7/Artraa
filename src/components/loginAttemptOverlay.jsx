@@ -2,7 +2,7 @@ import { createResource, Show, useContext } from "solid-js";
 import { get_temporary_device } from "~/routes/api/utils";
 import { WSContext } from "~/ws_context";
 
-export const LoginAttemptOverlay = ({ pending_verification_id }) => {
+export default ({ pending_verification_id }) => {
     const ctx = useContext(WSContext)
     const [data] = createResource(async () => {
         try {
@@ -29,7 +29,6 @@ export const LoginAttemptOverlay = ({ pending_verification_id }) => {
         }))
         ctx?.setStore('login_requests', req => req.filter(device_id => device_id !== id))
     }
-
     const close_popup = (id) => {
         ctx?.setStore('login_requests', req => req.filter(device_id => device_id !== id))
     }
@@ -61,7 +60,9 @@ export const LoginAttemptOverlay = ({ pending_verification_id }) => {
                     <div class="space-y-4 mt-6">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center">
-                                <img src="/svg/device.svg" class="w-6 opacity-70" />
+                                {data().device_type === "mobile" ? 
+                                    <img src="/svg/device-mobile.svg" />
+                                : data().device_type === "desktop" && <img src="/svg/device-desktop.svg" />}
                             </div>
                             <div>
                                 <p class="text-slate-900 font-gsans font-normal text-base">

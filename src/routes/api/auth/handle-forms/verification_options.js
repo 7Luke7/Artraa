@@ -1,21 +1,20 @@
 import { action, json, redirect } from "@solidjs/router"
-import { exctract_client_info, send_verification_code } from "../../utils"
+import { exctract_client_info, retreiveCookie, send_verification_code } from "../../utils"
 import { redisHGet, redisHSet } from "../../lib/redis/hash"
 import { redis } from "../../redis"
-import { getCookie } from "vinxi/http"
 import { getRequestEvent } from "solid-js/web"
 import { createHmac, randomInt } from "node:crypto"
 import { notify_user_new_device } from "~/server/utils"
 import { pool } from "../../db"
 
-export const approve_with_email = action(async () => {
+export const approve_with_email = action(async (next_page) => {
     'use server'
     const { request } = getRequestEvent()
     const cookie = request.headers.get('cookie')
 
     try {
         if (!cookie) throw redirect('/login')
-        const pending_verification_id = getCookie('pending_verification', cookie)
+        const pending_verification_id = retreiveCookie('pending_verification', cookie)
 
         if (!pending_verification_id) throw redirect('/login')
         const email = await redisHGet(`pending:verification:${pending_verification_id}`, 'email')
@@ -29,7 +28,7 @@ export const approve_with_email = action(async () => {
 
         try { await send_verification_code(email, verification_code) } catch (e) { }
 
-        throw redirect('/verify/email', {
+        throw redirect(!next_page ? '/verify/email' : `/verify/email${next_page}`, {
             status: 303,
             headers: {
                 'Set-Cookie': `pending_verification=${pending_verification_id}; Path=/; Max-Age=900; HttpOnly; Secure; SameSite=Strict`
@@ -41,14 +40,13 @@ export const approve_with_email = action(async () => {
     }
 }, 'verify-approve-email')
 
-export const approve_with_device = action(async () => {
+export const approve_with_device = action(async (next_page) => {
     'use server'
     const event = getRequestEvent()
     const cookie = event.request.headers.get('cookie')
-
     try {
         if (!cookie) throw redirect('/login')
-        const pending_verification_id = getCookie('pending_verification', cookie)
+        const pending_verification_id = retreiveCookie('pending_verification', cookie)
 
         if (!pending_verification_id) throw redirect('/login')
         const email = await redisHGet(`pending:verification:${pending_verification_id}`, 'email')
@@ -132,8 +130,7 @@ export const approve_with_device = action(async () => {
             type: 'new-device-login-request',
             pending_verification_id
         })
-        throw redirect('/verify/await')
-        
+        throw redirect(!next_page ? '/verify/await' : `/verify/await${next_page}`)
     } catch (error) {
         if (error instanceof Response) throw error
     }

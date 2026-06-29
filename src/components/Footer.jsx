@@ -1,284 +1,166 @@
 import { A } from "@solidjs/router"
 
+const SOCIAL = [
+    {
+        name: "Facebook",
+        href: "https://facebook.com/artra",
+        icon: <img src='/svg/facebook.svg' width={18} height={18} />
+    },
+    {
+        name: "Instagram",
+        href: "https://instagram.com/artra",
+        icon: <img src='/svg/instagram.svg' width={18} height={18} />
+    },
+    {
+        name: "TikTok",
+        href: "https://tiktok.com/@artra",
+        icon: <img src='/svg/tiktok.svg' width={18} height={18} />
+    },
+    {
+        name: "YouTube",
+        href: "https://youtube.com/@artra",
+        icon: <img src='/svg/youtube.svg' width={18} height={18} />
+    },
+]
+
+const NAV_LINKS = [
+    { href: "/courses", label: "კურსები" },
+    { href: "/about", label: "ჩვენს შესახებ" },
+    { href: "/contact", label: "კონტაქტი" },
+]
+
+const LEGAL_LINKS = [
+    { href: "/terms", label: "წესები" },
+    { href: "/privacy", label: "კონფიდენციალურობა" },
+    { href: "/cookies", label: "ქუქი-ფაილები" },
+]
+
 export const Footer = () => {
-    const currentYear = new Date().getFullYear();
-    
+    const year = new Date().getFullYear()
+
     return (
-        <footer 
-            className="w-full bg-gray-50 border-t border-gray-200 pt-10"
+        <footer
             role="contentinfo"
             aria-label="საიტის ქვედა ნაწილი"
+            class="w-full bg-white border-t border-gray-100"
         >
-            <div className="w-10/12 mx-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 pb-10">
-                    <div className="space-y-4">
-                        <h2 className="text-lg font-gsans font-bold text-gray-900">
+            <div class="w-full md:w-10/12 px-4 sm:px-6 mx-auto">
+                <div class="py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
+                    <div class="lg:col-span-1 space-y-5">
+                        <A
+                            href="/"
+                            class="inline-block text-[#E85A4F] text-2xl tracking-[0.15em] font-sans font-[800] hover:opacity-80 transition-opacity"
+                            aria-label="Artra - მთავარი გვერდი"
+                        >
+                            ARTRA
+                        </A>
+                        <p class="text-sm font-gsans text-gray-400 leading-relaxed max-w-[220px]">
+                            ქართულ ენაზე შექმნილი პრაქტიკული ონლაინ კურსები პროფესიონალი ინსტრუქტორებისგან.
+                        </p>
+                        <div class="flex items-center gap-2">
+                            {SOCIAL.map(s => (
+                                <a
+                                    href={s.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer nofollow"
+                                    aria-label={`Artra ${s.name}-ზე`}
+                                    class="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-[#E85A4F]/10 hover:text-[#E85A4F] transition-colors"
+                                >
+                                    {s.icon}
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h2 class="text-sm font-gsans font-bold text-gray-900 uppercase tracking-wide">
                             ნავიგაცია
                         </h2>
-                        <hr 
-                            className="border-2 border-[#E85A4F] w-12" 
-                            aria-hidden="true" 
-                        />
+                        <div class="w-8 h-0.5 bg-[#E85A4F] rounded-full" aria-hidden="true" />
                         <nav aria-label="ნავიგაციის ბმულები">
-                            <ul className="space-y-3">
-                                <li>
-                                    <A 
-                                        href="/about" 
-                                        className="text-base font-gsans font-normal text-gray-700 hover:text-[#E85A4F] transition-colors block py-1 focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
-                                        aria-label="ჩვენ შესახებ"
-                                    >
-                                        ჩვენ შესახებ
-                                    </A>
-                                </li>
-                                <li>
-                                    <A 
-                                        href="/terms" 
-                                        className="text-base font-gsans font-normal text-gray-700 hover:text-[#E85A4F] transition-colors block py-1 focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
-                                        aria-label="წესები და პირობები"
-                                    >
-                                        წესები და პირობები
-                                    </A>
-                                </li>
-                                <li>
-                                    <A 
-                                        href="/privacy" 
-                                        className="text-base font-gsans font-normal text-gray-700 hover:text-[#E85A4F] transition-colors block py-1 focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
-                                        aria-label="კონფიდენციალურობის პოლიტიკა"
-                                    >
-                                        კონფიდენციალურობის პოლიტიკა
-                                    </A>
-                                </li>
-                                <li>
-                                    <A 
-                                        href="/courses" 
-                                        className="text-base font-gsans font-normal text-gray-700 hover:text-[#E85A4F] transition-colors block py-1 focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
-                                        aria-label="კურსები"
-                                    >
-                                        კურსები
-                                    </A>
-                                </li>
+                            <ul class="space-y-2.5">
+                                {NAV_LINKS.slice(0, 4).map(link => (
+                                    <li>
+                                        <A
+                                            href={link.href}
+                                            class="text-sm font-gsans text-gray-500 hover:text-[#E85A4F] transition-colors"
+                                        >
+                                            {link.label}
+                                        </A>
+                                    </li>
+                                ))}
                             </ul>
                         </nav>
                     </div>
-                    
-                    <div className="space-y-4">
-                        <h2 className="text-lg font-gsans font-bold text-gray-900">
-                            გამოგვყევი
+
+                    <div class="space-y-4">
+                        <h2 class="text-sm font-gsans font-bold text-gray-900 uppercase tracking-wide">
+                            სამართლებრივი
                         </h2>
-                        <hr 
-                            className="border-2 border-[#E85A4F] w-12" 
-                            aria-hidden="true" 
-                        />
-                        <nav aria-label="სოციალური მედიის ბმულები">
-                            <ul className="space-y-4">
-                                <li>
-                                    <a 
-                                        href="https://facebook.com/artra" 
-                                        target="_blank" 
-                                        rel="noopener noreferrer nofollow"
-                                        className="text-base font-gsans font-normal text-gray-700 hover:text-[#E85A4F] transition-colors flex items-center gap-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
-                                        aria-label="Artra Facebook-ზე (ახალ ფანჯარაში გაიხსნება)"
-                                    >
-                                        <div 
-                                            className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-lg"
+                        <div class="w-8 h-0.5 bg-[#E85A4F] rounded-full" aria-hidden="true" />
+                        <nav aria-label="იურიდიული ბმულები">
+                            <ul class="space-y-2.5">
+                                {LEGAL_LINKS.map(link => (
+                                    <li>
+                                        <A
+                                            href={link.href}
+                                            class="text-sm font-gsans text-gray-500 hover:text-[#E85A4F] transition-colors"
                                         >
-                                            <img 
-                                                src='/svg/facebook.svg' 
-                                                aria-hidden="true"
-                                                alt="" 
-                                                loading="lazy" 
-                                                width={24} 
-                                                height={24}
-                                            />
-                                        </div>
-                                        Facebook
-                                    </a>
-                                </li>
-                                <li>
-                                    <a 
-                                        href="https://instagram.com/artra" 
-                                        target="_blank" 
-                                        rel="noopener noreferrer nofollow"
-                                        className="text-base font-gsans font-normal text-gray-700 hover:text-[#E85A4F] transition-colors flex items-center gap-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
-                                        aria-label="Artra Instagram-ზე (ახალ ფანჯარაში გაიხსნება)"
-                                    >
-                                        <div 
-                                            className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-lg"
-                                        >
-                                            <img 
-                                                src='/svg/instagram.svg' 
-                                                alt="" 
-                                                aria-hidden="true"
-                                                loading="lazy" 
-                                                width={24} 
-                                                height={24}
-                                            />
-                                        </div>
-                                        Instagram
-                                    </a>
-                                </li>
-                                <li>
-                                    <a 
-                                        href="https://tiktok.com/@artra" 
-                                        target="_blank" 
-                                        rel="noopener noreferrer nofollow"
-                                        className="text-base font-gsans font-normal text-gray-700 hover:text-[#E85A4F] transition-colors flex items-center gap-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
-                                        aria-label="Artra TikTok-ზე (ახალ ფანჯარაში გაიხსნება)"
-                                    >
-                                        <div 
-                                            className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-lg"
-                                        >
-                                            <img 
-                                                src='/svg/tiktok.svg' 
-                                                aria-hidden="true"
-                                                alt="" 
-                                                loading="lazy" 
-                                                width={24} 
-                                                height={24}
-                                            />
-                                        </div>
-                                        TikTok
-                                    </a>
-                                </li>
-                                <li>
-                                    <a 
-                                        href="https://youtube.com/@artra" 
-                                        target="_blank" 
-                                        rel="noopener noreferrer nofollow"
-                                        className="text-base font-gsans font-normal text-gray-700 hover:text-[#E85A4F] transition-colors flex items-center gap-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
-                                        aria-label="Artra YouTube-ზე (ახალ ფანჯარაში გაიხსნება)"
-                                    >
-                                        <div 
-                                            className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-lg"
-                                        >
-                                            <img 
-                                                src='/svg/youtube.svg' 
-                                                alt="" 
-                                                aria-hidden="true"
-                                                loading="lazy" 
-                                                width={24} 
-                                                height={24}
-                                            />
-                                        </div>
-                                        YouTube
-                                    </a>
-                                </li>
+                                            {link.label}
+                                        </A>
+                                    </li>
+                                ))}
                             </ul>
                         </nav>
                     </div>
-                    
-                    <div className="space-y-4">
-                        <h2 className="text-lg font-gsans font-bold text-gray-900">
+
+                    {/* Contact column */}
+                    <div class="space-y-4">
+                        <h2 class="text-sm font-gsans font-bold text-gray-900 uppercase tracking-wide">
                             კონტაქტი
                         </h2>
-                        <hr 
-                            className="border-2 border-[#E85A4F] w-12" 
-                            aria-hidden="true" 
-                        />
-                        <address className="not-italic" aria-label="საკონტაქტო ინფორმაცია">
-                            <ul className="space-y-4">
-                                <li className="text-base font-gsans font-normal text-gray-700 flex items-start gap-3 py-2">
-                                    <div 
-                                        className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-lg flex-shrink-0"
+                        <div class="w-8 h-0.5 bg-[#E85A4F] rounded-full" aria-hidden="true" />
+                        <address class="not-italic space-y-4">
+                            {/* Email */}
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-[#E85A4F]/8 flex items-center justify-center shrink-0 mt-0.5">
+                                    <img src='/svg/inbox-stroke.svg' width={15} height={15} />
+                                </div>
+                                <div>
+                                    <p class="text-xs font-gsans font-medium text-gray-400 mb-0.5">ელ. ფოსტა</p>
+                                    <a
+                                        href={`mailto:${import.meta.env.VITE_EMAIL}`}
+                                        class="text-sm font-gsans text-gray-600 hover:text-[#E85A4F] transition-colors"
+                                        aria-label={`გაგზავნეთ ელ. ფოსტა`}
                                     >
-                                        <img 
-                                            src='/svg/inbox-stroke.svg' 
-                                            alt="" 
-                                            aria-hidden="true"
-                                            loading="lazy" 
-                                            width={24} 
-                                            height={24}
-                                        />
-                                    </div>
-                                    <div>
-                                        <div className="font-gsans font-medium">ელ. ფოსტა</div>
-                                        <a 
-                                            href={`mailto:${import.meta.env.VITE_EMAIL}`} 
-                                            className="hover:text-[#E85A4F] transition-colors focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
-                                            aria-label={`გაგზავნეთ ელ. ფოსტა ${import.meta.env.VITE_EMAIL}-ზე`}
-                                        >
-                                            {import.meta.env.VITE_EMAIL}
-                                        </a>
-                                    </div>
-                                </li>
-                                <li className="text-base font-gsans font-normal text-gray-700 flex items-start gap-3 py-2">
-                                    <div 
-                                        className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-lg flex-shrink-0"
+                                        {import.meta.env.VITE_EMAIL}
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-[#E85A4F]/8 flex items-center justify-center shrink-0 mt-0.5">
+                                    <img src='/svg/telephone.svg' width={15} height={15} />
+                                </div>
+                                <div>
+                                    <p class="text-xs font-gsans font-medium text-gray-400 mb-0.5">ტელეფონი</p>
+                                    <a
+                                        href="tel:+995322603060"
+                                        class="text-sm font-gsans text-gray-600 hover:text-[#E85A4F] transition-colors"
+                                        aria-label="დაგვირეკეთ"
                                     >
-                                        <img 
-                                            src='/svg/telephone.svg' 
-                                            alt="" 
-                                            aria-hidden="true"
-                                            loading="lazy" 
-                                            width={24} 
-                                            height={24}
-                                        />
-                                    </div>
-                                    <div>
-                                        <div className="font-gsans font-medium">ტელეფონი</div>
-                                        <a 
-                                            href="tel:+995322603060" 
-                                            className="hover:text-[#E85A4F] transition-colors block focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
-                                            aria-label="დაგვირეკეთ ნომერზე +995 32 2 60 30 60"
-                                        >
-                                            +995 (32) 2 60 30 60
-                                        </a>
-                                    </div>
-                                </li>
-                            </ul>
+                                        +995 (32) 2 60 30 60
+                                    </a>
+                                </div>
+                            </div>
                         </address>
                     </div>
                 </div>
-                
-                <div className="border-t border-gray-200 pt-8 pb-6">
-                    <div className="text-center">
-                        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
-                            <A 
-                                href="/" 
-                                className="text-[#E85A4F] text-2xl font-sans font-[800] tracking-[0.15em] focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
-                                aria-label="მთავარი გვერდი"
-                            >
-                                ARTRA
-                            </A>
-                            <nav aria-label="იურიდიული ბმულები">
-                                <div className="flex flex-wrap justify-center items-center gap-4 md:gap-6">
-                                    <A 
-                                        href="/terms" 
-                                        className="text-sm font-gsans font-normal text-gray-600 hover:text-[#E85A4F] transition-colors focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
-                                        aria-label="მომსახურების წესები და პირობები"
-                                    >
-                                        წესები
-                                    </A>
-                                    <A 
-                                        href="/privacy" 
-                                        className="text-sm font-gsans font-normal text-gray-600 hover:text-[#E85A4F] transition-colors focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
-                                        aria-label="კონფიდენციალურობის პოლიტიკა"
-                                    >
-                                        კონფიდენციალურობა
-                                    </A>
-                                    <A 
-                                        href="/cookies" 
-                                        className="text-sm font-gsans font-normal text-gray-600 hover:text-[#E85A4F] transition-colors focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
-                                        aria-label="ქუქი-ფაილების პოლიტიკა"
-                                    >
-                                        ქუქი-ფაილები
-                                    </A>
-                                    <A 
-                                        href="/sitemap.xml" 
-                                        className="text-sm font-gsans font-normal text-gray-600 hover:text-[#E85A4F] transition-colors focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 focus:rounded"
-                                        aria-label="საიტის რუკა"
-                                    >
-                                        საიტის რუკა
-                                    </A>
-                                </div>
-                            </nav>
-                        </div>
-                        <p className="text-sm font-sans font-[800] text-gray-600 pt-4">
-                            Copyright © {currentYear} Artra.edu.ge ყველა უფლება დაცულია.
-                        </p>
-                    </div>
-                </div>
+
+                <p class="text-xs border-t border-gray-100 py-6 font-gsans text-gray-400 text-center sm:text-left">
+                    © {year} Artra. ყველა უფლება დაცულია.
+                </p>
             </div>
         </footer>
-    );
+    )
 }

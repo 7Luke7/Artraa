@@ -1,5 +1,5 @@
 import { eventHandler } from "vinxi/http";
-import { getCookie } from '../routes/api/utils'
+import { retreiveCookie } from '../routes/api/utils'
 import { redisHGet, redisHSet } from "../routes/api/lib/redis/hash";
 import { pool } from "../routes/api/db";
 import { redis } from "../routes/api/redis";
@@ -12,7 +12,7 @@ export default eventHandler({
     async open(peer) {
       const origin = peer.request.headers.get('origin')
       if (origin !== import.meta.env.VITE_URL) return peer.terminate()
-      const session_id = getCookie('auth.session-token', peer.request.headers.get('cookie'))
+      const session_id = retreiveCookie('auth.session-token', peer.request.headers.get('cookie'))
       if (!session_id) return peer.close(1008, 'Session expired.')
       const user_id = await redisHGet(`user:session:${session_id}`, 'user_id');
       if (!user_id) return peer.close(1008, 'Session expired.')

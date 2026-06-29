@@ -1,5 +1,3 @@
-import { A } from "@solidjs/router";
-
 export const LandingHero = () => {
     return (
         <section 
@@ -20,7 +18,7 @@ export const LandingHero = () => {
                             გამოცდილი ინსტრუქტორები და ცოდნა, რომელიც რეალურად გამოგადგება.
                         </p>                        
                         <div class="flex flex-col sm:flex-row gap-4 mb-10 md:mb-12 justify-center xl:justify-start">
-                            <A
+                            <a
                                 href="/courses"
                                 class="group inline-flex items-center justify-center gap-3 rounded-lg bg-[#E85A4F] hover:bg-[#D84A3F] px-8 py-4 text-lg font-gsans font-bold text-white shadow-lg shadow-[#E85A4F]/20"
                                 aria-label="კურსების სრული კატალოგის ნახვა"
@@ -34,8 +32,8 @@ export const LandingHero = () => {
                                     height={24} 
                                     loading="lazy"
                                 />
-                            </A>
-                            <A
+                            </a>
+                            <a
                                 href="/register"
                                 target="_self"
                                 class="inline-flex items-center justify-center gap-3 rounded-lg border-2 border-gray-300 hover:border-[#E85A4F] px-8 py-4 text-lg font-gsans font-bold text-gray-800 hover:text-[#E85A4F] transition-all hover:shadow-lg"
@@ -50,7 +48,7 @@ export const LandingHero = () => {
                                     height={24} 
                                     loading="lazy"
                                 />
-                            </A>
+                            </a>
                         </div>
                     </div>
                     <div class="relative lg:pl-8">

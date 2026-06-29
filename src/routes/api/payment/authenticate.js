@@ -1,5 +1,4 @@
 'use server'
-
 let token = null
 let expires_at = null
 let refreshPromise = null

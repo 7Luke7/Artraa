@@ -15,12 +15,10 @@ export const findUserForReset = action(async (formData) => {
     const { email } = validation_result.data
 
     try {
-        const res = await pool.query(`SELECT google_id, password, id FROM "User" WHERE email = $1`, [email]);
-        if (!res.rowCount) return json({ ok: true, field: 'global', message: "ინსტრუქცია გამოგეგზავნათ, თუ ეს ელ.ფოსტა დარეგისტრირებულია ჩვენს სისტემაში." }, {status: 200});
+        const res = await pool.query(`SELECT id FROM "User" WHERE email = $1`, [email]);
+        if (!res.rowCount) return json({ ok: true, field: 'global', message: "ინსტრუქცია გამოგეგზავნათ." }, {status: 200});
 
-        const {google_id, password, id} = res.rows[0];
-
-        if (google_id && !password) return json({ type: 'hint', field: 'global', message: 'თქვენ რეგისტრირებული ხართ Google-ის მეშვეობით გთხოვთ შეხვიდეთ თქვენს ექაუნთში და დააყენოთ პაროლი' }, {status: 400});
+        const {id} = res.rows[0];
 
         const token = randomBytes(48).toString("hex");
         const hashed_code = createHmac('sha256', process.env.PASSWORD_RESET_SECRET).update(token).digest('hex')
@@ -39,7 +37,7 @@ export const findUserForReset = action(async (formData) => {
         return json({
             ok: true,
             field: 'global',
-            message: "ინსტრუქცია გამოგეგზავნათ, თუ ეს ელ.ფოსტა დარეგისტრირებულია ჩვენს სისტემაში."
+            message: "ინსტრუქცია გამოგეგზავნათ."
         }, {status: 200});
     } catch (error) {
         console.log(error)

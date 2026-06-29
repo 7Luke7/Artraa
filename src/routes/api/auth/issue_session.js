@@ -1,3 +1,4 @@
+"use server"
 import { FormDataValidator } from "../validate/validation-service"
 import { createHmac, randomBytes } from "node:crypto"
 import { redisDel, redisGet, redisSet } from "../lib/redis/basic"

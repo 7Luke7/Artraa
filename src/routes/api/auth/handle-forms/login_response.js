@@ -4,7 +4,7 @@ import { redisHGet, redisHSet } from "../../lib/redis/hash"
 import { pool } from "../../db"
 import { redisDel } from "../../lib/redis/basic"
 import { getRequestEvent } from "solid-js/web"
-import { getCookie } from "../../utils"
+import { retreiveCookie } from "../../utils"
 import { redis } from "../../redis"
 import { FormDataValidator } from "../../validate/validation-service"
 
@@ -12,6 +12,8 @@ export const act_on_login_response = query(async () => {
     'use server'
     const { request } = getRequestEvent()
     const cookies = request.headers.get('cookie')
+    const next_page = new URL(request.url).searchParams.get("next")
+
     if (!cookies) return json({ ok: false }, {
         status: 401,
         headers: {
@@ -19,7 +21,7 @@ export const act_on_login_response = query(async () => {
         }
     })
 
-    const pending = getCookie('pending_verification', cookies)
+    const pending = retreiveCookie('pending_verification', cookies)
     if (!pending) return json({ ok: false }, {
         status: 401,
         headers: {
@@ -77,7 +79,7 @@ export const act_on_login_response = query(async () => {
         await redis.sAdd(`user:sessions:${user_id}`, rand_id)
         await redis.expire(`user:sessions:${user_id}`, 14 * 86400)
         await redisDel(`pending:verification:${vid}`)
-        return json({ ok: true }, {
+        return json({ ok: true, next_page: next_page || null }, {
             status: 200,
             headers: new Headers([
                 ['Set-Cookie', `auth.session-token=${rand_id}; Path=/; Max-Age=${durationSeconds}; HttpOnly; Secure; SameSite=Strict`],

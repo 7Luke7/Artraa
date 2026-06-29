@@ -1,8 +1,7 @@
 import { query, redirect } from "@solidjs/router";
 import { getRequestEvent } from "solid-js/web";
-import { getCookie } from "../utils";
+import { retreiveCookie } from "../utils";
 import { redisExists } from "../lib/redis/basic";
-import { redisHGet } from "../lib/redis/hash";
 
 export const auth = query(async () => {
   'use server'
@@ -10,7 +9,7 @@ export const auth = query(async () => {
   const cookie = event.request.headers.get("cookie");
   if (!cookie) return false;
 
-  const id = getCookie("auth.session-token", cookie);
+  const id = retreiveCookie("auth.session-token", cookie);
   if (!id) return false;
 
   try {
@@ -21,6 +20,17 @@ export const auth = query(async () => {
     return { error: 'დაფიქსირდა შეცდომა', status: 500 };
   }
 }, 'auth')
+
+export const websocket_route = query(async () => {
+  'use server'
+  try {
+    const auth_state = await auth()
+    return auth_state
+  } catch (error) {
+    if (error instanceof Response) throw error
+    console.log(error)
+  }
+}, 'websocket')
 
 export const protect_anonymous = query(async () => {
   'use server'
@@ -50,25 +60,6 @@ export const protected_route = query(async () => {
   }
 }, 'protected')
 
-export const get_session_data = query(async (id, field = []) => {
-  'use server'
-  try {
-    if (!field.length) return null
-    const results = await Promise.all(
-      field.map(async (f) => {
-        const data = await redisHGet(`user:session:${id}`, f)
-        return data ? { [f]: data } : null
-      })
-    )
-
-    const filtered = results.filter(Boolean)
-
-    return filtered.length ? Object.assign({}, ...filtered) : null
-  } catch (error) {
-    return { error: 'დაფიქსირდა შეცდომა', status: 500 };
-  }
-}, 'get-session-data')
-
 export const ProtectVerifyRoute = query(async () => {
   'use server'
   const { request } = getRequestEvent()
@@ -76,12 +67,12 @@ export const ProtectVerifyRoute = query(async () => {
 
   if (!cookie) return 401
 
-  const session = getCookie('auth.session-token', cookie)
+  const session = retreiveCookie('auth.session-token', cookie)
 
   const existsSession = await redisExists(`user:session:${session}`)
   if (existsSession) throw redirect('/')
 
-  const pending_verification_id = getCookie('pending_verification', cookie)
+  const pending_verification_id = retreiveCookie('pending_verification', cookie)
   if (!pending_verification_id) return 401
 
   try {
@@ -100,7 +91,7 @@ export const ProtectResetPassword = query(async () => {
   const cookie = request.headers.get('cookie')
 
   if (!cookie) return { allowed: false, message: 'თქვენ არ გაქვთ გვერდზე წვდომის უფლება.', status: 401 }
-  const rs = getCookie('reset_session', cookie)
+  const rs = retreiveCookie('reset_session', cookie)
   if (!rs) return { allowed: false, message: 'თქვენ არ გაქვთ გვერდზე წვდომის უფლება.', status: 401 }
 
   try {

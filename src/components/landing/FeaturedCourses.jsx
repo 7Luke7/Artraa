@@ -1,4 +1,3 @@
-import { A } from "@solidjs/router";
 import { CourseCard } from "../CourseCard";
 import { For } from "solid-js";
 
@@ -67,7 +66,7 @@ export const FeaturedCourses = (props) => {
                                     </p>
                                 </div>
 
-                                <A
+                                <a
                                     href="/courses"
                                     class="inline-flex items-center justify-center gap-2 bg-[#E85A4F] hover:bg-[#D84A3F] text-white px-8 py-4 rounded-lg font-gsans font-bold text-lg transition-colors shadow-md hover:shadow-lg"
                                     aria-label="ყველა კურსის ნახვა - გადახვედი სრულ კატალოგზე"
@@ -80,7 +79,7 @@ export const FeaturedCourses = (props) => {
                                         alt=""
                                         aria-hidden="true"
                                     />
-                                </A>
+                                </a>
                             </div>
                         </div>
                     </div>

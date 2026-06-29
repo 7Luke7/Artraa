@@ -59,7 +59,7 @@ export function generateLandingStructuredData(siteUrl, courses) {
     "@type": "WebSite",
     "name": "Artra - ონლაინ განათლება საქართველოში",
     "url": siteUrl,
-    "description": "პრაქტიკული ონლაინ კურსები ქართველებისთვის. ტექნოლოგიები, ბიზნესი, დიზაინი და სხვა თანამედროვე პროფესიები.",
+    "description": "პრაქტიკული ონლაინ კურსები ქართველებისთვის. მშენებლობა, ტექნოლოგიები, ბიზნესი, დიზაინი და სხვა თანამედროვე პროფესიები.",
     "publisher": {
       "@type": "Organization",
       "name": "Artra",
@@ -71,7 +71,7 @@ export function generateLandingStructuredData(siteUrl, courses) {
       ]
     },
     "inLanguage": "ka",
-    "keywords": "ონლაინ კურსები, განათლება საქართველოში, ქართული ონლაინ კურსები, ტექნოლოგიები, ბიზნესი, დიზაინი"
+    "keywords": "ონლაინ კურსები, განათლება საქართველოში, ქართული ონლაინ კურსები, მშენებლობა, ტექნოლოგიები, ბიზნესი, დიზაინი"
   };
 
   const courseListingSchema = {

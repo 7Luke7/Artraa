@@ -1,5 +1,4 @@
 import { Title } from "@solidjs/meta"
-import { A } from "@solidjs/router"
 
 export const VerificationUnauthorized = () => {
     return <>
@@ -28,13 +27,13 @@ export const VerificationUnauthorized = () => {
                     </span>
                 </p>
 
-                <A
+                <a
                     href="/login"
                     class="inline-block bg-[#E85A4F] px-6 py-3 rounded-lg text-white font-gsans font-medium transition-all hover:bg-[#d04a40] focus:outline-none focus:ring-4 focus:ring-[#E85A4F] focus:ring-opacity-50 shadow-md hover:shadow-lg"
                     aria-label="შესვლის გვერდზე გადასვლა"
                 >
                     შესვლის გვერდზე დაბრუნება
-                </A>
+                </a>
 
                 <p class="mt-4 text-sm text-gray-500">
                     პრობლემა გაგრძელდა?{" "}
@@ -43,7 +42,7 @@ export const VerificationUnauthorized = () => {
                         class="text-[#E85A4F] hover:underline font-gsans font-medium"
                         aria-label={`ელ. ფოსტა ${import.meta.env.VITE_EMAIL}`}
                     >
-                        {import.meta.env.VITE_EMAIL}
+                        დაგვიკავშირდით
                     </a>
                 </p>
             </div>

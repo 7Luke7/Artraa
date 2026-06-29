@@ -1,26 +1,14 @@
-import { BasicClientSideCache, createClient } from "redis";
-
-const cache = new BasicClientSideCache({
-  ttl: 60000,
-  maxEntries: 1000,
-  evictPolicy: "LRU",
-});
+'use sevrer'
+import { createClient } from "redis";
 
 export const redis = createClient({
-  url: process.env.REDIS_URL,
-  RESP: 3,
-  clientSideCache: cache,
-  socket: {
-    reconnectStrategy: (retries, cause) => {
-      if (cause.name === "SocketTimeoutError") {
-        return false;
-      }
-      const jitter = Math.random() * 200;
-      const delay = Math.min((2 ** retries) * 50, 2000);
-      return delay + jitter;
+    username: "default",
+    password: process.env.REDIS_PASSWORD,
+    socket: {
+      host: process.env.REDIS_HOST,
+      port: parseInt(process.env.REDIS_PORT)
     }
-  }
-});
+})  
 
 redis.on("error", (err) => console.error(err));
 redis.connect();

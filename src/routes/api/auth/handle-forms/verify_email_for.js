@@ -1,3 +1,4 @@
+"use server"
 import { exctract_client_info } from "../../utils"
 import { randomBytes } from "node:crypto"
 import { redisHSet } from "../../lib/redis/hash"

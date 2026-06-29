@@ -1,8 +1,7 @@
 import { json, query, redirect } from "@solidjs/router"
-import { get_session_data } from "../auth/ProtectRoutes"
 import { pool } from "../db"
 import { getRequestEvent } from "solid-js/web"
-import { format_to_time, getCookie } from "../utils"
+import { format_to_time, retreiveCookie } from "../utils"
 import { redisExists } from "../lib/redis/basic"
 import { redis } from "../redis"
 import { redisHGet, redisHSet } from "../lib/redis/hash"
@@ -17,7 +16,7 @@ export const get_new_notification_count = query(async () => {
             'Set-Cookie': 'auth.session-token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict',
         }
     })
-    const id = getCookie("auth.session-token", cookie);
+    const id = retreiveCookie("auth.session-token", cookie);
     if (!id) throw redirect('/login', {
         status: 302,
         headers: {
@@ -32,10 +31,10 @@ export const get_new_notification_count = query(async () => {
         }
     })
     try {
-        const data = await get_session_data(id, ['user_id'])
-        if (!data) throw redirect('/login')
-        
-        const notification_count = await redisHGet(`user:notifications:${data.user_id}`, 'unseen_notification_count')
+        const user_id = await redisHGet(`user:session:${id}`, 'user_id')
+        if (!user_id) throw redirect('/login')
+
+        const notification_count = await redisHGet(`user:notifications:${user_id}`, 'unseen_notification_count')
 
         return notification_count ?? 0
     } catch (error) {
@@ -53,7 +52,7 @@ export const get_all_notifications_count = query(async () => {
             'Set-Cookie': 'auth.session-token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict',
         }
     })
-    const id = getCookie("auth.session-token", cookie);
+    const id = retreiveCookie("auth.session-token", cookie);
     if (!id) throw redirect('/login', {
         status: 302,
         headers: {
@@ -68,10 +67,10 @@ export const get_all_notifications_count = query(async () => {
         }
     })
     try {
-        const data = await get_session_data(id, ['user_id'])
-        if (!data) throw redirect('/login')
-        
-        const notification_count = await redisHGet(`user:notifications:${data.user_id}`, 'notification_count')
+        const user_id = await redisHGet(`user:session:${id}`, 'user_id')
+        if (!user_id) throw redirect('/login')
+
+        const notification_count = await redisHGet(`user:notifications:${user_id}`, 'notification_count')
 
         return notification_count ?? 0
     } catch (error) {
@@ -79,7 +78,7 @@ export const get_all_notifications_count = query(async () => {
     }
 }, 'get-all-notifications')
 
-export const get_notifications = query(async ({created_at, id}) => {
+export const get_notifications = query(async ({ created_at, id }) => {
     'use server'
     const { request } = getRequestEvent()
     const cookie = request.headers.get("cookie");
@@ -89,7 +88,7 @@ export const get_notifications = query(async ({created_at, id}) => {
             'Set-Cookie': 'auth.session-token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict',
         }
     })
-    const cookie_id = getCookie("auth.session-token", cookie);
+    const cookie_id = retreiveCookie("auth.session-token", cookie);
     if (!cookie_id) throw redirect('/login', {
         status: 302,
         headers: {
@@ -104,9 +103,9 @@ export const get_notifications = query(async ({created_at, id}) => {
         }
     })
     try {
-        const data = await get_session_data(cookie_id, ['user_id'])
-        if (!data) throw redirect('/login')
-        const notifications_result = await pool.query(`
+        const user_id = await redisHGet(`user:session:${cookie_id}`, 'user_id')
+        if (!user_id) throw redirect('/login')
+        const text = `
             SELECT 
             id, user_id, notif_type, title, description, seen, created_at FROM notifications
             WHERE user_id=$1 
@@ -117,11 +116,13 @@ export const get_notifications = query(async ({created_at, id}) => {
             )  
             ORDER BY created_at DESC, id DESC
             LIMIT 8
-        `, [data.user_id, id, created_at])
+        `
+
+        const notifications_result = await pool.query(text, [user_id, id, created_at])
 
         if (!notifications_result.rowCount) return json({
             ok: false
-        }, {status: 400})
+        }, { status: 400 })
 
         const notifications = notifications_result.rows
         notifications.forEach((notification) => {
@@ -131,7 +132,7 @@ export const get_notifications = query(async ({created_at, id}) => {
         return json({
             ok: true,
             data: notifications
-        }, {status: 200})
+        }, { status: 200 })
     } catch (error) {
         if (error instanceof Response) throw error
         console.log(error)
@@ -148,7 +149,7 @@ export const mark_notification_as = async (id, seen) => {
             'Set-Cookie': 'auth.session-token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict',
         }
     })
-    const session_id = getCookie("auth.session-token", cookie);
+    const session_id = retreiveCookie("auth.session-token", cookie);
     if (!session_id) throw redirect('/login', {
         status: 302,
         headers: {
@@ -163,24 +164,24 @@ export const mark_notification_as = async (id, seen) => {
         }
     })
     try {
-        const data = await get_session_data(session_id, ['user_id'])
-        if (!data) throw redirect('/login')
+        const user_id = await redisHGet(`user:session:${session_id}`, 'user_id')
+        if (!user_id) throw redirect('/login')
 
         const update_seen = await pool.query(`
             UPDATE notifications
             SET seen=$4
             WHERE user_id=$1 AND id=$2 AND seen=$3
-        `, [data.user_id, id, !seen, seen])
-        
-        if (!update_seen.rowCount) return json({ok: false, message: "დაფიქსირდა შეცდომა."}, {
+        `, [user_id, id, !seen, seen])
+
+        if (!update_seen.rowCount) return json({ ok: false, message: "დაფიქსირდა შეცდომა." }, {
             status: 500
         })
-        await redis.hIncrBy(`user:notifications:${data.user_id}`, 'unseen_notification_count', seen ? -1 : 1)
+        await redis.hIncrBy(`user:notifications:${user_id}`, 'unseen_notification_count', seen ? -1 : 1)
 
-        return json({ok: true}, {
+        return json({ ok: true }, {
             status: 200
         })
-    } catch(error) {
+    } catch (error) {
         if (error instanceof Response) throw error
         console.log(error)
     }
@@ -196,7 +197,7 @@ export const remove_notification = async (id, seen) => {
             'Set-Cookie': 'auth.session-token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict',
         }
     })
-    const session_id = getCookie("auth.session-token", cookie);
+    const session_id = retreiveCookie("auth.session-token", cookie);
     if (!session_id) throw redirect('/login', {
         status: 302,
         headers: {
@@ -211,26 +212,26 @@ export const remove_notification = async (id, seen) => {
         }
     })
     try {
-        const data = await get_session_data(session_id, ['user_id'])
-        if (!data) throw redirect('/login')
+        const user_id = await redisHGet(`user:session:${session_id}`, 'user_id')
+        if (!user_id) throw redirect('/login')
 
         const remove_notification = await pool.query(`
             DELETE FROM notifications
             WHERE user_id=$1 AND id=$2
-        `, [data.user_id, id])
+        `, [user_id, id])
 
-        if (!remove_notification.rowCount) return json({ok: false, message: "დაფიქსირდა შეცდომა."}, {
+        if (!remove_notification.rowCount) return json({ ok: false, message: "დაფიქსირდა შეცდომა." }, {
             status: 500
         })
-        if (!seen) await redis.hIncrBy(`user:notifications:${data.user_id}`, 'unseen_notification_count', -1)
-        await redis.hIncrBy(`user:notifications:${data.user_id}`, 'notification_count', -1)
-    
-        return json({ok: true}, {
+        if (!seen) await redis.hIncrBy(`user:notifications:${user_id}`, 'unseen_notification_count', -1)
+        await redis.hIncrBy(`user:notifications:${user_id}`, 'notification_count', -1)
+
+        return json({ ok: true }, {
             status: 200
         })
-    } catch(error) {
-        if (error instanceof Response) throw error
+    } catch (error) {
         console.log(error)
+        if (error instanceof Response) throw error
     }
 }
 
@@ -244,7 +245,7 @@ export const mark_all_notification_as_seen = async () => {
             'Set-Cookie': 'auth.session-token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict',
         }
     })
-    const session_id = getCookie("auth.session-token", cookie);
+    const session_id = retreiveCookie("auth.session-token", cookie);
     if (!session_id) throw redirect('/login', {
         status: 302,
         headers: {
@@ -259,24 +260,24 @@ export const mark_all_notification_as_seen = async () => {
         }
     })
     try {
-        const data = await get_session_data(session_id, ['user_id'])
-        if (!data) throw redirect('/login')
+        const user_id = await redisHGet(`user:session:${session_id}`, 'user_id')
+        if (!user_id) throw redirect('/login')
 
         const update_seen = await pool.query(`
             UPDATE notifications
             SET seen=$3
             WHERE user_id=$1 AND seen=$2
-        `, [data.user_id, false, true])
+        `, [user_id, false, true])
 
-        if (!update_seen.rowCount) return json({ok: false, message: "დაფიქსირდა შეცდომა."}, {
+        if (!update_seen.rowCount) return json({ ok: false, message: "დაფიქსირდა შეცდომა." }, {
             status: 500
         })
-        await redisHSet(`user:notifications:${data.user_id}`, {unseen_notification_count: 0})
+        await redisHSet(`user:notifications:${user_id}`, { unseen_notification_count: 0 })
 
-        return json({ok: true}, {
+        return json({ ok: true }, {
             status: 200
         })
-    } catch(error) {
+    } catch (error) {
         console.log(error)
         if (error instanceof Response) throw error
     }

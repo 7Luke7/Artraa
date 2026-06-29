@@ -1,16 +1,19 @@
 import { createAsync } from "@solidjs/router";
 import { auth } from "./api/auth/ProtectRoutes";
-import { LandingContent } from "~/components/landing/Landing";
-import { Show } from "solid-js";
-import { AuthorizedLanding } from "~/components/AuthorizedLanding/AuthorizedLanding";
-import { WebSocketContextProvider } from "~/ws_context";
+import { lazy, Match, Switch } from "solid-js";
+
+const LazyLandingContent = lazy(() => import("~/components/landing/Landing.jsx"))
+const LazyAuthorizedLanding = lazy(() => import("~/components/AuthorizedLanding/AuthorizedLanding.jsx"))
 
 export default function Landing() {
-  const is_auth = createAsync(auth, { deferStream: true })
+  const is_auth = createAsync(auth, { deferStream: false, initialValue: "loading" })
 
-  return <Show fallback={<LandingContent />} when={is_auth()}>
-    <WebSocketContextProvider>
-      <AuthorizedLanding />
-    </WebSocketContextProvider>
-  </Show>
+  return <Switch>
+      <Match when={!is_auth()}>
+        <LazyLandingContent />  
+      </Match>
+      <Match when={is_auth() && is_auth() !== "loading"}>
+        <LazyAuthorizedLanding />
+      </Match>
+    </Switch>
 }

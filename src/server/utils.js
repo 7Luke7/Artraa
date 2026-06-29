@@ -11,7 +11,6 @@ export const notify_user_new_device = async (user_id, payload) => {
 }
 
 export const publish_to_device = async (user_id, device_id = null) => {
-    console.log(user_id, device_id)
     if (!user_peers.has(user_id)) return
     const all_user_devices = user_peers.get(user_id)
     for (const devices of all_user_devices) {

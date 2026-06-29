@@ -8,15 +8,9 @@ export const CourseBlocks = (props) => {
             prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
         )
     }
-    const formatDuration = (minutes) => {
-        const hours = Math.floor(minutes / 60);
-        const rem = minutes % 60;
-        return hours > 0 ? `${hours}სთ ${rem}წთ` : `${minutes} წთ`;
-    };
     return (
         <div itemscope itemtype="https://schema.org/ItemList">
             <meta itemprop="numberOfItems" content={props.course.course_content?.length || 0} />
-
             <For each={props.course.course_content}>
                 {(section, sectionIndex) => {
                     const idx = sectionIndex()
@@ -72,9 +66,11 @@ export const CourseBlocks = (props) => {
                                     <For each={section.lessons}>
                                         {(lesson, lessonIndex) => (
                                             <a
-                                                href={lesson.is_preview ? `${props.course.slug}/lessons/${section.lesson_id}` : "#"}
+                                                href={lesson.is_preview ? `/course/${props.course.slug}?ln=${lesson.lesson_id}` : "#"}
                                                 class={`flex items-center gap-3 px-4 py-3 border-b border-gray-100/80 last:border-b-0 transition-colors group/lesson ${lesson.is_preview ? 'hover:bg-white cursor-pointer' : 'opacity-75 cursor-default'}`}
                                                 itemscope
+                                                aria-disabled={!lesson.is_preview}
+                                                target={lesson.is_preview && "_self"}
                                                 itemtype="https://schema.org/CreativeWork"
                                             >
                                                 <div class={`flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-medium transition-colors ${lesson.is_preview ? 'bg-[#E85A4F]/10 text-[#E85A4F] group-hover/lesson:bg-[#E85A4F]/30 group-hover/lesson:text-white' : 'bg-gray-100 text-gray-400'}`}>
@@ -93,12 +89,12 @@ export const CourseBlocks = (props) => {
 
                                                 <div class="flex items-center gap-2 flex-shrink-0">
                                                     <Show when={lesson.is_preview}>
-                                                        <span class="text-xs font-medium text-[#E85A4F] bg-[#E85A4F]/8 px-2 py-0.5 rounded-full border border-[#E85A4F]/20">
+                                                        <span class="text-xs font-gsans font-medium text-[#E85A4F] bg-[#E85A4F]/8 px-2 py-0.5 rounded-full border border-[#E85A4F]/20">
                                                             უფასო
                                                         </span>
                                                     </Show>
-                                                    <span class="text-xs font-bold text-gray-800">
-                                                        {formatDuration(lesson.video_duration)}
+                                                    <span class="text-xs font-gsans font-bold text-gray-800">
+                                                        {lesson.video_duration}
                                                     </span>
                                                 </div>
                                                 <meta itemprop="learningResourceType" content="Video" />

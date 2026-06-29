@@ -4,7 +4,7 @@ import SessionsList from "./SessionsList"
 import { createAsync } from "@solidjs/router"
 
 const Security = () => {
-  const security = createAsync(get_security_details, { deferStream: true })
+  const security = createAsync(get_security_details, { deferStream: false })
 
     return (
         <>

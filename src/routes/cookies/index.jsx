@@ -1,8 +1,9 @@
 import { Title, Meta } from "@solidjs/meta"
 import { LegalPage } from "~/components/LegalPage"
- 
+import { RenderWebsocketRoutes } from "~/components/RenderWebsocketRoutes"
+
 const LAST_UPDATED = "2024 წლის 1 იანვარი"
- 
+
 const SECTIONS = [
     {
         heading: "Cookie ფაილები — რა არის",
@@ -47,17 +48,15 @@ const SECTIONS = [
         body: "ეს Cookie პოლიტიკა შეიძლება განახლდეს. ნებისმიერი მნიშვნელოვანი ცვლილების შემთხვევაში მომხმარებელს ვაცნობებთ ელ-ფოსტით ან პლატფორმაზე განცხადებით.",
     },
 ]
- 
+
 export default function CookiesPage() {
-    return (
-        <>
-            <Title>Cookie პოლიტიკა - Artra</Title>
-            <Meta name="description" content="Artra-ს Cookie პოლიტიკა — რა cookie-ებს ვიყენებთ და რატომ." />
-            <LegalPage
-                title="Cookie-ფაილების პოლიტიკა"
-                lastUpdated={LAST_UPDATED}
-                sections={SECTIONS}
-            />
-        </>
-    )
+    return <RenderWebsocketRoutes>
+        <Title>Cookie პოლიტიკა - Artra</Title>
+        <Meta name="description" content="Artra-ს Cookie პოლიტიკა — რა cookie-ებს ვიყენებთ და რატომ." />
+        <LegalPage
+            title="Cookie-ფაილების პოლიტიკა"
+            lastUpdated={LAST_UPDATED}
+            sections={SECTIONS}
+        />
+    </RenderWebsocketRoutes>
 }

@@ -15,6 +15,13 @@ export const validation_rules = {
         maxLength: 50,
         pattern: /^\p{L}+$/u,
     },
+    name: {
+        required: true,
+        type: 'string',
+        local_name: 'სახელი',
+        minLength: 2,
+        maxLength: 100,
+    },
     email: {
         required: true,
         local_name: 'მეილი',
@@ -22,17 +29,26 @@ export const validation_rules = {
         pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
         maxLength: 254,
     },
-    "topic-subject": {
+    subject: {
         required: true,
         local_name: 'თემა',
         type: 'string',
-        maxLength: 60,
+        options: [
+            "ტექნიკური პრობლემა",
+            "გადახდასთან დაკავშირებული კითხვა",
+            "კურსის შინაარსი",
+            "ანგარიშის საკითხი",
+            "ინსტრუქტორობა",
+            "პარტნიორობა",
+            "სხვა"
+        ]
     },
-    "topic-message": {
+    message: {
         required: true,
         local_name: 'შეტყობინება',
         type: 'string',
-        maxLength: 800,
+        maxLength: 1000,
+        minLength: 50
     },
     password: {
         required: true,

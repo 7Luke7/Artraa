@@ -1,67 +1,45 @@
-import { A, createAsync } from "@solidjs/router"
-import { createEffect, createSignal, lazy, Match, on, onCleanup, onMount, Show, Suspense, Switch } from "solid-js"
-import { get_header } from "~/routes/api/user/dashboard/landing"
+import { createAsync } from "@solidjs/router"
+import { createEffect, createSignal, lazy, Match, on, onCleanup, Show, Suspense, Switch } from "solid-js"
+import { get_header } from "~/routes/api/user/landing.js"
 
 const LazyHeaderActionsAuthorized = lazy(() => import('./HeaderActionsAuthorized.jsx'))
 const LazyHeaderLinks = lazy(() => import('./HeaderLinks.jsx'))
+const LazyMobileMenu = lazy(() => import('./MobileMenu.jsx'))
 
 export const Header = () => {
     const data = createAsync(get_header, { deferStream: true })
-    const [isScrolled, setIsScrolled] = createSignal(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = createSignal(false)
-    let mobileMenuRef;
+    let mobileMenuRef
 
     createEffect(on(isMobileMenuOpen, () => {
-        const handleClick = (event) => {
-            if (
-                isMobileMenuOpen() &&
-                mobileMenuRef &&
-                !mobileMenuRef.contains(event.target)
-            ) {
-                setIsMobileMenuOpen(false);
+        const onClick = (e) => {
+            if (isMobileMenuOpen() && mobileMenuRef && !mobileMenuRef.contains(e.target)) {
+                setIsMobileMenuOpen(false)
             }
-        };
-
-        document.addEventListener("click", handleClick);
-
-        onCleanup(() => document.removeEventListener('click', handleClick))
+        }
+        document.addEventListener("click", onClick)
+        onCleanup(() => document.removeEventListener("click", onClick))
     }, { defer: true }))
-
-    onMount(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 10);
-        };
-
-        window.addEventListener("scroll", handleScroll);
-        onCleanup(() => window.removeEventListener("scroll", handleScroll));
-    });
 
     return (
         <header
             role="banner"
-            class={`sticky top-0 left-0 right-0 w-full z-50 transition-all duration-300
-                ${isScrolled() && 'shadow-lg'}
-                border-b bg-white border-gray-200/50
-                px-4 lg:px-12
-                rounded-b-3xl
-                py-3 lg:py-4`}
+            class="sticky top-0 left-0 right-0 w-full z-50 bg-white border-b border-gray-200/50 rounded-b-3xl
+                px-4 lg:px-12 py-3 lg:py-4 transition-all duration-300"
         >
             <div class="container mx-auto flex items-center justify-between">
-                <div class="flex items-center">
-                    <A
-                        href="/"
-                        class="text-[#E85A4F] text-2xl lg:text-3xl tracking-[0.15em] font-sans font-[800] hover:opacity-90 transition-opacity rounded"
-                        aria-label="Artra - მთავარი გვერდი"
-                    >
-                        <h1 class="m-0">ARTRA</h1>
-                    </A>
-                </div>
-
-                <div class="hidden xl:flex">
+                <a
+                    href="/"
+                    class="text-[#E85A4F] text-2xl lg:text-3xl tracking-[0.15em] font-gsans font-[800] hover:opacity-90 transition-opacity"
+                    aria-label="Artra - მთავარი გვერდი"
+                >
+                    ARTRA
+                </a>
+                <div class="hidden lg:flex">
                     <Suspense>
                         <Switch>
                             <Match when={data()?.status === 200}>
-                                <LazyHeaderActionsAuthorized data={data} />
+                                <LazyHeaderActionsAuthorized avatar={data()?.avatar} />
                             </Match>
                             <Match when={data()?.status === 401}>
                                 <LazyHeaderLinks />
@@ -69,104 +47,32 @@ export const Header = () => {
                         </Switch>
                     </Suspense>
                 </div>
-
                 <button
-                    class="xl:hidden flex flex-col items-center justify-center w-10 h-10 rounded"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setIsMobileMenuOpen(!isMobileMenuOpen());
-                    }}
+                    class="lg:hidden flex flex-col items-center justify-center w-10 h-10 rounded"
+                    onClick={(e) => { e.stopPropagation(); setIsMobileMenuOpen(v => !v) }}
                     aria-label={isMobileMenuOpen() ? "მენიუს დახურვა" : "მენიუს გახსნა"}
                     aria-expanded={isMobileMenuOpen()}
                     aria-controls="mobile-menu"
                 >
-                    <span class={`w-6 h-0.5 bg-gray-700 mb-1.5 transition-transform ${isMobileMenuOpen() ? 'rotate-45 translate-y-2' : ''}`}></span>
-                    <span class={`w-6 h-0.5 bg-gray-700 mb-1.5 transition-opacity ${isMobileMenuOpen() ? 'opacity-0' : ''}`}></span>
-                    <span class={`w-6 h-0.5 bg-gray-700 transition-transform ${isMobileMenuOpen() ? '-rotate-45 -translate-y-2' : ''}`}></span>
+                    <span class={`w-6 h-0.5 bg-gray-700 mb-1.5 transition-transform ${isMobileMenuOpen() ? "rotate-45 translate-y-2" : ""}`} />
+                    <span class={`w-6 h-0.5 bg-gray-700 mb-1.5 transition-opacity ${isMobileMenuOpen() ? "opacity-0" : ""}`} />
+                    <span class={`w-6 h-0.5 bg-gray-700 transition-transform ${isMobileMenuOpen() ? "-rotate-45 -translate-y-2" : ""}`} />
                 </button>
             </div>
-
             <Show when={isMobileMenuOpen()}>
                 <div
                     ref={el => (mobileMenuRef = el)}
-                    class="xl:hidden bg-white border-t border-gray-200 py-4"
                     id="mobile-menu"
                     role="dialog"
                     aria-label="მობილური მენიუ"
+                    class="lg:hidden border-t border-gray-100 pt-4 pb-2"
                 >
-                    <nav
-                        class="flex flex-col gap-y-2"
-                        aria-label="მობილური ნავიგაცია"
-                    >
-                        <Show when={data().status === 401}>
-                            <A
-                                href="/about"
-                                class="text-gray-700 hover:text-[#E85A4F] font-gsans font-medium py-2 rounded-lg hover:bg-gray-50"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                                ჩვენს შესახებ
-                            </A>
-                        </Show>
-                        <A
-                            href="/courses"
-                            class="text-gray-700 hover:text-[#E85A4F] font-gsans font-medium py-2 rounded-lg hover:bg-gray-50"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                            კურსები
-                        </A>
-
-                        <Show when={data()?.status === 401}>
-                            <div class="pt-4 border-t border-gray-200 space-y-3">
-                                <A
-                                    href="/login"
-                                    target="_self"
-                                    class="block text-center bg-[#E85A4F] text-white font-gsans font-bold py-3 px-4 rounded-lg hover:bg-[#D84A3F]"
-                                    rel="noopener"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                >
-                                    შესვლა
-                                </A>
-                                <A
-                                    href="/register"
-                                    target="_self"
-                                    class="block text-center border border-gray-300 text-gray-800 font-gsans font-bold py-3 px-4 rounded-lg hover:border-[#E85A4F] hover:text-[#E85A4F]"
-                                    rel="noopener"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                >
-                                    რეგისტრაცია
-                                </A>
-                            </div>
-                        </Show>
-
-                        <Show when={data()?.status === 200}>
-                            <div class="pt-4 border-t border-gray-200 space-y-1">
-                                <img
-                                    src={data()?.data ?? '/default_profile.png'}
-                                    alt='პროფილის სურათი'
-                                    class="rounded-full w-10 h-10 object-cover shrink-0"
-                                    width={40}
-                                    height={40}
-                                    loading="lazy"
-                                />
-                                <A
-                                    href="/account"
-                                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:text-[#E85A4F] font-gsans font-normal"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                >
-                                    <img src="/svg/gear.svg" alt="" width={18} height={18} />
-                                    აქაუნთი
-                                </A>
-                                <A
-                                    href="/notifications"
-                                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:text-[#E85A4F] font-gsans font-normal"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                >
-                                    <img src="/svg/notification.svg" alt="" width={18} height={18} />
-                                    შეტყობინებები
-                                </A>
-                            </div>
-                        </Show>
-                    </nav>
+                    <Suspense>
+                        <LazyMobileMenu
+                            status={data()?.status}
+                            onClose={() => setIsMobileMenuOpen(false)}
+                        />
+                    </Suspense>
                 </div>
             </Show>
         </header>

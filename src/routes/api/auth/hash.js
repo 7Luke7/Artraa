@@ -1,3 +1,4 @@
+"use server"
 import { argon2 } from "node:crypto"
 
 export const hash_password = (parameters) => {

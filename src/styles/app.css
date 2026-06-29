@@ -25,6 +25,7 @@
 }
 
 @theme {
+  --breakpoint-xs: 320px;
   --font-gsans: "Noto Sans Georgian", ui-sans-serif, system-ui, sans-serif;
 }
 

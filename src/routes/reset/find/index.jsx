@@ -1,6 +1,6 @@
 import { Meta, Title, Link } from "@solidjs/meta"
 import { Footer } from "~/components/Footer"
-import { A, useSubmission } from "@solidjs/router"
+import { useSubmission } from "@solidjs/router"
 import { Show } from "solid-js"
 import { ProtectAnonymousRoute } from "~/components/protectAnonymousRoutes"
 import { findUserForReset } from "~/routes/api/auth/handle-forms/findUserForReset"
@@ -11,7 +11,6 @@ const FindUser = () => {
     const GlobalField = () => submission.result?.field === 'global'
     const EmailField = () => submission.result?.field === 'email'
     const is_success = () => submission.result?.ok
-    const is_hint = () => submission.result?.type === 'hint'
     const message = () => submission.result?.message
 
     return (
@@ -79,11 +78,11 @@ const FindUser = () => {
 
                         <Show when={GlobalField() && !is_success()}>
                             <div
-                                class={`mb-6 p-3 border ${!is_hint() ? 'bg-red-50 border-red-200' : 'border-amber-200 bg-amber-50'} rounded-lg`}
+                                class="mb-6 p-3 border border-amber-200 bg-amber-50 rounded-lg"
                                 role='alert'
                                 aria-live="assertive"
                             >
-                                <p class={`${!is_hint() ? 'text-red-800' : 'text-amber-800'} text-sm font-gsans font-medium`}>
+                                <p class="text-amber-800 text-sm font-gsans font-medium">
                                     {message()}
                                 </p>
                             </div>
@@ -153,14 +152,14 @@ const FindUser = () => {
                         </div>
 
                         <div class="text-center">
-                            <A
+                            <a
                                 href="/login"
                                 target="_self"
                                 class="text-[#E85A4F] hover:text-[#E98074] font-gsans font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 rounded"
                                 aria-label="დაბრუნება შესვლის გვერდზე"
                             >
                                 დაბრუნება შესვლის გვერდზე
-                            </A>
+                            </a>
                         </div>
 
                         <div class="mt-8 pt-6 border-t border-gray-100">

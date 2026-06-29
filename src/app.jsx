@@ -3,13 +3,14 @@ import { FileRoutes } from "@solidjs/start/router";
 import { Suspense } from "solid-js";
 import "~/styles/app.css"
 import { MetaProvider } from "@solidjs/meta";
+import { PageLoader } from "./components/PageLoader";
 
 export default function App() {
   return (
     <Router
       root={props => (
         <MetaProvider>
-          <Suspense>
+          <Suspense fallback={<PageLoader />}>
             {props.children}
           </Suspense>
         </MetaProvider>

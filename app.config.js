@@ -1,3 +1,4 @@
+import "dotenv/config"
 import { defineConfig } from "@solidjs/start/config";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -6,10 +7,16 @@ export default defineConfig({
     plugins: [
       tailwindcss(),
     ],
+    server: {
+      allowedHosts: [
+        "dale-nonoxidizing-cordelia.ngrok-free.dev",
+        ".ngrok-free.dev",
+        "localhost"
+      ]
+    }
   },
   server: {
     port: 3000,
-    allowedHosts: ["dale-nonoxidizing-cordelia.ngrok-free.dev"],
     experimental: {
       websocket: true,
     },

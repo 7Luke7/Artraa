@@ -2,7 +2,7 @@ import { action, json, redirect } from "@solidjs/router";
 import { getRequestEvent } from "solid-js/web";
 import { FormDataValidator } from "../../validate/validation-service";
 import { verify_email_for } from "./verify_email_for";
-import { getCookie } from "../../utils";
+import { retreiveCookie } from "../../utils";
 import { createHmac } from "node:crypto"
 import { redisHGetAll } from "../../lib/redis/hash";
 import { redisDel } from "../../lib/redis/basic";
@@ -14,8 +14,12 @@ export const verify_email_action = action(async (formData) => {
 
     if (!cookies) return json({ field: 'global', message: "არასწორი მონაცემები." }, { status: 401 })
 
-    const pending = getCookie('pending_verification', cookies)
+    const pending = retreiveCookie('pending_verification', cookies)
     if (!pending) return json({ field: 'global', message: "ვერიფიკაციის იდენტიფიკატორი ვერ მოიძებნა." }, { status: 400 })
+
+    const next_page_search = formData.get('next_page')
+    const next_page = new URLSearchParams(next_page_search).get('next')
+    formData.delete('next_page')
 
     const result = FormDataValidator.validateInput(formData)
     const validate_verification_id = FormDataValidator.validateField('vid', pending)
@@ -50,9 +54,8 @@ export const verify_email_action = action(async (formData) => {
 
         if (result.response_type === 'redirect') {
             try { await redisDel(`pending:verification:${vid}`) } catch (error) { }
-            throw redirect(result.location, {
+            throw redirect(!next_page ? result.location : next_page, {
                 status: result.status,
-                revalidate: ['auth', 'protect-verify', 'get-user-header'],
                 headers: result.headers
             });
         }

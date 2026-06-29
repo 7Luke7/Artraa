@@ -1,6 +1,6 @@
 import { Link, Meta, Title } from "@solidjs/meta";
 import { Footer } from "~/components/Footer";
-import { A, useSubmission } from "@solidjs/router";
+import { useSubmission } from "@solidjs/router";
 import { createSignal, onMount, Show } from "solid-js";
 import { register } from "../api/auth/handle-forms/register";
 import { ProtectAnonymousRoute } from "~/components/protectAnonymousRoutes";
@@ -106,14 +106,14 @@ const Register = () => {
 
                             <p class="text-[15px] font-gsans font-medium text-slate-600">
                                 უკვე გაქვს ანგარიში?{" "}
-                                <A
+                                <a
                                     target="_self"
                                     aria-label="შესვლა Artra-ზე"
                                     href="/login"
                                     class="text-[#E85A4F] font-gsans font-medium hover:underline ml-1"
                                 >
                                     შესვლა
-                                </A>
+                                </a>
                             </p>
                         </div>
 
@@ -356,14 +356,14 @@ const Register = () => {
                                         <div class="lg:hidden">
                                             <p class="text-sm font-gsans font-medium text-slate-600">
                                                 უკვე გაქვთ ანგარიში?{" "}
-                                                <A
+                                                <a
                                                     target="_self"
                                                     aria-label="შესვლა Artra-ზე"
                                                     href="/login"
                                                     class="text-[#E85A4F] font-gsans font-medium hover:underline ml-1"
                                                 >
                                                     შესვლა
-                                                </A>
+                                                </a>
                                             </p>
                                         </div>
                                     </section>
@@ -390,21 +390,21 @@ const Register = () => {
                                 <div class="mb-6">
                                     <p class="text-xs font-gsans font-medium text-slate-600 text-center md:text-left">
                                         რეგისტრაციით თქვენ ეთანხმებით ჩვენს{" "}
-                                        <A
+                                        <a
                                             href="/terms"
                                             class="text-[#E85A4F] hover:underline"
                                             aria-label="წესები და პირობები"
                                         >
                                             წესებს და პირობებს
-                                        </A>{" "}
+                                        </a>{" "}
                                         და{" "}
-                                        <A
+                                        <a
                                             href="/privacy"
                                             class="text-[#E85A4F] hover:underline"
                                             aria-label="კონფიდენციალურობის პოლიტიკა"
                                         >
                                             კონფიდენციალურობის პოლიტიკას
-                                        </A>.
+                                        </a>.
                                     </p>
                                 </div>
 

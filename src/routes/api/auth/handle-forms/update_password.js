@@ -1,6 +1,6 @@
 import { action, json, redirect } from "@solidjs/router";
 import { getRequestEvent } from "solid-js/web";
-import { getCookie, logout_other_devices } from "../../utils";
+import { retreiveCookie, logout_other_devices } from "../../utils";
 import { FormDataValidator } from "../../validate/validation-service";
 import { pool } from "../../db";
 import { hash_password } from "../hash";
@@ -20,7 +20,7 @@ export const update_password = action(async (formData) => {
     const cookie = event.request.headers.get('cookie')
     if (!cookie) throw redirect('/login')
 
-    const id = getCookie("auth.session-token", cookie);
+    const id = retreiveCookie("auth.session-token", cookie);
     if (!id) throw redirect('/login', {
         status: 303,
         headers: {
@@ -36,6 +36,7 @@ export const update_password = action(async (formData) => {
         }
     })
 
+    let client
     try {
         const res = await pool.query(`SELECT name, salt, password, id FROM "User" WHERE id = $1`, [user_id]);
 
@@ -87,7 +88,11 @@ export const update_password = action(async (formData) => {
         }, {
             status: 500
         })
-        const update_password = await pool.query(`
+
+        client = await pool.connect()
+        await client.query("BEGIN")
+
+        const update_password = await client.query(`
             UPDATE "User"
             SET password=$2, salt=$3
             WHERE id=$1
@@ -101,7 +106,7 @@ export const update_password = action(async (formData) => {
         })
 
         const device_id = await redisHGet(`user:session:${id}`, 'device_id')
-        const logout_others = await logout_other_devices(user_id, id, device_id)
+        const logout_others = await logout_other_devices(user_id, id, device_id, client)
         if (!logout_others) return json({
             ok: false,
             message: 'დაფიქსირდა შეცდომა, სცადეთ ხელახლა.'
@@ -109,6 +114,7 @@ export const update_password = action(async (formData) => {
             status: 500
         })
 
+        await client.query("COMMIT")
         return json({
             ok: true,
             message: 'პაროლის შეცვლა წარმატებით დასრულდა.'
@@ -121,12 +127,15 @@ export const update_password = action(async (formData) => {
         })
     } catch (error) {
         console.log(error)
+        if (client) await client.query("ROLLBACK")
         return json({
             ok: false,
             message: 'დაფიuser_id, id, device_idქსირდა შეცდომა, სცადეთ ხელახლა.'
         }, {
             status: 500
         })
+    } finally {
+        if (client) client.release()
     }
 }, 'update-password')
 
@@ -143,7 +152,7 @@ export const set_password = action(async (formData) => {
     const cookie = event.request.headers.get('cookie')
     if (!cookie) throw redirect('/login')
 
-    const id = getCookie("auth.session-token", cookie);
+    const id = retreiveCookie("auth.session-token", cookie);
     if (!id) throw redirect('/login', {
         status: 303,
         headers: {
@@ -159,6 +168,7 @@ export const set_password = action(async (formData) => {
         }
     })
 
+    let client
     try {
         const salt = randomBytes(16);
         const new_password_parameters = {
@@ -178,6 +188,10 @@ export const set_password = action(async (formData) => {
         }, {
             status: 500
         })
+        
+        client = await pool.connect()
+        await client.query("BEGIN")
+        
         const update_password = await pool.query(`
             UPDATE "User"
             SET password=$2, salt=$3
@@ -192,7 +206,7 @@ export const set_password = action(async (formData) => {
         })
 
         const device_id = await redisHGet(`user:session:${id}`, 'device_id')
-        const logout_others = await logout_other_devices(user_id, id, device_id)
+        const logout_others = await logout_other_devices(user_id, id, device_id, client)
         if (!logout_others) return json({
             ok: false,
             message: 'დაფიქსირდა შეცდომა, სცადეთ ხელახლა.'
@@ -200,6 +214,7 @@ export const set_password = action(async (formData) => {
             status: 500
         })
 
+        await client.query("COMMIT")
         return json({
             ok: true,
             message: 'პაროლის წარმატებით დაყენდა.'
@@ -211,11 +226,14 @@ export const set_password = action(async (formData) => {
             }
         })
     } catch (error) {
+        if (client) await client.query("ROLLBACK")
         return json({
             ok: false,
             message: 'დაფიქსირდა შეცდომა, სცადეთ ხელახლა.'
         }, {
             status: 500
         })
+    } finally {
+        if (client) client.release()
     }
 }, 'set-password')

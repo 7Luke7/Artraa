@@ -32,6 +32,12 @@ export class FormDataValidator {
         const { isValid, value } = this.coerce(rawValue, rules.type);
         if (!isValid) return { field: fieldName, message: `${localName} მოითხოვს სწორ ტიპის მონაცემს.`, ok: false };
 
+        if (rules['options'] && !rules['options'].includes(value)) return {
+            ok: false,
+            message: `${localName} სავალდებულოა.`,
+            field: fieldName
+        };
+
         if (rules.type === 'boolean') return { ok: true, value }
 
         const val = this.normalizeWhitespace(value);

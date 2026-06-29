@@ -1,7 +1,6 @@
 import { Title, Meta } from "@solidjs/meta"
 import { Header } from "~/components/Header"
 import { Footer } from "~/components/Footer"
-import { A } from "@solidjs/router"
 
 // ─── EDIT THIS OBJECT TO UPDATE THE PAGE ──────────────────────────────────────
 const ABOUT_CONTENT = {
@@ -125,12 +124,12 @@ export default function AboutPage() {
                     <section class="bg-[#E85A4F] rounded-2xl p-10 md:p-16 text-center mb-16">
                         <h2 class="text-2xl md:text-3xl font-gsans font-bold text-white mb-3">{c.cta.heading}</h2>
                         <p class="text-white/80 font-gsans mb-8 text-sm md:text-base">{c.cta.body}</p>
-                        <A
+                        <a
                             href={c.cta.buttonHref}
                             class="inline-block px-8 py-3 rounded-xl bg-white text-[#E85A4F] font-gsans font-bold text-sm hover:bg-gray-100 transition-colors"
                         >
                             {c.cta.buttonText}
-                        </A>
+                        </a>
                     </section>
                 </div>
                 <Footer />

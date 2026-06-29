@@ -1,9 +1,9 @@
 import { json, query, redirect } from "@solidjs/router"
-import { get_session_data } from "../auth/ProtectRoutes"
 import { pool } from "../db"
 import { getRequestEvent } from "solid-js/web"
-import { format_to_time, getCookie } from "../utils"
+import { format_to_time, getAvatarUrl, retreiveCookie } from "../utils"
 import { redisExists } from "../lib/redis/basic"
+import { redisHGet } from "../lib/redis/hash"
 
 export const get_user = query(async () => {
     'use server'
@@ -16,7 +16,7 @@ export const get_user = query(async () => {
         }
     })
 
-    const id = getCookie("auth.session-token", cookie);
+    const id = retreiveCookie("auth.session-token", cookie);
     if (!id) throw redirect('/login', {
         status: 302,
         headers: {
@@ -32,27 +32,26 @@ export const get_user = query(async () => {
         }
     })
     try {
-        const data = await get_session_data(id, ['user_id'])
-        if (!data) throw redirect('/login')
+        const user_id = await redisHGet(`user:session:${id}`, 'user_id')
+        if (!user_id) throw redirect('/login')
         const user = await pool.query(`
-            SELECT created_at, email, name, profile_picture_link FROM "User"
+            SELECT created_at, email, name, avatar FROM "User"
             WHERE id=$1
-        `, [data.user_id])
+        `, [user_id])
 
         if (!user.rowCount) return json({ok: false, message: "დაფიქსირდა შეცდომა"}, {status: 500})
 
-        const { created_at, ...rest } = user.rows[0]
+        const { created_at, avatar, ...rest } = user.rows[0]
         const parsed_created_at = new Intl.DateTimeFormat("ka-GE", {
             day: "2-digit",
             month: "long",
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
+            year: "numeric",
         }).format(new Date(created_at))
 
         return {
             parsed_created_at,
-            ...rest
+            ...rest,
+            avatar: getAvatarUrl(avatar)
         }
     } catch (error) {
         if (error instanceof Response) throw error
@@ -71,7 +70,7 @@ export const get_security_details = query(async () => {
         }
     })
 
-    const id = getCookie("auth.session-token", cookie);
+    const id = retreiveCookie("auth.session-token", cookie);
     if (!id) throw redirect('/login', {
         status: 302,
         headers: {
@@ -87,8 +86,8 @@ export const get_security_details = query(async () => {
         }
     })
     try {
-        const data = await get_session_data(id, ['user_id'])
-        if (!data) throw redirect('/login')
+        const user_id = await redisHGet(`user:session:${id}`, 'user_id')
+        if (!user_id) throw redirect('/login')
         const user_devices = await pool.query(`
             SELECT
             jsonb_build_object(
@@ -117,7 +116,7 @@ export const get_security_details = query(async () => {
             INNER JOIN "User" u ON u.id = ud.user_id
             WHERE ud.user_id=$1
             GROUP BY u.id
-        `, [data.user_id])
+        `, [user_id])
 
         if (!user_devices.rowCount) return json({ok: false, message: "დაფიქსირდა შეცდომა"}, {status: 500})
 
@@ -163,7 +162,7 @@ export const unblock_devicee = async (device_id) => {
         }
     })
 
-    const id = getCookie("auth.session-token", cookie);
+    const id = retreiveCookie("auth.session-token", cookie);
     if (!id) throw redirect('/login', {
         status: 302,
         headers: {
@@ -179,14 +178,14 @@ export const unblock_devicee = async (device_id) => {
         }
     })
     try {
-        const data = await get_session_data(id, ['user_id'])
-        if (!data) throw redirect('/login')
+        const user_id = await redisHGet(`user:session:${id}`, 'user_id')
+        if (!user_id) throw redirect('/login')
 
         const res = await pool.query(`
             UPDATE user_devices
                 SET status='trusted'
             WHERE user_id=$1 AND id=$2
-        `, [data.user_id, device_id])
+        `, [user_id, device_id])
         if (!res.rowCount) return json({ok: false, message: "დაფიქსირდა შეცდომა"}, {status: 500})
         return json({ok: true}, {status: 200})
     } catch (error) {
@@ -205,7 +204,7 @@ export const block_deviee = async (device_id) => {
         }
     })
 
-    const id = getCookie("auth.session-token", cookie);
+    const id = retreiveCookie("auth.session-token", cookie);
     if (!id) throw redirect('/login', {
         status: 302,
         headers: {
@@ -221,14 +220,14 @@ export const block_deviee = async (device_id) => {
         }
     })
     try {
-        const data = await get_session_data(id, ['user_id'])
-        if (!data) throw redirect('/login')
+        const user_id = await redisHGet(`user:session:${id}`, 'user_id')
+        if (!user_id) throw redirect('/login')
 
         const res = await pool.query(`
             UPDATE user_devices
                 SET status='blocked'
             WHERE user_id=$1 AND id=$2
-        `, [data.user_id, device_id])
+        `, [user_id, device_id])
         if (!res.rowCount) return json({ok: false, message: "დაფიქსირდა შეცდომა"}, {status: 500})
         return json({ok: true}, {status: 200})
     } catch (error) {

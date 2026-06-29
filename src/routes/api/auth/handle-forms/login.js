@@ -10,6 +10,8 @@ import { getRequestEvent } from "solid-js/web"
 
 export const login = action(async (formData) => {
     "use server"
+    const next_page = formData.get('next_page')
+    formData.delete('next_page')
     const validation_result = FormDataValidator.validateInput(formData)
     if (!validation_result.ok) return json({ message: validation_result.message, field: validation_result.field }, {
         status: 400
@@ -17,6 +19,7 @@ export const login = action(async (formData) => {
     const { email, password, remember_me } = validation_result.data
 
     const event = getRequestEvent()
+
     try {
         const {device_fingerprint} = exctract_client_info(event.request, event.clientAddress)
         const res = await pool.query(`
@@ -39,6 +42,7 @@ export const login = action(async (formData) => {
         if (!user.password) return json({ field: 'global', message: 'პაროლი არ არსებობს.' }, {
             status: 400
         })
+
         const parameters = {
             message: password,
             nonce: Buffer.from(user.salt, 'hex'),
@@ -70,13 +74,14 @@ export const login = action(async (formData) => {
         })
         await redis.expire(`pending:verification:${rand_id}`, 900)
 
-        throw redirect("/verify/pending", {
+        throw redirect(!next_page ? "/verify/pending" : `/verify/pending${next_page}`, {
             status: 303,
             headers: {
                 'Set-Cookie': `pending_verification=${rand_id}; Path=/; Max-Age=900; HttpOnly; Secure; SameSite=Strict`,
             }
         })
     } catch (error) {
+        console.log(error)
         if (error instanceof Response) throw error;
         return json({
             field: 'global', message: 'დაფიქსირდა შეცდომა, სცადეთ ხელახლა.'

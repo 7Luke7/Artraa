@@ -7,21 +7,21 @@
     "start": "vinxi start"
   },
   "dependencies": {
-    "@tanstack/solid-virtual": "^3.13.13",
-    "jose": "^6.1.2",
-    "nodemailer": "^7.0.11",
-    "ua-parser-js": "^2.0.6"
-  },
-  "devDependencies": {
-    "pg": "^8.16.3",
-    "redis": "^5.10.0",
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.15.4",
     "@solidjs/start": "^1.2.0",
-    "solid-js": "^1.9.5",
-    "vinxi": "^0.5.7",
     "@tailwindcss/vite": "^4.0.7",
-    "tailwindcss": "^4.0.7"
+    "@tanstack/solid-virtual": "^3.13.13",
+    "jose": "^6.1.2",
+    "nodemailer": "^8.0.7",
+    "pg": "^8.16.3",
+    "pg-format": "^1.0.4",
+    "redis": "^5.10.0",
+    "resend": "^6.12.3",
+    "solid-js": "^1.9.5",
+    "tailwindcss": "^4.0.7",
+    "ua-parser-js": "^2.0.6",
+    "vinxi": "^0.5.7"
   },
   "engines": {
     "node": ">=18.0.0"

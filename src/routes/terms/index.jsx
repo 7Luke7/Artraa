@@ -1,5 +1,6 @@
 import { Title, Meta } from "@solidjs/meta"
 import { LegalPage } from "~/components/LegalPage"
+import { RenderWebsocketRoutes } from "~/components/RenderWebsocketRoutes"
 
 const LAST_UPDATED = "2024 წლის 1 იანვარი"
 
@@ -58,15 +59,13 @@ const SECTIONS = [
 ]
 
 export default function TermsPage() {
-    return (
-        <>
-            <Title>გამოყენების წესები - Artra</Title>
-            <Meta name="description" content="Artra-ს გამოყენების წესები და პირობები." />
-            <LegalPage
-                title="გამოყენების წესები"
-                lastUpdated={LAST_UPDATED}
-                sections={SECTIONS}
-            />
-        </>
-    )
+    return <RenderWebsocketRoutes>
+        <Title>გამოყენების წესები - Artra</Title>
+        <Meta name="description" content="Artra-ს გამოყენების წესები და პირობები." />
+        <LegalPage
+            title="გამოყენების წესები"
+            lastUpdated={LAST_UPDATED}
+            sections={SECTIONS}
+        />
+    </RenderWebsocketRoutes>
 }

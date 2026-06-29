@@ -1,14 +1,13 @@
 "use server"
 import { UAParser } from "ua-parser-js";
-import nodemailer from "nodemailer"
 import { createHmac } from "node:crypto"
 import { redisHGetAll } from "./lib/redis/hash";
 import { redis } from "./redis";
 import { redisDel } from "./lib/redis/basic";
 import { publish_to_device } from "../../server/utils"
-import { pool } from "./db";
+import nodemailer from "nodemailer"
 
-export const getCookie = (name, cookieHeader) => {
+export const retreiveCookie = (name, cookieHeader) => {
   if (!cookieHeader) return null;
 
   return cookieHeader
@@ -53,12 +52,20 @@ export const exctract_client_info = (request, clientAddress) => {
 
 const send_email = async (to, subject, html, text) => {
   try {
+    // const { data, error } = await resend.emails.send({
+    //   from: 'Acme <onboarding@resend.dev>',
+    //   to: [to],
+    //   subject: subject,
+    //   html,
+    //   text,
+    // });
+
     const transporter = nodemailer.createTransport({
-      service: process.env.EMAIL_SERVICE,
+      service: 'gmail',
       auth: {
         user: import.meta.env.VITE_EMAIL,
         pass: process.env.EMAIL_SECRET
-      },
+      },  
     });
 
     await transporter.verify();
@@ -74,7 +81,7 @@ const send_email = async (to, subject, html, text) => {
     await transporter.sendMail(mailOptions);
     return { status: 200 };
   } catch (err) {
-    console.error(err);
+    console.error("ERROR_WHILE_SENDING_EMAIL: ", err);
     return { status: 500, message: 'მეილის გაგზავნა ვერ მოხერხდა, ხელახლა სცადეთ.' };
   }
 };
@@ -168,17 +175,18 @@ export const format_to_time = (date) => {
   return `${diffDays} დღის წინ`;
 }
 
-export const logout_all_devices = async (user_id) => {
+export const logout_all_devices = async (user_id, client) => {
   try {
     const sessions = await redis.sMembers(`user:sessions:${user_id}`)
-    
+
+    console.log(user_id, sessions)
     for (const sid of sessions) {
-      await pool.query(`
+      await client.query(`
         UPDATE user_devices
           SET session_id=null
         WHERE user_id=$1 
       `, [user_id])
-      await redisDel(`user:session:${sid}`) 
+      await redisDel(`user:session:${sid}`)
     }
 
     await redisDel(`user:sessions:${user_id}`)
@@ -190,13 +198,13 @@ export const logout_all_devices = async (user_id) => {
   }
 }
 
-export const logout_other_devices = async (user_id, current_session, device_id) => {
+export const logout_other_devices = async (user_id, current_session, device_id, client) => {
   try {
     const sessions = await redis.sMembers(`user:sessions:${user_id}`)
-    
+
     for (const sid of sessions.filter((sess) => sess !== current_session)) {
-      await redisDel(`user:session:${sid}`) 
-      await pool.query(`
+      await redisDel(`user:session:${sid}`)
+      await client.query(`
         UPDATE user_devices
           SET session_id=null
         WHERE user_id=$1 AND id!=$2 
@@ -209,15 +217,43 @@ export const logout_other_devices = async (user_id, current_session, device_id) 
     return true
   } catch (error) {
     return false
-  } 
+  }
 }
 
-export const get_course_level = (level = 'beginner') => {
-  return level === 'advanced' ? 'რთული' : level === 'intermediate' ? 'საშუალო' : 'დამწყები'
+export const formatDuration = (seconds) => {
+  if (!seconds) return ""
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const rem = minutes % 60
+  return hours > 0 ? `${hours}სთ ${rem}წთ` : `${minutes}წთ`
 }
 
-export const formatDuration = (minutes) => {
-  const hours = Math.floor(minutes / 60);
-  const rem = minutes % 60;
-  return hours > 0 ? `${hours}სთ ${rem}წთ` : `${minutes} წთ`;
-};
+export const get_course_level = (level = 'beginner') => level === 'advanced'
+  ? 'რთული' : level === 'intermediate'
+    ? 'საშუალო' : 'დამწყები'
+
+
+export const modify_courses = (courses) => {
+  for (let i = 0; i < courses.length; i++) {
+    const average_rating = Number(courses[i]['average_rating']) || 0
+    const original_price = Number(courses[i]['original_price'])
+    const price = Number(courses[i]['price'])
+    courses[i]['avatar'] = getAvatarUrl(courses[i]['avatar'])
+
+    if (original_price && (original_price > price)) courses[i]['discount'] = Math.round((original_price - price) / original_price * 100)
+    courses[i]['level'] = get_course_level(courses[i]['level'])
+
+    if (average_rating) courses[i]['hasHalfStar'] = average_rating % 1 >= 0.25
+    courses[i]['total_duration'] = formatDuration(courses[i]['total_duration'])
+  }
+}
+
+export const getAvatarUrl = (raw) => {
+  if (!raw) return '/default_profile.png'
+  if (raw.startsWith("cf:")) {
+    const id = raw.slice(3)
+    return `https://imagedelivery.net/${process.env.CF_ACCOUNT_HASH}/${id}/avatar`
+  }
+  if (!raw.startsWith("google:")) return raw
+  return raw.slice(7)
+}

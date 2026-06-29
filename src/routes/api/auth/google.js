@@ -1,3 +1,4 @@
+"use server"
 import { redirect } from "@solidjs/router";
 import { jwtVerify, createRemoteJWKSet } from "jose";
 import { randomBytes } from "node:crypto"
@@ -35,6 +36,7 @@ export async function POST({ request }) {
     const form = await request.formData();
     const event = getRequestEvent()
     const credential = form.get("credential");
+
     try {
         if (typeof credential !== "string") return redirect('/login', {
             status: 303,
@@ -45,7 +47,7 @@ export async function POST({ request }) {
         if (!payload || !payload.email || !payload.email_verified) return redirect('/login', {
             status: 303,
         });
-        const user = await pool.query(`SELECT id, name FROM "User" WHERE (google_id=$1 OR email=$2)`, [payload.sub, payload.email]);
+        const user = await pool.query(`SELECT id, name, avatar FROM "User" WHERE (google_id=$1 OR email=$2)`, [payload.sub, payload.email]);
 
         if (user.rowCount) {
             const rand_id = randomBytes(32).toString("hex")
@@ -85,7 +87,7 @@ export async function POST({ request }) {
             await redisHSet(`user:session:${rand_id}`, {
                 user_id: user.rows[0].id,
                 firstname: user.rows[0].name.split(' ')[0],
-                pfp: payload.picture,
+                pfp: user.rows[0].avatar || payload.picture,
                 device_id: create_user_device.rows[0].id
             })
             await redis.expire(`user:session:${rand_id}`, durationSeconds)
@@ -94,7 +96,7 @@ export async function POST({ request }) {
 
             return redirect('/', {
                 status: 303,
-                revalidate: ['auth', 'get-user-header'],
+                revalidate: 'auth',
                 headers: {
                     'Set-Cookie': `auth.session-token=${rand_id}; Path=/; Max-Age=${durationSeconds}; HttpOnly; Secure; SameSite=Lax`,
                 }
@@ -104,10 +106,10 @@ export async function POST({ request }) {
 
         try {
             const create_user = await client.query(`
-                INSERT INTO "User" (email, name, google_id, email_verified, profile_picture_link)
+                INSERT INTO "User" (email, name, google_id, email_verified, avatar)
                 VALUES ($1, $2, $3, $4, $5)
                 RETURNING id
-            `, [payload.email, payload.name, payload.sub, payload.email_verified, payload.picture])
+            `, [payload.email, payload.name, payload.sub, payload.email_verified, "google:" + payload.picture])
 
             if (!create_user.rowCount) {
                 await client.query('ROLLBACK')
@@ -156,18 +158,18 @@ export async function POST({ request }) {
             await client.query('COMMIT')
             return redirect('/', {
                 status: 201,
-                revalidate: ['auth', 'get-user-header'],
+                revalidate: 'auth',
                 headers: {
                     'Set-Cookie': `auth.session-token=${rand_id}; Path=/; Max-Age=${durationSeconds}; HttpOnly; Secure; SameSite=Lax`,
                 }
             });
         } catch (error) {
-            await client.query('ROLLBACK')
+            if (client) await client.query("ROLLBACK") 
             return redirect('/login', {
                 status: 303
             })
         } finally {
-            client.release()
+            if (client) client.release()
         }
     } catch (error) {
         return redirect('/login', {

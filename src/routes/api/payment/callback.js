@@ -1,3 +1,4 @@
+"use server"
 import { handleBogCallback } from "./payment"
 
 const BOG_ALLOWED_IPS    = [

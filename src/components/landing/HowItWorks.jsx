@@ -1,5 +1,3 @@
-import { A } from "@solidjs/router";
-
 export const HowItWorks = () => {
   const steps = [
     {
@@ -118,7 +116,7 @@ export const HowItWorks = () => {
               დაათვალიერე ყველა კურსი და იპოვე შენთვის შესაფერისი
             </p>
           </div>
-          <A
+          <a
             id="step-0-link"
             href="/courses" 
             class="inline-flex items-center gap-2 bg-[#E85A4F] hover:bg-[#D84A3F] text-white px-6 py-3 rounded-lg font-gsans font-bold transition-colors whitespace-nowrap"
@@ -126,7 +124,7 @@ export const HowItWorks = () => {
           >
             <span>იხილე კურსები</span>
             <img loading="lazy" src='/svg/arrow-narrow-right.svg' width={24} height={24} aria-hidden='true' alt='' />
-          </A>
+          </a>
         </div>
       </div>
       <div class="sr-only">

@@ -1,6 +1,6 @@
 import { action, json } from "@solidjs/router"
 import { getRequestEvent } from "solid-js/web"
-import { getCookie, send_verification_code } from "../../utils"
+import { retreiveCookie, send_verification_code } from "../../utils"
 import { FormDataValidator } from "../../validate/validation-service"
 import { createHmac, randomInt } from "node:crypto"
 import { redisHGet, redisHSet } from "../../lib/redis/hash"
@@ -11,7 +11,7 @@ export const resend_code = action(async () => {
     const { request } = getRequestEvent()
     const cookies = request.headers.get('cookie')
     if (!cookies) return json({ field: 'global', message: "არასწორი მონაცემები." }, { status: 401 })
-    const pending = getCookie('pending_verification', cookies)
+    const pending = retreiveCookie('pending_verification', cookies)
 
     if (!pending) return json({ field: 'global', message: "ვერიფიკაციის იდენტიფიკატორი ვერ მოიძებნა." }, { status: 401 })
 

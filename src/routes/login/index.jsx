@@ -1,11 +1,11 @@
 import { Link, Meta, Title } from "@solidjs/meta"
 import { Footer } from "~/components/Footer"
-import { A, useSubmission } from "@solidjs/router"
+import { useSubmission } from "@solidjs/router"
 import { createSignal, onMount, Show } from "solid-js"
 import { login } from "../api/auth/handle-forms/login"
 import { ProtectAnonymousRoute } from "~/components/protectAnonymousRoutes"
 
-const Login = () => {
+const Login = (props) => {
     const submission = useSubmission(login)
     const [showPassword, setShowPassword] = createSignal(false);
     const [googleLoaded, setGoogleLoaded] = createSignal(false)
@@ -82,6 +82,7 @@ const Login = () => {
                             role="form"
                             class="lg:bg-transparent rounded-lg lg:rounded-none md:p-6 lg:p-0"
                         >
+                            <input type='hidden' name='next_page' value={props.location.search} />
                             <h2 id="login-form-title" class="sr-only">
                                 შესვლის ფორმა
                             </h2>
@@ -237,25 +238,25 @@ const Login = () => {
                                     <div>
                                         <p class="text-sm font-gsans font-medium text-slate-600">
                                             არ გაქვთ ანგარიში?{" "}
-                                            <A
+                                            <a
                                                 target="_self"
                                                 aria-label="ანგარიშის შექმნა Artra-ზე"
                                                 href="/register"
                                                 class="text-[#E85A4F] font-gsans font-medium hover:underline ml-1"
                                             >
                                                 რეგისტრაცია
-                                            </A>
+                                            </a>
                                         </p>
                                     </div>
                                 </section>
                                 <div class="text-sm">
-                                    <A
+                                    <a
                                         href="/reset/find"
                                         aria-label="პაროლის აღდგენა Artra-ზე"
                                         class="text-[#E85A4F] font-gsans font-medium hover:underline ml-1"
                                     >
                                         დაგავიწყდა პაროლი?
-                                    </A>
+                                    </a>
                                 </div>
                             </div>
 
@@ -280,21 +281,21 @@ const Login = () => {
                             <div class="mb-6">
                                 <p class="text-xs font-gsans font-medium text-slate-600 text-center md:text-left">
                                     შესვლით თქვენ ეთანხმებით ჩვენს{" "}
-                                    <A
+                                    <a
                                         href="/terms"
                                         class="text-[#E85A4F] hover:underline"
                                         aria-label="წესები და პირობები"
                                     >
                                         წესებს და პირობებს
-                                    </A>{" "}
+                                    </a>{" "}
                                     და{" "}
-                                    <A
+                                    <a
                                         href="/privacy"
                                         class="text-[#E85A4F] hover:underline"
                                         aria-label="კონფიდენციალურობის პოლიტიკა"
                                     >
                                         კონფიდენციალურობის პოლიტიკას
-                                    </A>.
+                                    </a>.
                                 </p>
                             </div>
 

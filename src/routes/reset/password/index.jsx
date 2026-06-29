@@ -1,5 +1,5 @@
 import { Footer } from "~/components/Footer"
-import { A, createAsync, useSubmission } from "@solidjs/router"
+import { createAsync, useSubmission } from "@solidjs/router"
 import { Match, Show, Switch, createSignal } from "solid-js"
 import { resetPasswordAction } from "~/routes/api/auth/handle-forms/ResetPassword"
 import { HttpStatusCode } from "@solidjs/start"
@@ -7,7 +7,7 @@ import { ProtectResetPassword } from "~/routes/api/auth/ProtectRoutes"
 import { Title } from "@solidjs/meta"
 
 const ResetPassword = () => {
-    const authResult = createAsync(ProtectResetPassword, { deferStream: true })
+    const authResult = createAsync(ProtectResetPassword, { deferStream: false })
     const submission = useSubmission(resetPasswordAction)
     const [showPassword, setShowPassword] = createSignal(false)
     const [showConfirmPassword, setShowConfirmPassword] = createSignal(false)
@@ -21,49 +21,57 @@ const ResetPassword = () => {
         <HttpStatusCode code={authResult()?.status} />
         <Switch>
             <Match when={authResult()?.status === 401}>
-                <Title>401 - არაიდენტიფიცირებული</Title>
-                <div class="min-h-screen flex items-center justify-center p-4">
+                <Title>401 - პაროლის აღდგენა</Title>
+                <div class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
                     <div
-                        class="text-center p-6 md:p-8 bg-white rounded-xl shadow-sm border border-gray-200 max-w-md w-full"
-                        role="alert"
-                        aria-live="assertive"
-                    >
-                        <div class="mb-6">
-                            <div
-                                class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4"
-                                aria-hidden="true"
-                            >
-                                <span class="text-red-600 text-2xl">!</span>
+                        class="fixed inset-0 pointer-events-none opacity-[0.03]"
+                        style={{
+                            "background-image": "radial-gradient(#E85A4F 1px, transparent 1px)",
+                            "background-size": "28px 28px",
+                        }}
+                    />
+
+                    <div class="relative w-full max-w-sm">
+                        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                            <div class="h-1 bg-gradient-to-r from-[#E85A4F] via-[#f07068] to-[#E85A4F]/40" />
+
+                            <div class="p-8 text-center">
+                                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#E85A4F]/8 border border-[#E85A4F]/15 mb-5">
+                                    <img src='/svg/link-off.svg' width={26} height={26} />
+                                </div>
+
+                                <h1 class="text-xl font-gsans font-bold text-gray-900 mb-2">
+                                    ბმული არ არის მოქმედი
+                                </h1>
+                                <p class="text-sm font-gsans text-gray-400 leading-relaxed mb-8 max-w-xs mx-auto">
+                                    პაროლის აღდგენის ბმულის ვადა ამოიწურა ან ბმული არასწორია
+                                </p>
+
+                                <div class="space-y-3">
+                                    <a
+                                        href="/reset/find"
+                                        class="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-[#E85A4F] hover:bg-[#D84A3F] text-white font-gsans font-bold text-sm transition-colors active:scale-[0.99] shadow-sm"
+                                    >
+                                        <img src='/svg/refresh.svg' width={15} height={15} />
+                                        ახალი ბმულის მოთხოვნა
+                                    </a>
+
+                                    <a
+                                        href="/login"
+                                        class="flex items-center justify-center w-full py-3.5 rounded-xl border border-gray-200 text-gray-600 font-gsans font-medium text-sm hover:bg-gray-50 hover:border-gray-300 transition-colors"
+                                    >
+                                        შესვლის გვერდზე დაბრუნება
+                                    </a>
+                                </div>
                             </div>
-                            <h1 class="text-xl font-gsans font-bold text-slate-900 mb-3">
-                                ბმული არ არის მოქმედი
-                            </h1>
-                            <p class="text-slate-600 text-sm font-gsans font-medium leading-relaxed">
-                                პაროლის აღდგენის ბმულის ვადა ამოიწურა ან არასწორია.
-                            </p>
                         </div>
 
-                        <div class="space-y-4">
-                            <A
-                                href="/reset/find"
-                                class="block w-full bg-[#E98074] hover:bg-[#E85A4F] text-white px-5 py-3 rounded-lg font-gsans font-medium transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-[#E98074] focus:ring-opacity-50"
-                                aria-label="ახალი პაროლის აღდგენის მოთხოვნა"
-                            >
-                                მოითხოვეთ ახალი ბმული
-                            </A>
-
-                            <A
-                                href="/login"
-                                target="_self"
-                                class="block w-full border border-gray-300 hover:bg-gray-50 text-slate-700 px-5 py-3 rounded-lg font-gsans font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                                aria-label="დაბრუნება შესვლის გვერდზე"
-                            >
-                                შესვლის გვერდზე დაბრუნება
-                            </A>
-                        </div>
+                        <p class="text-center text-xs text-gray-300 font-gsans mt-5">
+                            Artra · პაროლის აღდგენა
+                        </p>
                     </div>
                 </div>
-            </Match>
+            </Match >
 
             <Match when={authResult()?.status === 200}>
                 <div class="flex flex-col items-center my-20 justify-center p-4">
@@ -249,19 +257,19 @@ const ResetPassword = () => {
                             </div>
 
                             <div class="text-center">
-                                <A
+                                <a
                                     href="/login"
                                     class="text-[#E85A4F] hover:text-[#E98074] font-gsans font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#E85A4F] focus:ring-offset-2 rounded"
                                     aria-label="დაბრუნება შესვლის გვერდზე"
                                 >
                                     დაბრუნება შესვლის გვერდზე
-                                </A>
+                                </a>
                             </div>
                         </form>
                     </main>
                 </div>
             </Match>
-        </Switch>
+        </Switch >
         <Footer />
     </>
 }

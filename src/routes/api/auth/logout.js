@@ -1,6 +1,6 @@
 import { action, json, redirect } from "@solidjs/router";
 import { getRequestEvent } from "solid-js/web";
-import { getCookie } from "../utils";
+import { retreiveCookie } from "../utils";
 import { redisDel } from "../lib/redis/basic";
 import { pool } from "../db";
 import { redis } from "../redis";
@@ -13,11 +13,10 @@ export const logout = action(async () => {
     const cookie = event.request.headers.get("cookie");
     if (!cookie) throw redirect('/login')
 
-    const id = getCookie("auth.session-token", cookie);
+    const id = retreiveCookie("auth.session-token", cookie);
 
     if (!id) throw redirect('/login', {
       status: 303,
-      revalidate: ['auth', 'protect-anonymous', 'protected', 'get-user-header'],
       headers: new Headers([
         ['Set-Cookie', 'auth.session-token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict'],
         ['Set-Cookie', 'g_csrf_token=; Path=/; Max-age=0'],
@@ -27,7 +26,6 @@ export const logout = action(async () => {
     const user_id = await redisHGet(`user:session:${id}`, 'user_id')
     if (!user_id) throw redirect('/login', {
       status: 303,
-      revalidate: ['auth', 'protect-anonymous', 'protected', 'get-user-header'],
       headers: new Headers([
         ['Set-Cookie', 'auth.session-token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict'],
         ['Set-Cookie', 'g_csrf_token=; Path=/; Max-age=0'],
@@ -44,7 +42,6 @@ export const logout = action(async () => {
 
     throw redirect('/login', {
       status: 303,
-      revalidate: ['auth', 'protect-anonymous', 'protected', 'get-user-header'],
       headers: new Headers([
         ['Set-Cookie', 'auth.session-token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict'],
         ['Set-Cookie', 'g_csrf_token=; Path=/; Max-age=0'],

@@ -1,14 +1,14 @@
 import { pool } from "./db"
 
-const BASE_URL = import.meta.env.VITE_URL || "https://artra.ge"
+const BASE_URL = import.meta.env.VITE_URL
 
 const STATIC_PAGES = [
-    { path: "/",           priority: "1.0", changefreq: "weekly" },
-    { path: "/courses",    priority: "0.9", changefreq: "daily"  },
-    { path: "/about",      priority: "0.7", changefreq: "monthly" },
-    { path: "/terms",      priority: "0.3", changefreq: "yearly"  },
-    { path: "/privacy",    priority: "0.3", changefreq: "yearly"  },
-    { path: "/cookies",    priority: "0.3", changefreq: "yearly"  },
+    { path: "/", priority: "1.0", changefreq: "weekly" },
+    { path: "/courses", priority: "0.9", changefreq: "daily" },
+    { path: "/about", priority: "0.7", changefreq: "monthly" },
+    { path: "/terms", priority: "0.3", changefreq: "yearly" },
+    { path: "/privacy", priority: "0.3", changefreq: "yearly" },
+    { path: "/cookies", priority: "0.3", changefreq: "yearly" },
 ]
 
 export async function GET() {
