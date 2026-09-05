@@ -12,6 +12,7 @@
     "@solidjs/start": "^1.2.0",
     "@tailwindcss/vite": "^4.0.7",
     "@tanstack/solid-virtual": "^3.13.13",
+    "dotenv": "^17.4.2",
     "jose": "^6.1.2",
     "nodemailer": "^8.0.7",
     "pg": "^8.16.3",

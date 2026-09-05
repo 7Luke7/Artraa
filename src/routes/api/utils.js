@@ -5,7 +5,7 @@ import { redisHGetAll } from "./lib/redis/hash";
 import { redis } from "./redis";
 import { redisDel } from "./lib/redis/basic";
 import { publish_to_device } from "../../server/utils"
-import nodemailer from "nodemailer"
+import { send_email } from "./lib/email"
 
 export const retreiveCookie = (name, cookieHeader) => {
   if (!cookieHeader) return null;
@@ -49,42 +49,6 @@ export const exctract_client_info = (request, clientAddress) => {
     device_fingerprint
   };
 }
-
-const send_email = async (to, subject, html, text) => {
-  try {
-    // const { data, error } = await resend.emails.send({
-    //   from: 'Acme <onboarding@resend.dev>',
-    //   to: [to],
-    //   subject: subject,
-    //   html,
-    //   text,
-    // });
-
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: import.meta.env.VITE_EMAIL,
-        pass: process.env.EMAIL_SECRET
-      },  
-    });
-
-    await transporter.verify();
-
-    const mailOptions = {
-      from: `"Artra" <${import.meta.env.VITE_EMAIL}>`,
-      to,
-      subject,
-      html,
-      text
-    };
-
-    await transporter.sendMail(mailOptions);
-    return { status: 200 };
-  } catch (err) {
-    console.error("ERROR_WHILE_SENDING_EMAIL: ", err);
-    return { status: 500, message: 'მეილის გაგზავნა ვერ მოხერხდა, ხელახლა სცადეთ.' };
-  }
-};
 
 export const send_verification_code = async (target, code) => {
   const html = `

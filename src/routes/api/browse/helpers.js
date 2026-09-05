@@ -76,32 +76,44 @@ export const get_courses = async (search) => {
     !tsc ? ",\n \tCOUNT(*) OVER() AS total_count" : "",
   )
 
-  let conditions = [];
+  // Only published courses are public. Every sibling query in the application
+  // filters on this - the landing page, the course detail page, the instructor
+  // page - but the catalogue listing did not, so unpublished drafts were
+  // included in the total and appeared on the last page of the catalogue.
+  let conditions = ["c.status = 'published'"];
   let values = [];
 
   if (category) {
-    conditions.push(`$${conditions.length + 1} = cc.slug`);
+    conditions.push(`$${values.length + 1} = cc.slug`);
     values.push(category);
   }
 
   if (priceFrom) {
-    conditions.push(`c.price >= $${conditions.length + 1}`);
+    conditions.push(`c.price >= $${values.length + 1}`);
     values.push(Number(priceFrom));
   }
 
   if (priceTo) {
-    conditions.push(`c.price <= $${conditions.length + 1}`);
+    conditions.push(`c.price <= $${values.length + 1}`);
     values.push(Number(priceTo));
   }
 
   if (search.level) {
-    conditions.push(`level = $${conditions.length + 1}`)
+    conditions.push(`level = $${values.length + 1}`)
     values.push(search.level)
+  }
+
+  // Collected with the other filters rather than appended to `text` after the
+  // WHERE clause is built. Appended, it silently attached itself to the last
+  // LEFT JOIN's ON clause whenever no other filter was active, so ?offer=sale
+  // on its own returned the entire catalogue instead of the discounted courses.
+  if (search.offer === "sale") {
+    conditions.push("c.original_price > c.price")
   }
 
   if (!is_skipped) {
     if (is_prev) {
-      conditions.push(`c.slug != $${conditions.length + 1}`)
+      conditions.push(`c.slug != $${values.length + 1}`)
       values.push(search["course-slug"])
     }
 
@@ -112,8 +124,8 @@ export const get_courses = async (search) => {
         "(c.%I, c.slug) %s ($%s, $%s)",
         column,
         op,
-        conditions.length + 1,
-        conditions.length + 2
+        values.length + 1,
+        values.length + 2
       )
       if (column === "created_at") {
         values.push(new Date(search[`course-${column}`]))
@@ -124,7 +136,7 @@ export const get_courses = async (search) => {
       conditions.push(base_text)
 
     } else if (search[`course-${column}`]) {
-      base_text = format("c.%I %s $%s", column, op, conditions.length + 1)
+      base_text = format("c.%I %s $%s", column, op, values.length + 1)
       if (column === "created_at") {
         values.push(new Date(search[`course-${column}`]))
       } else {
@@ -137,15 +149,12 @@ export const get_courses = async (search) => {
   if (conditions.length > 0) {
     text += `WHERE ${conditions.join(" AND ")}`;
   }
-  if (search.offer === "sale") {
-    text += " AND c.original_price > c.price"
-  }
   if (order) {
     text += `\n${order}`
   }
 
   if (is_skipped) {
-    text += `\nLIMIT 15 OFFSET ($${conditions.length + 1} - 1) * 15`;
+    text += `\nLIMIT 15 OFFSET ($${values.length + 1} - 1) * 15`;
     values.push(Number(page.split("_")[1]))
   } else {
     text += `\nLIMIT 15\n`;
