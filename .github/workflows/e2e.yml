@@ -14,9 +14,13 @@ name: E2E
 # Rules). A push itself cannot be rejected by CI; GitHub has already accepted
 # the commit by the time a workflow starts.
 
+# main is protected and changes land through pull requests, so the pull_request
+# event is the gate and the push event is the record that main itself is green.
+# Deliberately NOT `push: ['**']`: a branch with an open PR would then run the
+# suite twice on the same commit, once per event, for no extra information.
 on:
   push:
-    branches: ['**']
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -42,12 +46,12 @@ env:
 
 jobs:
 
-  # Decides which browsers to run.
+  # Turns the browser list into the matrix.
   #
-  # The full matrix on main and on pull requests, where the result is a gate.
-  # Chrome alone on a feature branch, where it is fast feedback and three jobs
-  # per work-in-progress commit would be noise. A separate job because GitHub's
-  # expression language has no way to split a string into a matrix.
+  # Always the full three unless a manual run asks for fewer: every one of them
+  # is a required status check on main, so a run that quietly produced only some
+  # of them would leave a pull request waiting for a check that is never coming.
+  # A separate job because GitHub's expression language cannot split a string.
   plan:
     name: Resolve browser matrix
     runs-on: ubuntu-latest
@@ -58,15 +62,8 @@ jobs:
       - id: resolve
         env:
           REQUESTED: ${{ inputs.browsers }}
-          IS_GATE: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/main' }}
         run: |
-          if [ -n "$REQUESTED" ]; then
-            list="$REQUESTED"
-          elif [ "$IS_GATE" = "true" ]; then
-            list="chrome,firefox,edge"
-          else
-            list="chrome"
-          fi
+          list="${REQUESTED:-chrome,firefox,edge}"
           json=$(printf '%s' "$list" | tr -d '[:space:]' \
             | awk -F, '{printf "["; for (i = 1; i <= NF; i++) if ($i != "") printf "%s\"%s\"", (i > 1 ? "," : ""), $i; printf "]"}')
           echo "Matrix: $json"
