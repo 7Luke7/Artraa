@@ -28,6 +28,9 @@ export const validation_rules = {
         type: 'string',
         pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
         maxLength: 254,
+        // Folded to lower case before it is stored or looked up - see
+        // FormDataValidator.normalizeEmail for why that is not optional.
+        normalize: 'email',
     },
     subject: {
         required: true,

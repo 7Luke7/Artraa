@@ -5,6 +5,7 @@ import { FormDataValidator } from "../../validate/validation-service"
 import { createHmac, randomInt } from "node:crypto"
 import { redisHGet, redisHSet } from "../../lib/redis/hash"
 import { redis } from "../../redis"
+import { logError } from "../../lib/log"
 
 export const resend_code = action(async () => {
     "use server"
@@ -39,7 +40,10 @@ export const resend_code = action(async () => {
             }
         })
     } catch (error) {
-        console.log(error)
-        return json({ field: 'global', field: "დაფიქსირდა შეცდომა, სცადეთ ხელახლა." }, { status: 500 })
+        logError("auth/handle-forms/resend_code", error)
+        // Was { field, field } - the second key overwrote the first, so this
+        // branch returned no message at all and the screen showed an empty
+        // error box.
+        return json({ field: 'global', message: "დაფიქსირდა შეცდომა, სცადეთ ხელახლა." }, { status: 500 })
     }
 }, 'resend-code')
