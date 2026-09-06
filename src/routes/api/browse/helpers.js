@@ -1,6 +1,7 @@
 'use server'
 import format from "pg-format"
 import { pool } from "../db";
+import { logError } from "../lib/log"
 
 export const get_courses = async (search) => {
   const {
@@ -169,7 +170,7 @@ export const get_courses = async (search) => {
       total_count: data.rows[0]?.total_count ?? tsc
     }
   } catch (error) {
-    console.log(error);
+    logError("browse/helpers", error)
   }
 };
 

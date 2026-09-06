@@ -2,6 +2,7 @@ import { query, redirect } from "@solidjs/router";
 import { getRequestEvent } from "solid-js/web";
 import { retreiveCookie } from "../utils";
 import { redisExists } from "../lib/redis/basic";
+import { logError } from "../lib/log"
 
 export const auth = query(async () => {
   'use server'
@@ -28,7 +29,7 @@ export const websocket_route = query(async () => {
     return auth_state
   } catch (error) {
     if (error instanceof Response) throw error
-    console.log(error)
+    logError("auth/ProtectRoutes", error)
   }
 }, 'websocket')
 
@@ -40,7 +41,7 @@ export const protect_anonymous = query(async () => {
     return true
   } catch (error) {
     if (error instanceof Response) throw error
-    console.log(error)
+    logError("auth/ProtectRoutes", error)
   }
 }, 'protect-anonymous')
 
@@ -56,7 +57,7 @@ export const protected_route = query(async () => {
     return true
   } catch (error) {
     if (error instanceof Response) throw error
-    console.log(error)
+    logError("auth/ProtectRoutes", error)
   }
 }, 'protected')
 
@@ -100,7 +101,7 @@ export const ProtectResetPassword = query(async () => {
 
     return { allowed: true, status: 200 }
   } catch (error) {
-    console.log(error)
+    logError("auth/ProtectRoutes", error)
     return { allowed: false, message: 'ათენთიფიკაცია შეცდომით დასრულდა, სცადეთ ხელახლა.', status: 500 }
   }
 }, 'protect-reset-password')

@@ -6,6 +6,7 @@ import { getRequestEvent } from "solid-js/web"
 import { createHmac, randomInt } from "node:crypto"
 import { notify_user_new_device } from "~/server/utils"
 import { pool } from "../../db"
+import { logError } from "../../lib/log"
 
 export const approve_with_email = action(async (next_page) => {
     'use server'
@@ -35,7 +36,7 @@ export const approve_with_email = action(async (next_page) => {
             }
         })
     } catch (error) {
-        console.log(error)
+        logError("auth/handle-forms/verification_options", error)
         if (error instanceof Response) throw error
     }
 }, 'verify-approve-email')

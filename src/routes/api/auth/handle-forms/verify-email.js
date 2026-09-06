@@ -6,6 +6,7 @@ import { retreiveCookie } from "../../utils";
 import { createHmac } from "node:crypto"
 import { redisHGetAll } from "../../lib/redis/hash";
 import { redisDel } from "../../lib/redis/basic";
+import { logError } from "../../lib/log"
 
 export const verify_email_action = action(async (formData) => {
     "use server"
@@ -60,7 +61,7 @@ export const verify_email_action = action(async (formData) => {
             });
         }
     } catch (error) {
-        console.log(error)
+        logError("auth/handle-forms/verify-email", error)
         if (error instanceof Response) throw error
         return json({ field: 'global', message: 'ვერიფიკაცია შეცდომით დასრულდა, სცადეთ ხელახლა.' }, {
             status: 500

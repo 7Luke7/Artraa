@@ -2,6 +2,7 @@
 import { FormDataValidator } from "../validate/validation-service"
 import { createHmac, randomBytes } from "node:crypto"
 import { redisDel, redisGet, redisSet } from "../lib/redis/basic"
+import { logError } from "../lib/log"
 
 export async function GET({ request }) {
     const url = new URL(request.url)
@@ -38,7 +39,7 @@ export async function GET({ request }) {
         const sess = randomBytes(32).toString("hex")
         await redisSet(`password:reset:${sess}`, user_id, 900)
 
-        try {await redisDel(`pending:verification:${user_token_hash}`)} catch (error) {console.log(error)}
+        try {await redisDel(`pending:verification:${user_token_hash}`)} catch (error) {logError("auth/issue_session", error)}
         return new Response(null, { 
             status: 303,
             headers: {

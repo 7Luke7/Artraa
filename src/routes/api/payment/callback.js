@@ -14,7 +14,11 @@ export async function POST({ request }) {
     }
     try {
         const body = await request.json()
-        console.log("[BOG callback]", body)
+        // The order and its outcome, not the payload. The full body carries the
+        // buyer's details and the provider's own identifiers, and this endpoint
+        // is hit on every purchase.
+        console.info(`[payment/callback] order=${body?.body?.external_order_id ?? "unknown"} `
+            + `status=${body?.body?.status ?? "unknown"}`)
 
         const result = await handleBogCallback(body)
 

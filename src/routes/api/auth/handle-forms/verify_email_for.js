@@ -4,6 +4,7 @@ import { randomBytes } from "node:crypto"
 import { redisHSet } from "../../lib/redis/hash"
 import { redis } from "../../redis"
 import { pool } from "../../db"
+import { logError } from "../../lib/log"
 
 export const verify_email_for = async (verification, event) => {
     switch (verification.type) {
@@ -74,7 +75,7 @@ export const verify_email_for = async (verification, event) => {
                     ])
                 }
             } catch (error) {
-                console.log(error)
+                logError("auth/handle-forms/verify_email_for", error)
                 await client.query('ROLLBACK')
                 return {
                     error_message: "ვერიფიკაცია შეცდომით დასრულდა, სცადეთ ხელახლა.",
@@ -172,7 +173,7 @@ export const verify_email_for = async (verification, event) => {
                     ]
                 }
             } catch (error) {
-                console.log(error)
+                logError("auth/handle-forms/verify_email_for", error)
                 return {
                     error_message: "ვერიფიკაცია შეცდომით დასრულდა, სცადეთ ხელახლა.",
                     status: 500,

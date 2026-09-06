@@ -4,6 +4,7 @@ import {createHmac, randomBytes } from "node:crypto";
 import { pool } from "../../db";
 import { send_verification_link } from "../../utils";
 import { redisSet } from "../../lib/redis/basic";
+import { logError } from "../../lib/log"
 
 export const findUserForReset = action(async (formData) => {
     "use server"
@@ -40,7 +41,7 @@ export const findUserForReset = action(async (formData) => {
             message: "ინსტრუქცია გამოგეგზავნათ."
         }, {status: 200});
     } catch (error) {
-        console.log(error)
+        logError("auth/handle-forms/findUserForReset", error)
         return json({ field: 'global', message: 'დაფიქსირდა შეცდომა, სცადეთ ხელახლა.' }, { status: 500 })
     }
 }, 'find-user-for-reset')

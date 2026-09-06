@@ -1,4 +1,5 @@
 'use server'
+import { logError } from "../lib/log"
 let token = null
 let expires_at = null
 let refreshPromise = null
@@ -67,6 +68,6 @@ export const get_bog_access_token = async () => {
 
         return refreshPromise
     } catch (error) {
-        console.log(error)
+        logError("payment/authenticate", error)
     }
 }
