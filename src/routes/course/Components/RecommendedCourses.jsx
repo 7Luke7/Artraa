@@ -14,7 +14,7 @@ export default (props) => {
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
                     <div class="w-9 h-9 rounded-xl bg-[#E85A4F]/10 flex items-center justify-center shrink-0">
-                        <img src='/svg/sparkles.svg' width={18} height={18} />
+                        <img src='/svg/sparkles.svg' width={18} height={18} alt="" />
                     </div>
                     <div>
                         <h2 id="recommended-heading" class="text-xl md:text-2xl font-gsans font-bold text-gray-900 leading-tight">

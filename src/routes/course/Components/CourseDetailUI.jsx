@@ -128,12 +128,12 @@ export const CourseDetailUI = (props) => {
                                     </p>
                                     <div class="flex items-center gap-3 flex-wrap text-xs text-gray-400 font-gsans mb-4">
                                         <span class="flex items-center gap-1">
-                                            <img src='/svg/book-2.svg' width={13} height={13} />
+                                            <img src='/svg/book-2.svg' width={13} height={13} alt="" />
                                             {props.course.total_courses} კურსი
                                         </span>
                                         <span class="text-gray-200">·</span>
                                         <span class="flex items-center gap-1">
-                                            <img src='/svg/users-group.svg' width={13} height={13} />
+                                            <img src='/svg/users-group.svg' width={13} height={13} alt="" />
                                             {props.course.total_students} მოსწავლე
                                         </span>
                                     </div>
@@ -143,7 +143,7 @@ export const CourseDetailUI = (props) => {
                                         class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-gray-200 text-xs font-gsans font-medium text-gray-600 hover:border-[#E85A4F]/40 hover:text-[#E85A4F] hover:bg-[#E85A4F]/4 transition-all"
                                     >
                                         პროფილის ნახვა
-                                        <img src='/svg/arrow-narrow-right-black.svg' width={13} height={13} />
+                                        <img src='/svg/arrow-narrow-right-black.svg' width={13} height={13} alt="" />
                                     </a>
                                 </div>
                             </div>

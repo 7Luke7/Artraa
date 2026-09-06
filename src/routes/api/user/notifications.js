@@ -5,6 +5,7 @@ import { format_to_time, retreiveCookie } from "../utils"
 import { redisExists } from "../lib/redis/basic"
 import { redis } from "../redis"
 import { redisHGet, redisHSet } from "../lib/redis/hash"
+import { logError } from "../lib/log"
 
 export const get_new_notification_count = query(async () => {
     'use server'
@@ -38,7 +39,7 @@ export const get_new_notification_count = query(async () => {
 
         return notification_count ?? 0
     } catch (error) {
-        console.log(error)
+        logError("user/notifications", error)
     }
 }, 'new-notification-count')
 
@@ -74,7 +75,7 @@ export const get_all_notifications_count = query(async () => {
 
         return notification_count ?? 0
     } catch (error) {
-        console.log(error)
+        logError("user/notifications", error)
     }
 }, 'get-all-notifications')
 
@@ -135,7 +136,7 @@ export const get_notifications = query(async ({ created_at, id }) => {
         }, { status: 200 })
     } catch (error) {
         if (error instanceof Response) throw error
-        console.log(error)
+        logError("user/notifications", error)
     }
 }, 'get-active-sessions')
 
@@ -183,7 +184,7 @@ export const mark_notification_as = async (id, seen) => {
         })
     } catch (error) {
         if (error instanceof Response) throw error
-        console.log(error)
+        logError("user/notifications", error)
     }
 }
 
@@ -230,7 +231,7 @@ export const remove_notification = async (id, seen) => {
             status: 200
         })
     } catch (error) {
-        console.log(error)
+        logError("user/notifications", error)
         if (error instanceof Response) throw error
     }
 }
@@ -278,7 +279,7 @@ export const mark_all_notification_as_seen = async () => {
             status: 200
         })
     } catch (error) {
-        console.log(error)
+        logError("user/notifications", error)
         if (error instanceof Response) throw error
     }
 }

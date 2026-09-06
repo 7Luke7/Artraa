@@ -4,6 +4,7 @@ import { redisExists } from "../lib/redis/basic";
 import { redisHGet } from "../lib/redis/hash";
 import { getAvatarUrl, modify_courses, retreiveCookie } from "../utils";
 import { pool } from "../db";
+import { logError } from "../lib/log"
 
 export const get_user = query(async () => {
   'use server'
@@ -21,7 +22,7 @@ export const get_user = query(async () => {
 
     return firstname
   } catch (error) {
-    console.log(error)
+    logError("user/landing", error)
   }
 }, 'get-user')
 
@@ -44,7 +45,7 @@ export const get_header = query(async () => {
 
     return { status: 200, avatar }
   } catch (error) {
-    console.log(error)
+    logError("user/landing", error)
   }
 }, 'get-user-header')
 

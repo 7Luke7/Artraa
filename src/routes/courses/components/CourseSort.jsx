@@ -37,7 +37,7 @@ export const CourseSort = (props) => {
                     {opt => <option name={opt.label} value={opt.value}>{opt.label}</option>}
                 </For>
             </select>
-            <img src="svg/chevron-down.svg" class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" width={14} height={14} />
+            <img src="svg/chevron-down.svg" class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" width={14} height={14} alt="" />
         </div>
     )
 }

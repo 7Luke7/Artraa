@@ -79,14 +79,14 @@ export default function NotFound() {
                                     href="/"
                                     class="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-3 rounded-xl bg-[#E85A4F] text-white font-gsans font-bold text-sm hover:bg-[#D84A3F] transition-colors shadow-sm"
                                 >
-                                    <img src='/svg/home-white.svg' width={16} height={16}></img>
+                                    <img src='/svg/home-white.svg' width={16} height={16} alt="" ></img>
                                     მთავარი გვერდი
                                 </a>
                                 <a
                                     href="/courses"
                                     class="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-3 rounded-xl border border-gray-200 bg-white text-gray-700 font-gsans font-medium text-sm hover:border-gray-300 hover:bg-gray-50 transition-colors"
                                 >
-                                    <img src='/svg/book.svg' width={16} height={16} />
+                                    <img src='/svg/book.svg' width={16} height={16} alt="" />
                                     კურსების დათვალიერება
                                 </a>
                             </div>

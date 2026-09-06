@@ -2,6 +2,7 @@
 import { json } from "@solidjs/router";
 import { ConstructBrowseLinks, get_courses } from "./helpers";
 import { modify_courses } from "../utils";
+import { logError } from "../lib/log"
 
 const map_categories = {
   'construction': 'მშენებლობა',
@@ -65,7 +66,7 @@ export async function GET({ request }) {
       category: map_categories[mergedParams["category"]],
     }, {status: 200})
   } catch (error) {
-    console.log("err", error);
+    logError("browse/courses", error);
     return json({ok: false, message: "დაფიქსირდა შეცდომა."}, {status: 500})
   }
 }

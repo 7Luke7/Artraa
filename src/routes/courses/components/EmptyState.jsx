@@ -2,7 +2,7 @@ export default ({ hasFilters }) => {
     return (
         <div class="flex flex-col items-center justify-center py-20 text-center">
             <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-5">
-                <img src='/svg/search.svg' width={28} height={28} />
+                <img src='/svg/search.svg' width={28} height={28} alt="" />
             </div>
             <p class="font-gsans font-bold text-gray-900 mb-2">კურსები ვერ მოიძებნა</p>
             <p class="text-sm text-gray-400 font-gsans mb-6">სხვა ფილტრები სცადეთ</p>

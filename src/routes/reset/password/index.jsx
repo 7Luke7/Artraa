@@ -1,20 +1,19 @@
 import { Footer } from "~/components/Footer"
 import { createAsync, useSubmission } from "@solidjs/router"
-import { Match, Show, Switch, createSignal } from "solid-js"
+import { Match, Show, Switch } from "solid-js"
 import { resetPasswordAction } from "~/routes/api/auth/handle-forms/ResetPassword"
 import { HttpStatusCode } from "@solidjs/start"
 import { ProtectResetPassword } from "~/routes/api/auth/ProtectRoutes"
 import { Title } from "@solidjs/meta"
+import { PasswordField } from "~/components/forms/PasswordField"
 
 const ResetPassword = () => {
     const authResult = createAsync(ProtectResetPassword, { deferStream: false })
     const submission = useSubmission(resetPasswordAction)
-    const [showPassword, setShowPassword] = createSignal(false)
-    const [showConfirmPassword, setShowConfirmPassword] = createSignal(false)
 
-    const GlobalField = () => submission.result?.field === 'global'
-    const PasswordField = () => submission.result?.field === 'password'
-    const ConfirmPasswordField = () => submission.result?.field === 'confirm_password'
+    const globalFailed = () => submission.result?.field === 'global'
+    const passwordFailed = () => submission.result?.field === 'password'
+    const confirmPasswordFailed = () => submission.result?.field === 'confirm_password'
     const message = () => submission.result?.message
 
     return <>
@@ -37,7 +36,7 @@ const ResetPassword = () => {
 
                             <div class="p-8 text-center">
                                 <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#E85A4F]/8 border border-[#E85A4F]/15 mb-5">
-                                    <img src='/svg/link-off.svg' width={26} height={26} />
+                                    <img src='/svg/link-off.svg' width={26} height={26} alt="" />
                                 </div>
 
                                 <h1 class="text-xl font-gsans font-bold text-gray-900 mb-2">
@@ -52,7 +51,7 @@ const ResetPassword = () => {
                                         href="/reset/find"
                                         class="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-[#E85A4F] hover:bg-[#D84A3F] text-white font-gsans font-bold text-sm transition-colors active:scale-[0.99] shadow-sm"
                                     >
-                                        <img src='/svg/refresh.svg' width={15} height={15} />
+                                        <img src='/svg/refresh.svg' width={15} height={15} alt="" />
                                         ახალი ბმულის მოთხოვნა
                                     </a>
 
@@ -100,7 +99,7 @@ const ResetPassword = () => {
                                 </p>
                             </div>
 
-                            <Show when={GlobalField()}>
+                            <Show when={globalFailed()}>
                                 <div
                                     class="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg"
                                     role="alert"
@@ -114,128 +113,40 @@ const ResetPassword = () => {
 
                             <div class="space-y-6">
                                 <section>
-                                    <label
-                                        for="new-password"
-                                        class="text-sm text-slate-900 font-gsans font-medium mb-2 block"
-                                    >
-                                        ახალი პაროლი
-                                    </label>
-                                    <div class="relative">
-                                        <input
-                                            id="new-password"
-                                            name="password"
-                                            type={showPassword() ? "text" : "password"}
-                                            inputmode="text"
-                                            autocomplete="new-password"
-                                            required
-                                            minlength="8"
-                                            maxlength="128"
-                                            aria-required="true"
-                                            aria-invalid={PasswordField() ? "true" : "false"}
-                                            aria-describedby="password-constraints"
-                                            class={`bg-slate-50 w-full text-sm font-gsans font-medium text-slate-900 px-4 py-3 pr-10 rounded-md outline-0 border focus:bg-transparent transition-colors duration-200
-                                                        ${PasswordField()
-                                                    ? 'border-red-500'
-                                                    : 'border-gray-200 focus:ring-2 focus:ring-[#E98074] focus:ring-opacity-30'
-                                                }`}
-                                            placeholder="შეიყვანეთ ახალი პაროლი"
-                                            disabled={submission.pending}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword())}
-                                            class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 rounded hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E98074] focus:ring-offset-2 transition-colors duration-200"
-                                            aria-label={showPassword() ? "პაროლის დამალვა" : "პაროლის ჩვენება"}
-                                            aria-controls="new-password"
-                                            aria-expanded={showPassword()}
-                                            disabled={submission.pending}
-                                        >
-                                            <Show
-                                                when={showPassword()}
-                                                fallback={
-                                                    <img
-                                                        src="/svg/eye.svg"
-                                                        width={20}
-                                                        height={20}
-                                                        aria-hidden="true"
-                                                    />
-                                                }
-                                            >
-                                                <img
-                                                    src="/svg/eye-closed.svg"
-                                                    width={20}
-                                                    height={20}
-                                                    aria-hidden="true"
-                                                />
-                                            </Show>
-                                        </button>
-                                    </div>
-                                    <div id="password-constraints" aria-live={PasswordField() ? 'assertive' : 'off'} role={PasswordField() ? 'alert' : ''} class={`mt-2 font-gsans font-normal text-xs ${PasswordField() ? 'text-red-600' : 'text-slate-600'}`}>
-                                        {PasswordField() ? message() : 'მინიმუმ 8 სიმბოლო, space-ის გარეშე'}
-                                    </div>
+                                    <PasswordField
+                                        id="new-password"
+                                        name="password"
+                                        label="ახალი პაროლი"
+                                        autocomplete="new-password"
+                                        required
+                                        aria-required="true"
+                                        minlength="8"
+                                        maxlength="128"
+                                        disabled={submission.pending}
+                                        placeholder="შეიყვანეთ ახალი პაროლი"
+                                        invalid={passwordFailed()}
+                                        message={message()}
+                                        hint="მინიმუმ 8 სიმბოლო, space-ის გარეშე"
+                                    />
                                 </section>
 
                                 <section>
-                                    <label
-                                        for="confirm-password"
-                                        class="text-sm text-slate-900 font-gsans font-medium mb-2 block"
-                                    >
-                                        დაადასტურეთ პაროლი
-                                    </label>
-                                    <div class="relative">
-                                        <input
-                                            id="confirm-password"
-                                            name="confirm_password"
-                                            type={showConfirmPassword() ? "text" : "password"}
-                                            inputmode="text"
-                                            autocomplete="new-password"
-                                            required
-                                            minlength="8"
-                                            maxlength="128"
-                                            aria-required="true"
-                                            aria-invalid={ConfirmPasswordField() ? "true" : "false"}
-                                            class={`bg-slate-50 w-full text-sm font-gsans font-medium text-slate-900 px-4 py-3 pr-10 rounded-md outline-0 border focus:bg-transparent transition-colors duration-200
-                                                        ${ConfirmPasswordField()
-                                                    ? 'border-red-500'
-                                                    : 'border-gray-200 focus:ring-2 focus:ring-[#E98074] focus:ring-opacity-30'
-                                                }`}
-                                            placeholder="გაიმეორეთ ახალი პაროლი"
-                                            disabled={submission.pending}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowConfirmPassword(!showConfirmPassword())}
-                                            class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 rounded hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E98074] focus:ring-offset-2 transition-colors duration-200"
-                                            aria-label={showConfirmPassword() ? "პაროლის დამალვა" : "პაროლის ჩვენება"}
-                                            aria-controls="confirm-password"
-                                            aria-expanded={showConfirmPassword()}
-                                            disabled={submission.pending}
-                                        >
-                                            <Show
-                                                when={showConfirmPassword()}
-                                                fallback={
-                                                    <img
-                                                        src="/svg/eye.svg"
-                                                        width={20}
-                                                        height={20}
-                                                        aria-hidden="true"
-                                                    />
-                                                }
-                                            >
-                                                <img
-                                                    src="/svg/eye-closed.svg"
-                                                    width={20}
-                                                    height={20}
-                                                    aria-hidden="true"
-                                                />
-                                            </Show>
-                                        </button>
-                                    </div>
-                                    <Show when={ConfirmPasswordField()}>
-                                        <div id="password-constraints" aria-live='assertive' role='alert' class='mt-2 font-gsans font-normal text-xs text-red-600'>
-                                            {message()}
-                                        </div>
-                                    </Show>
+                                    <PasswordField
+                                        id="confirm-password"
+                                        name="confirm_password"
+                                        label="დაადასტურეთ პაროლი"
+                                        autocomplete="new-password"
+                                        required
+                                        aria-required="true"
+                                        minlength="8"
+                                        maxlength="128"
+                                        disabled={submission.pending}
+                                        placeholder="გაიმეორეთ ახალი პაროლი"
+                                        invalid={confirmPasswordFailed()}
+                                        message={message()}
+                                        hint="გაიმეორეთ ზუსტად იგივე პაროლი"
+                                        hintId="confirm-password-constraints"
+                                    />
                                 </section>
                             </div>
 

@@ -6,6 +6,7 @@ import { pool } from "../../db";
 import { hash_password } from "../hash";
 import { randomBytes } from "node:crypto"
 import { redisHGet } from "../../lib/redis/hash";
+import { logError } from "../../lib/log"
 
 export const update_password = action(async (formData) => {
     'use server'
@@ -126,7 +127,7 @@ export const update_password = action(async (formData) => {
             }
         })
     } catch (error) {
-        console.log(error)
+        logError("auth/handle-forms/update_password", error)
         if (client) await client.query("ROLLBACK")
         return json({
             ok: false,

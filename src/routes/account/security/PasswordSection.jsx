@@ -78,16 +78,14 @@ export const PasswordSection = ({security}) => {
                                                 src="/svg/eye.svg"
                                                 width={20}
                                                 height={20}
-                                                aria-hidden="true"
-                                            />
+                                                aria-hidden="true" alt="" />
                                         }
                                     >
                                         <img
                                             src="/svg/eye-closed.svg"
                                             width={20}
                                             height={20}
-                                            aria-hidden="true"
-                                        />
+                                            aria-hidden="true" alt="" />
                                     </Show>
                                 </button>
                             </section>
@@ -137,16 +135,14 @@ export const PasswordSection = ({security}) => {
                                                 src="/svg/eye.svg"
                                                 width={20}
                                                 height={20}
-                                                aria-hidden="true"
-                                            />
+                                                aria-hidden="true" alt="" />
                                         }
                                     >
                                         <img
                                             src="/svg/eye-closed.svg"
                                             width={20}
                                             height={20}
-                                            aria-hidden="true"
-                                        />
+                                            aria-hidden="true" alt="" />
                                     </Show>
                                 </button>
                             </section>
@@ -242,16 +238,14 @@ export const PasswordSection = ({security}) => {
                                                 src="/svg/eye.svg"
                                                 width={20}
                                                 height={20}
-                                                aria-hidden="true"
-                                            />
+                                                aria-hidden="true" alt="" />
                                         }
                                     >
                                         <img
                                             src="/svg/eye-closed.svg"
                                             width={20}
                                             height={20}
-                                            aria-hidden="true"
-                                        />
+                                            aria-hidden="true" alt="" />
                                     </Show>
                                 </button>
                             </section>
@@ -295,16 +289,14 @@ export const PasswordSection = ({security}) => {
                                                 src="/svg/eye.svg"
                                                 width={20}
                                                 height={20}
-                                                aria-hidden="true"
-                                            />
+                                                aria-hidden="true" alt="" />
                                         }
                                     >
                                         <img
                                             src="/svg/eye-closed.svg"
                                             width={20}
                                             height={20}
-                                            aria-hidden="true"
-                                        />
+                                            aria-hidden="true" alt="" />
                                     </Show>
                                 </button>
                             </section>
@@ -354,16 +346,14 @@ export const PasswordSection = ({security}) => {
                                                 src="/svg/eye.svg"
                                                 width={20}
                                                 height={20}
-                                                aria-hidden="true"
-                                            />
+                                                aria-hidden="true" alt="" />
                                         }
                                     >
                                         <img
                                             src="/svg/eye-closed.svg"
                                             width={20}
                                             height={20}
-                                            aria-hidden="true"
-                                        />
+                                            aria-hidden="true" alt="" />
                                     </Show>
                                 </button>
                             </section>

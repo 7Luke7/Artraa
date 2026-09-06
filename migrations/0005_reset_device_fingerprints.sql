@@ -1,0 +1,17 @@
+-- 0005 - clear device fingerprints computed by the old signature.
+--
+-- The fingerprint used to be device type + vendor + model + browser name + CPU
+-- architecture. ua-parser fills the first three in only for phones and tablets,
+-- so on desktop they were all "unknown" and every desktop Chrome on x86 hashed
+-- to the same value - which meant a sign-in from someone else's laptop matched
+-- the account owner's trusted-device row and skipped the second factor that
+-- row exists to require.
+--
+-- exctract_client_info now folds in the OS and the major versions. Rows written
+-- under the old signature can never match again, so they would sit in the
+-- account's device list forever, unmatchable and describing a device that was
+-- probably never the user's.
+--
+-- Effect: every account verifies once more on its next sign-in, on each device.
+-- Sessions are held in Redis and are not touched, so nobody is signed out.
+DELETE FROM public.user_devices;

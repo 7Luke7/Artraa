@@ -1,9 +1,10 @@
 "use server"
+import { logError } from "../lib/log"
 
 export const upload_image = async () => {
     try {
         
     } catch (error) {
-        console.log(error)
+        logError("user/profile", error)
     }
 }

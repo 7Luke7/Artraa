@@ -2,6 +2,7 @@ import { query } from "@solidjs/router";
 import { pool } from "./db";
 import { generateLandingStructuredData } from "./lib/seo";
 import { modify_courses } from "./utils";
+import { logError } from "./lib/log"
 
 export const unauthenticated_landing_data = query(async () => {
     'use server'
@@ -47,7 +48,7 @@ export const unauthenticated_landing_data = query(async () => {
             structuredData: generateLandingStructuredData(import.meta.env.VITE_URL, courses)
         }
     } catch (error) {
-        console.log(error)
+        logError("data_for_landing", error)
         return {ok: false, message: 'დაფიქსირდა შეცდომა კურსების ჩატვირთვისას'}   
     }
 }, 'unauthenticated_landing_data')

@@ -42,7 +42,12 @@ env:
   # the application should be tested against the current suite, so a new
   # regression test starts guarding this repository as soon as it is written.
   E2E_REPOSITORY: 7Luke7/artra-e2e
-  E2E_REF: main
+  # TEMPORARY - revert to main once the paired suite change is merged.
+  # This change and 7Luke7/artra-e2e#public-url-and-app-migrations depend on
+  # each other: the verification screen now submits itself once the sixth digit
+  # lands, which the suite on main does not expect. Pointing at the branch is
+  # what lets this pull request test the pairing that will actually ship.
+  E2E_REF: public-url-and-app-migrations
 
 jobs:
 

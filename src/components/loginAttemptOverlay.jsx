@@ -61,8 +61,8 @@ export default ({ pending_verification_id }) => {
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center">
                                 {data().device_type === "mobile" ? 
-                                    <img src="/svg/device-mobile.svg" />
-                                : data().device_type === "desktop" && <img src="/svg/device-desktop.svg" />}
+                                    <img src="/svg/device-mobile.svg" alt="" />
+                                : data().device_type === "desktop" && <img src="/svg/device-desktop.svg" alt="" />}
                             </div>
                             <div>
                                 <p class="text-slate-900 font-gsans font-normal text-base">

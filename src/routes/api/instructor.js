@@ -1,6 +1,7 @@
 import { query, json } from "@solidjs/router";
 import { pool } from "./db";
 import { getAvatarUrl, modify_courses } from "./utils";
+import { logError } from "./lib/log"
 
 export const get_instructor = query(async (slug) => {
     "use server";
@@ -153,13 +154,12 @@ export const get_instructor_courses = query(async (page, instructor_id) => {
         `
         const offset = (page - 1) * 6
 
-        console.log(text, [instructor_id, offset])
         const result = await pool.query(text, [instructor_id, offset])
 
         modify_courses(result.rows)
 
         return result.rows        
     } catch (error) {
-        console.log(error)
+        logError("instructor", error)
     }
 }, 'instructor-courses')

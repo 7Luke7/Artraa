@@ -6,6 +6,7 @@ import { redis } from "./redis";
 import { redisDel } from "./lib/redis/basic";
 import { publish_to_device } from "../../server/utils"
 import { send_email } from "./lib/email"
+import { logError } from "./lib/log"
 
 export const retreiveCookie = (name, cookieHeader) => {
   if (!cookieHeader) return null;
@@ -25,11 +26,32 @@ export const exctract_client_info = (request, clientAddress) => {
   const parser = new UAParser(user_agent);
   const result = parser.getResult()
 
+  // What the fingerprint is for: recognising a device the account has used
+  // before, so a second factor can be skipped for it.
+  //
+  // It used to be device type + vendor + model + browser name + CPU
+  // architecture. On desktop the first three are all "unknown" - ua-parser only
+  // fills them in for phones and tablets - so every desktop Chrome on x86
+  // hashed to the same value. A sign-in from a stranger's laptop matched the
+  // owner's trusted-device row and skipped the check the row exists to enforce.
+  //
+  // The OS and the major versions are what separate those machines. Majors
+  // only: a full version string would re-fingerprint the device on every patch
+  // release and ask for a code every few days.
+  //
+  // This is still a coarse signal - a UA cannot identify a device, and two
+  // identical laptops will always collide - so it is a filter, never proof of
+  // identity.
+  const major = (version) => String(version || '').split('.')[0] || 'უცნობი'
+
   const signature = [
     result.device.type || 'უცნობი',
     result.device.vendor || 'უცნობი',
     result.device.model || 'უცნობი',
     result.browser.name || 'უცნობი',
+    major(result.browser.version),
+    result.os.name || 'უცნობი',
+    major(result.os.version),
     result.cpu.architecture || 'უცნობი'
   ].join("|");
 
@@ -120,7 +142,7 @@ export const get_temporary_device = async (id) => {
       }
     })
   } catch (error) {
-    console.log(error)
+    logError("utils", error)
   }
 }
 
@@ -143,7 +165,6 @@ export const logout_all_devices = async (user_id, client) => {
   try {
     const sessions = await redis.sMembers(`user:sessions:${user_id}`)
 
-    console.log(user_id, sessions)
     for (const sid of sessions) {
       await client.query(`
         UPDATE user_devices
@@ -157,7 +178,7 @@ export const logout_all_devices = async (user_id, client) => {
     await publish_to_device(user_id)
     return true
   } catch (error) {
-    console.log(error)
+    logError("utils", error)
     return false
   }
 }

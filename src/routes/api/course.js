@@ -5,6 +5,7 @@ import { getRequestEvent } from "solid-js/web";
 import { redisHGet } from "./lib/redis/hash";
 import { formatDuration, get_course_level, getAvatarUrl, modify_courses, retreiveCookie } from "./utils";
 import crypto from "node:crypto"
+import { logError } from "./lib/log"
 
 export const get_course_detail = query(async (slug, search) => {
     'use server'
@@ -145,7 +146,7 @@ export const get_course_detail = query(async (slug, search) => {
             structuredData: !courses['preview_access'] || courses['is_enrolled'] ? generateCourseStructuredData(course.rows[0]) : null,
         };
     } catch (error) {
-        console.log(error)
+        logError("course", error)
         return {
             ok: false,
             message: "დაფიქსირდა შეცდომა.",
@@ -242,7 +243,7 @@ export const recommended_courses = query(async ({ category_id, currentCourseSlug
 
         return recommended;
     } catch (error) {
-        console.log(error);
+        logError("course", error)
         return [];
     }
 });
@@ -270,23 +271,9 @@ export const get_course_reviews = query(async (page, course_id) => {
 
         return result.rows
     } catch (error) {
-        console.log(error)
+        logError("course", error)
     }
 }, 'get-course-reviews')
-
-// export async function get_course_player(slug) {
-//     try {
-//         const { request } = getRequestEvent()
-//         const cookie = request.headers.get("cookie");
-
-//         const id = retreiveCookie("auth.session-token", cookie);
-//         const userId = await redisHGet(`user:session:${id}`, 'user_id')
-
-//     } catch (err) {
-//         console.error("get_course_player error:", err)
-//         return { ok: false, error: "სერვერის შეცდომა" }
-//     }
-// }
 
 /**
  * submit_review({ courseSlug, rating, comment })

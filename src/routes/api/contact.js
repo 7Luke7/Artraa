@@ -1,6 +1,7 @@
 import { action, json } from "@solidjs/router"
 import { FormDataValidator } from "./validate/validation-service"
 import { pool } from "./db"
+import { logError } from "./lib/log"
 
 export const contactForm = action(async (formData) => {
     "use server"
@@ -28,7 +29,7 @@ export const contactForm = action(async (formData) => {
     
         return { ok: true, message: `თქვენი შეტყობინება მიღებულია. ვუპასუხებთ 24 საათის განმავლობაში.`}    
     } catch (error) {
-        console.log(error)
+        logError("contact", error)
         return json({
             message: 'შეტყობინების გაგზავნისას დაფიქსირდა შეცდომა, სცადეთ ხელახლა.',
             field: 'global',

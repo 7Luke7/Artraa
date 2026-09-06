@@ -33,7 +33,7 @@ export default ({ instructor }) => {
                                 </h2>
                                 <button onClick={() => setActiveTab('courses')} class="text-sm font-gsans font-medium flex items-center cursor-pointer gap-x-1 text-[#E85A4F]">
                                     <span>ყველა</span>
-                                    <img src='/svg/arrow-narrow-right-branded.svg' width={15} height={15} />
+                                    <img src='/svg/arrow-narrow-right-branded.svg' width={15} height={15} alt="" />
                                 </button>
                             </div>
                             <Show

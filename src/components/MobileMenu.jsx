@@ -38,12 +38,12 @@ export default (props) => {
             <Show when={isAuthed()}>
                 <div class="pt-3 mt-2 border-t border-gray-100 space-y-1">
                     <a href="/notifications" class={linkCls} onClick={props.onClose}>
-                        <img src='/svg/notification.svg' width={18} height={18} />
+                        <img src='/svg/notification.svg' width={18} height={18} alt="" />
                         შეტყობინებები
                     </a>
 
                     <a href="/account" class={linkCls} onClick={props.onClose}>
-                        <img src='/svg/gear.svg' width={18} height={18} />
+                        <img src='/svg/gear.svg' width={18} height={18} alt="" />
                         აქაუნთი
                     </a>
 
@@ -53,7 +53,7 @@ export default (props) => {
                                 type="submit"
                                 class="w-full flex items-center gap-3 px-2 py-2.5 rounded-xl text-sm font-gsans font-medium text-red-500 hover:bg-red-50 transition-colors"
                             >
-                                <img src="/svg/logout.svg" width={18} height={18} />
+                                <img src="/svg/logout.svg" width={18} height={18} alt="" />
                                 გასვლა
                             </button>
                         </form>

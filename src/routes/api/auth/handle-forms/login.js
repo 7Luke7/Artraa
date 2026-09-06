@@ -7,6 +7,7 @@ import { redis } from "../../redis"
 import { redisHSet } from "../../lib/redis/hash"
 import { exctract_client_info } from "../../utils"
 import { getRequestEvent } from "solid-js/web"
+import { logError } from "../../lib/log"
 
 export const login = action(async (formData) => {
     "use server"
@@ -81,7 +82,7 @@ export const login = action(async (formData) => {
             }
         })
     } catch (error) {
-        console.log(error)
+        logError("auth/handle-forms/login", error)
         if (error instanceof Response) throw error;
         return json({
             field: 'global', message: 'დაფიქსირდა შეცდომა, სცადეთ ხელახლა.'

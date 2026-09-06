@@ -4,6 +4,7 @@ import { redisHGet, redisHModValue } from "../../lib/redis/hash"
 import { pool } from "../../db"
 import { retreiveCookie } from "../../utils"
 import { redisExists } from "../../lib/redis/basic"
+import { logError } from "../../lib/log"
 
 export const get_image_upload_url = query(async () => {
     'use server'
@@ -102,6 +103,6 @@ export const save_profile_picture = action(async (cfImageId) => {
         return { ok: true }
     } catch(error) {
         if (error instanceof Response) throw error
-        console.log(error)
+        logError("user/images/cloudflare", error)
     }
 }, "save-profile-picture")

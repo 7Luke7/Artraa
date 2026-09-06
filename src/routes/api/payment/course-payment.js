@@ -4,6 +4,7 @@ import { createBogOrder } from "./payment"
 import { redisHGet } from "../lib/redis/hash"
 import { pool } from "../db"
 import { retreiveCookie } from "../utils"
+import { logError } from "../lib/log"
 
 export const initiate_purchase = action(async (courseSlug) => {
     "use server"
@@ -53,7 +54,7 @@ export const initiate_purchase = action(async (courseSlug) => {
 
         throw redirect(redirectUrl)
     } catch (error) {
-        console.log(error)
+        logError("payment/course-payment", error)
         if (error instanceof Response) throw error;
     }
 }, "initiate-purchase")

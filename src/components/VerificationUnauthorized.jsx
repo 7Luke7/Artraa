@@ -10,7 +10,7 @@ export const VerificationUnauthorized = () => {
                 aria-labelledby="error-title"
             >
                 <div class="w-12 h-12 bg-red-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <img src='/svg/close-white.svg' width={32} height={32} />
+                    <img src='/svg/close-white.svg' width={32} height={32} alt="" />
                 </div>
 
                 <h1

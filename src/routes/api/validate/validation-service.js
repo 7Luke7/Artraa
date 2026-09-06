@@ -7,6 +7,27 @@ export class FormDataValidator {
             : input;
     }
 
+    /**
+     * Case-folds and trims an address.
+     *
+     * Every form field already passes through this class, so this is the one
+     * place where "Luka@Gmail.com" and "luka@gmail.com" can be made the same
+     * account. Left alone they are two: User.email is UNIQUE over the raw
+     * string, so the duplicate check misses, a second row is created for the
+     * same person, and the next sign-in - typed in whichever case the user
+     * happens to use that day - finds neither.
+     *
+     * RFC 5321 does allow a case-sensitive local part. No mail provider in
+     * practice treats one as significant, and the cost of pretending otherwise
+     * is a silently duplicated account, so this folds the whole address.
+     *
+     * Deliberately nothing more. Stripping dots or +tags would fold addresses
+     * that some providers really do treat as distinct.
+     */
+    static normalizeEmail(input) {
+        return typeof input === "string" ? input.trim().toLowerCase() : input;
+    }
+
     static coerce(value, expectedType) {
         if (value === null || value === undefined)
             return { isValid: false, value: null };
@@ -40,7 +61,11 @@ export class FormDataValidator {
 
         if (rules.type === 'boolean') return { ok: true, value }
 
-        const val = this.normalizeWhitespace(value);
+        let val = this.normalizeWhitespace(value);
+
+        // Before the length and pattern checks, so what is measured and matched
+        // is exactly what will be written to the database and looked up again.
+        if (rules.normalize === 'email') val = this.normalizeEmail(val);
 
         if (rules.required && (!val || !val.length)) return {
             ok: false,

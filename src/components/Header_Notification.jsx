@@ -29,8 +29,7 @@ export const HeaderNotification = ({ setDisplayModal }) => {
             src="/svg/notification.svg"
             width={18}
             class="md:w-8 md:h-8"
-            height={18}
-        />
+            height={18} alt="" />
 
         <Show when={notification_count()}>
             <span

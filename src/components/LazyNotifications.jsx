@@ -155,7 +155,7 @@ export default () => {
               class="p-1.5 rounded-full relative z-30
                       text-gray-400 hover:text-gray-700
                       hover:bg-gray-200/50 transition-colors">
-              <img src='/svg/dots.svg' width={24} height={24} />
+              <img src='/svg/dots.svg' width={24} height={24} alt="" />
               <Suspense>
                 <Show when={displayMainTools()}>
                   <div ref={mainToolsRef} class="absolute right-0 top-full mt-2 z-50">
@@ -306,7 +306,7 @@ export default () => {
                             text-gray-400 hover:text-gray-700
                             hover:bg-gray-200/50"
                         >
-                          <img src="/svg/dots.svg" width={16} height={16} />
+                          <img src="/svg/dots.svg" width={16} height={16} alt="" />
                         </button>
                         <Suspense>
                           <Show when={notificationTools() === notif.id}>

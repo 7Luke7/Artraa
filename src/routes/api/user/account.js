@@ -4,6 +4,7 @@ import { getRequestEvent } from "solid-js/web"
 import { format_to_time, getAvatarUrl, retreiveCookie } from "../utils"
 import { redisExists } from "../lib/redis/basic"
 import { redisHGet } from "../lib/redis/hash"
+import { logError } from "../lib/log"
 
 export const get_user = query(async () => {
     'use server'
@@ -145,7 +146,7 @@ export const get_security_details = query(async () => {
 
         return security
     } catch (error) {
-        console.log(error)
+        logError("user/account", error)
         if (error instanceof Response) throw error
         return json({ok: false, message: "დაფიქსირდა შეცდომა"}, {status: 500})
     }

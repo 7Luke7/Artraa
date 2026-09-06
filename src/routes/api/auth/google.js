@@ -5,6 +5,7 @@ import { randomBytes } from "node:crypto"
 import { redis } from "../redis";
 import { redisHSet } from "../lib/redis/hash";
 import { exctract_client_info } from "../utils";
+import { FormDataValidator } from "../validate/validation-service";
 import { pool } from "../db";
 import { getRequestEvent } from "solid-js/web";
 
@@ -47,7 +48,13 @@ export async function POST({ request }) {
         if (!payload || !payload.email || !payload.email_verified) return redirect('/login', {
             status: 303,
         });
-        const user = await pool.query(`SELECT id, name, avatar FROM "User" WHERE (google_id=$1 OR email=$2)`, [payload.sub, payload.email]);
+        // Google returns the address lower-cased, but a row created through the
+        // registration form may not be. Folding both sides through the same
+        // rule is what stops a Google sign-in from missing an existing account
+        // and silently creating a second one for the same person.
+        const email = FormDataValidator.normalizeEmail(payload.email)
+
+        const user = await pool.query(`SELECT id, name, avatar FROM "User" WHERE (google_id=$1 OR email=$2)`, [payload.sub, email]);
 
         if (user.rowCount) {
             const rand_id = randomBytes(32).toString("hex")
@@ -105,11 +112,18 @@ export async function POST({ request }) {
         const client = await pool.connect()
 
         try {
+            // Without this the connection is in autocommit: every statement
+            // below lands on its own, the COMMIT and the three ROLLBACKs are
+            // no-ops that Postgres answers with "there is no transaction in
+            // progress", and a failure after the user row is written leaves it
+            // orphaned instead of undoing it.
+            await client.query('BEGIN')
+
             const create_user = await client.query(`
                 INSERT INTO "User" (email, name, google_id, email_verified, avatar)
                 VALUES ($1, $2, $3, $4, $5)
                 RETURNING id
-            `, [payload.email, payload.name, payload.sub, payload.email_verified, "google:" + payload.picture])
+            `, [email, payload.name, payload.sub, payload.email_verified, "google:" + payload.picture])
 
             if (!create_user.rowCount) {
                 await client.query('ROLLBACK')
@@ -157,7 +171,13 @@ export async function POST({ request }) {
 
             await client.query('COMMIT')
             return redirect('/', {
-                status: 201,
+                // 303, not 201. Google's button posts the credential as a real
+                // top-level form submission, so this response is navigated by
+                // the browser - and a browser follows Location only on a 3xx.
+                // On a 201 it stored the cookie, rendered the empty body, and
+                // left every first-time Google user sitting on a blank
+                // /api/auth/google, signed in with no way to tell.
+                status: 303,
                 revalidate: 'auth',
                 headers: {
                     'Set-Cookie': `auth.session-token=${rand_id}; Path=/; Max-Age=${durationSeconds}; HttpOnly; Secure; SameSite=Lax`,
