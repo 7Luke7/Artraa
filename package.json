@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "vinxi dev",
     "build": "vinxi build",
-    "start": "vinxi start"
+    "start": "vinxi start",
+    "migrate": "node scripts/migrate.mjs"
   },
   "dependencies": {
     "@solidjs/meta": "^0.29.4",
