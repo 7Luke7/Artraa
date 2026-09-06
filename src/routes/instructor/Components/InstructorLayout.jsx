@@ -67,7 +67,7 @@ export const InstructorLayout = ({ instructor, setActiveTab, activeTab }) => {
             {[
                 {
                     icon: (
-                        <img src='/svg/users-group.svg' width={16} height={16} />
+                        <img src='/svg/users-group.svg' width={16} height={16} alt="" />
                     ),
                     label: "მოსწავლე",
                     value: instructor.total_students,
@@ -75,7 +75,7 @@ export const InstructorLayout = ({ instructor, setActiveTab, activeTab }) => {
                 },
                 {
                     icon: (
-                        <img src='/svg/courses.svg' width={16} height={16} />
+                        <img src='/svg/courses.svg' width={16} height={16} alt="" />
                     ),
                     label: "კურსი",
                     value: instructor.courses?.course_count || 0,

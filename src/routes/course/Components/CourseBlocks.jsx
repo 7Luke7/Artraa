@@ -77,7 +77,7 @@ export const CourseBlocks = (props) => {
                                                     {!lesson.is_preview ? (
                                                         <img src="/svg/lock-course.svg" width={16} height={16} alt="" />
                                                     ) : (
-                                                        <img src="/svg/player-play-lesson.svg" width={16} height={16}/>
+                                                        <img src="/svg/player-play-lesson.svg" width={16} height={16} alt="" />
                                                     )}
                                                 </div>
 

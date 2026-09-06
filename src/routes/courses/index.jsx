@@ -59,7 +59,7 @@ const BrowseCourses = (props) => {
                                 : "border-gray-200 text-gray-700 bg-white hover:border-gray-300"
                             }`}
                     >
-                        <img src='/svg/filter.svg' width={16} height={16} />
+                        <img src='/svg/filter.svg' width={16} height={16} alt="" />
                         ფილტრი
                         <Show when={hasActiveFilters()}>
                             <span class="w-1.5 h-1.5 rounded-full bg-[#E85A4F]" />
@@ -94,7 +94,7 @@ const BrowseCourses = (props) => {
                                         onClick={() => setFiltersOpen(false)}
                                         class="text-gray-400 hover:text-gray-600"
                                     >
-                                        <img src='/svg/close.svg' width={20} height={20} />
+                                        <img src='/svg/close.svg' width={20} height={20} alt="" />
                                     </button>
                                 </div>
                             </Show>

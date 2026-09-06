@@ -56,7 +56,7 @@ export default function ContactPage() {
                                 </div>
                                 <ContactCard
                                     icon={
-                                        <img src='/svg/inbox-stroke-normal.svg' width={20} height={20} />
+                                        <img src='/svg/inbox-stroke-normal.svg' width={20} height={20} alt="" />
                                     }
                                     label="ზოგადი კითხვები"
                                     value={CONTACT_INFO.email}
@@ -64,7 +64,7 @@ export default function ContactPage() {
                                 />
                                 <ContactCard
                                     icon={
-                                        <img src='/svg/help.svg' width={20} height={20} />
+                                        <img src='/svg/help.svg' width={20} height={20} alt="" />
                                     }
                                     label="ტექნიკური მხარდაჭერა"
                                     value={CONTACT_INFO.support_email}
@@ -72,7 +72,7 @@ export default function ContactPage() {
                                 />
                                 <ContactCard
                                     icon={
-                                        <img src='/svg/book-light.svg' width={20} height={20} />
+                                        <img src='/svg/book-light.svg' width={20} height={20} alt="" />
                                     }
                                     label="ინსტრუქტორობა"
                                     value={CONTACT_INFO.teach_email}
@@ -81,7 +81,7 @@ export default function ContactPage() {
 
                                 <div class="bg-[#E85A4F]/5 border border-[#E85A4F]/15 rounded-2xl p-4 flex items-start gap-3">
                                     <div class="w-8 h-8 rounded-lg bg-[#E85A4F]/10 flex items-center justify-center shrink-0 mt-0.5">
-                                        <img src='/svg/clock.svg' width={16} height={16} />
+                                        <img src='/svg/clock.svg' width={16} height={16} alt="" />
                                     </div>
                                     <div>
                                         <p class="text-sm font-gsans font-semibold text-gray-800 mb-0.5">სწრაფი პასუხი</p>
@@ -176,7 +176,7 @@ export default function ContactPage() {
                                                         <option value={opt}>{opt}</option>
                                                     ))}
                                                 </select>
-                                                <img src='/svg/chevron-down.svg' width={16} height={16} class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                                <img src='/svg/chevron-down.svg' width={16} height={16} class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" alt="" />
                                             </div>
                                         </Field>
 
@@ -227,7 +227,7 @@ export default function ContactPage() {
                                         </Show>
                                         <Show when={isOk()}>
                                             <div role="status" class="mb-5 flex items-center gap-3 p-3.5 bg-green-50 border border-green-100 rounded-xl">
-                                                <img src='/svg/check.svg' width={16} height={16} />
+                                                <img src='/svg/check.svg' width={16} height={16} alt="" />
                                                 <p class="text-sm font-gsans text-green-700">{message()}</p>
                                             </div>
                                         </Show>
@@ -242,7 +242,7 @@ export default function ContactPage() {
                                         >
                                             <Show when={submission.pending} fallback={
                                                 <>
-                                                    <img src='/svg/send.svg' width={16} height={16} />
+                                                    <img src='/svg/send.svg' width={16} height={16} alt="" />
                                                     გაგზავნა
                                                 </>
                                             }>
@@ -294,7 +294,7 @@ function ContactCard(props) {
                     {props.value}
                 </p>
             </div>
-            <img src='/svg/chevron-right-black.svg' width={16} height={16} class="ml-auto shrink-0" />
+            <img src='/svg/chevron-right-black.svg' width={16} height={16} class="ml-auto shrink-0" alt="" />
         </a>
     )
 }

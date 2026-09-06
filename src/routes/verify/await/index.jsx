@@ -48,7 +48,7 @@ const WaitingForApproval = (props) => {
                                 <span class="absolute w-20 h-20 rounded-full bg-[#E85A4F]/10 animate-ping opacity-40" />
                                 <span class="absolute w-16 h-16 rounded-full bg-[#E85A4F]/8" />
                                 <div class="relative w-14 h-14 rounded-2xl bg-[#E85A4F]/8 border border-[#E85A4F]/15 flex items-center justify-center">
-                                    <img src='/svg/device-mobile-check-branded.svg' width={26} height={26} />
+                                    <img src='/svg/device-mobile-check-branded.svg' width={26} height={26} alt="" />
                                 </div>
                             </div>
 

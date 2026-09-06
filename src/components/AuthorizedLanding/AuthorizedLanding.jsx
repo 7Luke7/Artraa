@@ -34,7 +34,7 @@ export default () => {
                                 class="text-sm font-gsans font-medium flex items-center self-end gap-x-1 text-[#E85A4F]"
                             >
                                 <span>ყველა</span> 
-                                <img src='/svg/arrow-narrow-right-branded.svg' width={15} height={15} />
+                                <img src='/svg/arrow-narrow-right-branded.svg' width={15} height={15} alt="" />
                             </a>
                         </div>                        
                         <Show when={userCourses()?.length > 0} fallback={

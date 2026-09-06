@@ -70,7 +70,7 @@ export const CourseMain = (props) => {
                                 when={submission.pending}
                                 fallback={
                                     <>
-                                        <img src='/svg/cart.svg' width={15} height={15} />                         
+                                        <img src='/svg/cart.svg' width={15} height={15} alt="" />                         
                                         კურსის შეძენა
                                     </>
                                 }
@@ -89,7 +89,7 @@ export const CourseMain = (props) => {
                             href={`/course/${course.slug}?ln=${course.preview_lesson_id}`}
                             class="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl text-gray-600 font-gsans font-medium text-sm border border-gray-200 hover:border-[#E85A4F]/40 hover:text-[#E85A4F] hover:bg-[#E85A4F]/5 transition-all duration-200"
                         >
-                            <img src='/svg/player-play-outline.svg' width={15} height={15}/>
+                            <img src='/svg/player-play-outline.svg' width={15} height={15} alt="" />
                             უფასო გაკვეთილი
                         </a>
                     </Show>
@@ -100,7 +100,7 @@ export const CourseMain = (props) => {
                 <div class="grid grid-cols-2 gap-2">
                     <StatItem
                         icon={
-                            <img src='/svg/clock.svg' width={16} height={16} />
+                            <img src='/svg/clock.svg' width={16} height={16} alt="" />
                         }
                         label="ხანგრძლივობა"
                         value={course.total_duration}
@@ -109,7 +109,7 @@ export const CourseMain = (props) => {
                     />
                     <StatItem
                         icon={
-                            <img src='/svg/book-2-branded.svg' width={16} height={16} />
+                            <img src='/svg/book-2-branded.svg' width={16} height={16} alt="" />
                         }
                         label="გაკვეთილები"
                         value={course.total_lessons}
@@ -118,7 +118,7 @@ export const CourseMain = (props) => {
                     />
                     <StatItem
                         icon={
-                            <img src='/svg/users-group-branded.svg' width={16} height={16} />
+                            <img src='/svg/users-group-branded.svg' width={16} height={16} alt="" />
                         }
                         label="მსმენელები"
                         value={course.enrollment_count}
@@ -127,7 +127,7 @@ export const CourseMain = (props) => {
                     />
                     <StatItem
                         icon={
-                            <img src='/svg/star-outline-orange.svg' width={16} height={16} />
+                            <img src='/svg/star-outline-orange.svg' width={16} height={16} alt="" />
                         }
                         label="რეიტინგი"
                         value={`${course.average_rating || 0} (${course.review_count || 0})`}

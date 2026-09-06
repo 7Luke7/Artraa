@@ -10,7 +10,7 @@ const verificationMethods = [
         id: "email",
         title: "ელფოსტის კოდი",
         description: "ერთჯერადი კოდი გამოგზავნილია თქვენს ელ-ფოსტაზე",
-        icon: <img src='/svg/mail-forward.svg' width={22} height={22} />,
+        icon: <img src='/svg/mail-forward.svg' width={22} height={22} alt="" />,
         ariaLabel: "ელფოსტაზე მიღებული კოდით დადასტურება",
     },
     {
@@ -18,7 +18,7 @@ const verificationMethods = [
         id: "device",
         title: "სხვა მოწყობილობა",
         description: "დაადასტურეთ სხვა ავტორიზებული მოწყობილობიდან",
-        icon: <img src='/svg/device-mobile-check.svg' width={22} height={22} />,
+        icon: <img src='/svg/device-mobile-check.svg' width={22} height={22} alt="" />,
         ariaLabel: "სხვა მოწყობილობით დადასტურება",
     },
 ]
@@ -48,7 +48,7 @@ const PendingLogin = (props) => {
                         <div class="p-8">
                             <div class="text-center mb-8">
                                 <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#E85A4F]/8 border border-[#E85A4F]/15 mb-5">
-                                    <img src='/svg/shield-lock.svg' width={26} height={26} />
+                                    <img src='/svg/shield-lock.svg' width={26} height={26} alt="" />
                                 </div>
                                 <h1 class="text-xl font-gsans font-bold text-gray-900 mb-2">
                                     დაადასტურეთ შესვლა
@@ -94,7 +94,7 @@ const PendingLogin = (props) => {
                                                 </p>
                                             </div>
                                             <Show when={!is_pending()}>
-                                                <img src='/svg/chevron-right-black.svg' width={16} height={16} />
+                                                <img src='/svg/chevron-right-black.svg' width={16} height={16} alt="" />
                                             </Show>
 
                                             <Show when={is_pending()}>

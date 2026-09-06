@@ -4,22 +4,22 @@ const SOCIAL = [
     {
         name: "Facebook",
         href: "https://facebook.com/artra",
-        icon: <img src='/svg/facebook.svg' width={18} height={18} />
+        icon: <img src='/svg/facebook.svg' width={18} height={18} alt="" />
     },
     {
         name: "Instagram",
         href: "https://instagram.com/artra",
-        icon: <img src='/svg/instagram.svg' width={18} height={18} />
+        icon: <img src='/svg/instagram.svg' width={18} height={18} alt="" />
     },
     {
         name: "TikTok",
         href: "https://tiktok.com/@artra",
-        icon: <img src='/svg/tiktok.svg' width={18} height={18} />
+        icon: <img src='/svg/tiktok.svg' width={18} height={18} alt="" />
     },
     {
         name: "YouTube",
         href: "https://youtube.com/@artra",
-        icon: <img src='/svg/youtube.svg' width={18} height={18} />
+        icon: <img src='/svg/youtube.svg' width={18} height={18} alt="" />
     },
 ]
 
@@ -124,7 +124,7 @@ export const Footer = () => {
                             {/* Email */}
                             <div class="flex items-start gap-3">
                                 <div class="w-8 h-8 rounded-lg bg-[#E85A4F]/8 flex items-center justify-center shrink-0 mt-0.5">
-                                    <img src='/svg/inbox-stroke.svg' width={15} height={15} />
+                                    <img src='/svg/inbox-stroke.svg' width={15} height={15} alt="" />
                                 </div>
                                 <div>
                                     <p class="text-xs font-gsans font-medium text-gray-400 mb-0.5">ელ. ფოსტა</p>
@@ -140,7 +140,7 @@ export const Footer = () => {
 
                             <div class="flex items-start gap-3">
                                 <div class="w-8 h-8 rounded-lg bg-[#E85A4F]/8 flex items-center justify-center shrink-0 mt-0.5">
-                                    <img src='/svg/telephone.svg' width={15} height={15} />
+                                    <img src='/svg/telephone.svg' width={15} height={15} alt="" />
                                 </div>
                                 <div>
                                     <p class="text-xs font-gsans font-medium text-gray-400 mb-0.5">ტელეფონი</p>
